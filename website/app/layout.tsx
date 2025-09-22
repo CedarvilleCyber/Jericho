@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Crimson_Pro } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import AppBar from "@/components/layout/app-bar";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
           <div className="w-screen h-[calc(100vh-3.5rem)] overflow-auto">
             {children}
           </div>
+          <Toaster position="bottom-right" richColors />
         </ThemeProvider>
       </body>
     </html>

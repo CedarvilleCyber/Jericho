@@ -10,6 +10,14 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "../ui/navigation-menu";
 
 export default async function AppBar() {
   const session = await auth();
@@ -26,6 +34,55 @@ export default async function AppBar() {
           Jericho
         </Link>
       </div>
+      <NavigationMenu className="ml-4 my-auto">
+        <NavigationMenuList className="gap-1">
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className="h-9 px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent/50">
+              Scenarios
+            </NavigationMenuTrigger>
+            <NavigationMenuContent className="min-w-[200px] p-2">
+              <div className="grid gap-1">
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/scenarios/nuclear-plant"
+                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                  >
+                    <div className="text-sm font-medium leading-none">
+                      Nuclear Plant
+                    </div>
+                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                      Can you melt the core?
+                    </p>
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/scenarios"
+                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                  >
+                    <div className="text-sm font-medium leading-none">
+                      All Scenarios
+                    </div>
+                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                      Browse all available scenarios
+                    </p>
+                  </Link>
+                </NavigationMenuLink>
+              </div>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+              <Link
+                href="/leaderboard"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+              >
+                Leaderboard
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
       <ThemeToggle className="ml-auto my-auto mr-2" />
       {user ? (
         <DropdownMenu>
