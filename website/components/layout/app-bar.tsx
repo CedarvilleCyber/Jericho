@@ -42,6 +42,10 @@ export default async function AppBar() {
             </NavigationMenuTrigger>
             <NavigationMenuContent className="min-w-[200px] p-2">
               <div className="grid gap-1">
+                {/* TODO: Need to figure out why the first NavigationMenuLink does not render on prod */}
+                <NavigationMenuLink asChild>
+                  <Link href="/">Home</Link>
+                </NavigationMenuLink>
                 <NavigationMenuLink asChild>
                   <Link
                     href="/scenarios/nuclear-plant"
@@ -52,6 +56,32 @@ export default async function AppBar() {
                     </div>
                     <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                       Can you melt the core?
+                    </p>
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/scenarios/water-treatment"
+                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                  >
+                    <div className="text-sm font-medium leading-none">
+                      Water Treatment
+                    </div>
+                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                      Can you dirty the water?
+                    </p>
+                  </Link>
+                </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/scenarios/traffic-light"
+                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                  >
+                    <div className="text-sm font-medium leading-none">
+                      Traffic Light
+                    </div>
+                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                      Can you change the lights?
                     </p>
                   </Link>
                 </NavigationMenuLink>
