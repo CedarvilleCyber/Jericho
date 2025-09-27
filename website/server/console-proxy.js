@@ -31,15 +31,17 @@ async function takeCookie(jti) {
 const wss = new WebSocketServer({ port: PORT, path: "/console/ws" });
 
 wss.on("connection", async (client, req) => {
+  console.log("[proxy] client connected", req.url);
   try {
-    const parts = url.parse(req.url, true);
-    const token = parts.query.token;
+    const u = new URL(req.url, `http://${req.headers.host}`);
+    const token = u.searchParams.get("token");
     if (!token) return client.close(1008, "missing token");
 
     let payload;
     try {
       payload = jwt.verify(token, JWT_SECRET);
     } catch (e) {
+      console.log("[proxy] token verify error", e);
       return client.close(1008, "bad token");
     }
 
