@@ -10,7 +10,8 @@ import https from "https";
  *  - PVE_INSECURE=true  (accept self-signed certs in dev)
  */
 
-const baseURL = `${process.env.PVE_HOST}/api2/json`;
+const host = (process.env.PVE_HOST || "").replace(/\/+$/, ""); // trim trailing /
+const baseURL = host.endsWith("/api2/json") ? host : `${host}/api2/json`;
 const token = process.env.PVE_TOKEN!;
 const insecure = process.env.PVE_INSECURE === "true";
 
