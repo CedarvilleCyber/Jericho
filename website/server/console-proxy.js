@@ -1,6 +1,5 @@
 // server/console-proxy.js
 import "dotenv/config";
-import { Agent } from "https";
 import Redis from "ioredis";
 import { verify } from "jsonwebtoken";
 import { WebSocket, WebSocketServer } from "ws";
@@ -11,6 +10,14 @@ const RAW_HOST = process.env.PVE_HOST || ""; // e.g. https://pve.example.com:800
 const INSECURE = process.env.PVE_INSECURE === "true";
 const ORIGIN = process.env.CONSOLE_ORIGIN || "https://example.org";
 const PORT = Number(process.env.CONSOLE_PROXY_PORT || 3088);
+
+// Set NODE_TLS_REJECT_UNAUTHORIZED=0 when using self-signed certs
+if (INSECURE) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  console.log(
+    "[proxy] Set NODE_TLS_REJECT_UNAUTHORIZED=0 for self-signed certificates"
+  );
+}
 
 console.log("[proxy] Starting console proxy server");
 console.log("[proxy] Config:", {
@@ -110,6 +117,7 @@ wss.on("connection", async (client, req) => {
       `[proxy] Client ${clientId} connecting to upstream:`,
       upstreamUrl.replace(/vncticket=[^&]+/, "vncticket=[REDACTED]")
     );
+    console.log(`[proxy] Client ${clientId} INSECURE setting:`, INSECURE);
 
     const headers = {
       Cookie: `PVEAuthCookie=${pveCookie}`,
@@ -120,20 +128,17 @@ wss.on("connection", async (client, req) => {
       headers,
     };
 
-    // Configure TLS options for wss:// connections with self-signed certificates
-    if (upstreamUrl.startsWith("wss://")) {
-      if (INSECURE) {
-        // For self-signed certificates, disable TLS verification entirely
-        wsOptions.rejectUnauthorized = false;
-        wsOptions.checkServerIdentity = () => undefined;
-      } else {
-        // Use HTTPS agent for proper certificate validation
-        wsOptions.agent = new Agent({ rejectUnauthorized: true });
-      }
-    } else {
-      // For ws:// connections, use the agent as before
-      wsOptions.agent = new Agent({ rejectUnauthorized: !INSECURE });
-    }
+    // TLS configuration is handled globally via NODE_TLS_REJECT_UNAUTHORIZED
+    console.log(
+      `[proxy] Client ${clientId} using TLS mode: ${
+        INSECURE
+          ? "INSECURE (accepting self-signed)"
+          : "SECURE (validating certs)"
+      }`
+    );
+    console.log(
+      `[proxy] Client ${clientId} NODE_TLS_REJECT_UNAUTHORIZED: ${process.env.NODE_TLS_REJECT_UNAUTHORIZED}`
+    );
 
     const upstream = new WebSocket(upstreamUrl, wsOptions);
 
