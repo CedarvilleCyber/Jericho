@@ -1,13 +1,15 @@
 <?php
-// admin.php
-session_start();
-if (!isset($_SESSION['authenticated'])) {
-    header("Location: login.php");
-    exit;
-}
+    // admin.php
+    session_start();
 
-// find the php.ini and add "file_uploads = On"
-// otherwise this won't work
+    // If not logged in, redirect to login.php
+    if (!isset($_SESSION['authenticated'])) {
+        header("Location: login.php");
+        exit;
+    }
+
+    // find the php.ini and add "file_uploads = On"
+    // otherwise this won't work
 ?>
 <!DOCTYPE html>
 <html>

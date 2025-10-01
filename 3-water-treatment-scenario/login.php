@@ -1,25 +1,25 @@
 <?php
-// login.php
-session_start();
+    // login.php
+    session_start();
 
-// Simple hardcoded credentials (for Hydra brute force). Add better creds later
-$valid_users = ["admin", "john_doe"];
-$valid_passwords = ["waterplant123", "john_doen't"];
+    // Simple hardcoded credentials (for Hydra brute force). Add better creds later
+    $valid_users = ["admin", "john_doe", "root"];
+    $valid_passwords = ["waterplant123", "john_doen't", "root"];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user = $_POST['username'];
-    $pass = $_POST['password'];
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $user = $_POST['username'];
+        $pass = $_POST['password'];
 
-    if (in_array($user, $valid_users, TRUE) && in_array($pass, $valid_passwords, TRUE)) {
-        // Store login flag in session
-        $_SESSION['authenticated'] = true;
-        $_SESSION['user'] = $user; // used for admin page auth later
-        header("Location: index.php");
-        exit;
-    } else {
-        $error = "Invalid login.";
+        if (in_array($user, $valid_users, TRUE) && in_array($pass, $valid_passwords, TRUE)) {
+            // Store login flag in session
+            $_SESSION['authenticated'] = true;
+            $_SESSION['user'] = $user; // used for admin page auth later
+            header("Location: index.php");
+            exit;
+        } else {
+            $error = "Invalid login.";
+        }
     }
-}
 ?>
 <!DOCTYPE html>
 <html>
