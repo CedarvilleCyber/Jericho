@@ -17,22 +17,13 @@
         <link rel="stylesheet" href="./css/bootstrap.min.css">
     </head>
     <body>
-        <!-- fill this in now that you have bootstrap in the project -->
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">Water Co.</a>
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="#">WebSiteName</a>
+                    <a class="navbar-brand" href="#">Jericho Water</a>
                 </div>
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li><a href="#">Page 1</a></li>
-                    <li><a href="#">Page 2</a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#">Sign Up</a></li>
-                    <li><a href="./login.php"></span> Login</a></li>
-                </ul>
+                <a href="./login.php">Login</a>
             </div>
         </nav> 
         <h1>Jericho Water Treatment Center</h1>
