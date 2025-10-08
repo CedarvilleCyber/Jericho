@@ -26,19 +26,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
   <title>Login</title>
-  <!-- MDB 5 CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/9.2.0/mdb.min.css" />
-
-  <link rel="stylesheet" href="./css/global.css">
-  <!-- NOTE: if the order of these two CSS links changes, then their precedence -->
+  <!-- NOTE: if the order of mdb and global changes, then their precedence -->
   <!-- order would change, meaning the page would no longer be in dark mode. -->
+  <link rel="stylesheet" href="./css/mdb.min.css" />
+  <link rel="stylesheet" href="./css/global.css">
   <link rel="stylesheet" href="./css/login.css">
+  <script src="./js/mdb.umd.min.js" defer></script>
 </head>
 
 <body>
   <h2>Jericho Water Co. Login</h2>
   <div class="flex-parent">
     <form method="POST">
+
+      <!-- TODO: make the input fields horizontally wider so the website doesn't look so old. -->
+      <!-- Compare against the mdb examples - you'll see what I mean. -->
+
       <!-- username input -->
       <div data-mdb-input-init class="form-outline mb-4">
         <input type="text" id="login-username-input" name="username" class="form-control" />
@@ -51,27 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label class="form-label" for="login-password-input">Password</label>
       </div>
 
-      <!-- Submit button -->
-      <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-4">Sign in</button>
+  <!-- Submit button -->
+  <button type="submit" data-mdb-ripple-init class="btn btn-primary btn-block mb-4">Sign in</button>
     </form>
   </div>
-
-  <!-- MDB 5 JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/9.2.0/mdb.umd.min.js"></script>
-
-  <!-- Initialize MDB Inputs -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('[data-mdb-input-init]').forEach((formOutline) => {
-        new mdb.Input(formOutline.querySelector('input'));
-      });
-    });
-  </script>
 
   <?php
   if (isset($error)) echo "<p class='error'>$error</p>";
   // Note the conspicuous lack of failed login limits or password lockouts...
   ?>
 </body>
-
 </html>
