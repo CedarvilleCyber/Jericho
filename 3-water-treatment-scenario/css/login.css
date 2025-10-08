@@ -1,11 +1,14 @@
+.flex-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 h2 {
     text-align: center;
 }
 
-label {
+.error {
     text-align: center;
-}
-
-input {
-    text-align: center;
+    color: red;
 }

@@ -23,7 +23,7 @@
                 <div class="navbar-header">
                     <a class="navbar-brand" href="#">Jericho Water</a>
                 </div>
-                <a href="./login.php">Login</a>
+                <a href="./logout.php">Log Out</a>
             </div>
         </nav> 
         <h1>Jericho Water Treatment Center</h1>
