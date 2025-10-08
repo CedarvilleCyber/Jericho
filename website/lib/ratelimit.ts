@@ -10,6 +10,6 @@ tx.zremrangebyscore(bucket, 0, now - windowSec * 1000);
 tx.zadd(bucket, now, String(now));
 tx.zcard(bucket);
 tx.expire(bucket, windowSec);
-const [, , count] = (await tx.exec()) as any[];
+const [, , count] = (await tx.exec()) || [0, 0, 0];
 return (count as number) <= limit;
 }

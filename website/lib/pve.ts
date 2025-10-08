@@ -27,8 +27,12 @@ export const pve = axios.create({
   timeout: 30_000,
 });
 
+interface ResponseData {
+  data: { data: unknown };
+}
+
 /** Proxmox wraps payloads as { data: ... }. This unwrap handles a few shapes. */
-export function unwrap<T = any>(x: any): T {
+export function unwrap<T = ResponseData>(x: ResponseData): T {
   if (!x) return x as T;
   // axios response
   if (x.data?.data !== undefined) return x.data.data as T;

@@ -24,20 +24,23 @@ async function createAccessTicket(): Promise<AccessTicket> {
   console.log("🔐 Creating access ticket for user:", PVE_USER);
   console.log("🌐 PVE Base URL:", BASE);
   console.log("🔓 Insecure mode:", INSECURE);
-  
+
   const form = new URLSearchParams({ username: PVE_USER, password: PVE_PASS });
-  
+
   try {
     const res = await axios.post(`${BASE}/access/ticket`, form, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       httpsAgent,
       timeout: 30_000,
     });
-    
+
     console.log("✅ Access ticket created successfully");
     console.log("📋 Ticket length:", res.data.data.ticket?.length || 0);
-    console.log("🛡️ CSRF token length:", res.data.data.CSRFPreventionToken?.length || 0);
-    
+    console.log(
+      "🛡️ CSRF token length:",
+      res.data.data.CSRFPreventionToken?.length || 0
+    );
+
     return res.data.data as AccessTicket;
   } catch (error) {
     console.error("❌ Failed to create access ticket:", error);
@@ -46,14 +49,23 @@ async function createAccessTicket(): Promise<AccessTicket> {
 }
 
 // IMPORTANT: use the same cookie/CSRF for vncproxy (not the API token client)
-async function createVncProxyWithCookie(node: string, vmid: string, auth: AccessTicket): Promise<VncResp> {
+async function createVncProxyWithCookie(
+  node: string,
+  vmid: string,
+  auth: AccessTicket
+): Promise<VncResp> {
   console.log(`🖥️ Creating VNC proxy for node: ${node}, VM: ${vmid}`);
   console.log("🍪 Using cookie length:", auth.ticket?.length || 0);
-  console.log("🛡️ Using CSRF token length:", auth.CSRFPreventionToken?.length || 0);
-  
-  const url = `${BASE}/nodes/${encodeURIComponent(node)}/qemu/${encodeURIComponent(vmid)}/vncproxy`;
+  console.log(
+    "🛡️ Using CSRF token length:",
+    auth.CSRFPreventionToken?.length || 0
+  );
+
+  const url = `${BASE}/nodes/${encodeURIComponent(
+    node
+  )}/qemu/${encodeURIComponent(vmid)}/vncproxy`;
   console.log("📡 VNC proxy URL:", url);
-  
+
   try {
     const res = await axios.post(
       url,
@@ -67,11 +79,11 @@ async function createVncProxyWithCookie(node: string, vmid: string, auth: Access
         },
       }
     );
-    
+
     console.log("✅ VNC proxy created successfully");
     console.log("🔌 VNC port:", res.data.data.port);
     console.log("🎫 VNC ticket length:", res.data.data.ticket?.length || 0);
-    
+
     return res.data.data as VncResp;
   } catch (error) {
     console.error("❌ Failed to create VNC proxy:", error);
@@ -84,11 +96,11 @@ export async function POST(
   context: { params: Promise<{ node: string; vmid: string }> }
 ) {
   console.log("🚀 Starting console initialization");
-  
+
   try {
     const session = await auth();
     console.log("👤 Session check - User ID:", session?.user?.id || "none");
-    
+
     if (!session?.user?.id) {
       console.log("❌ Unauthorized - no user session");
       return Response.json({ error: "unauthorized" }, { status: 401 });
@@ -114,38 +126,63 @@ export async function POST(
 
     // 4) Short-lived JWT for the browser -> WS proxy
     console.log("📝 Step 4: Creating JWT token...");
-    const tokenPayload = { 
-      sub: session.user.id, 
-      jti, 
-      node, 
-      vmid, 
-      port: vnc.port, 
-      vncticket: vnc.ticket 
+    const tokenPayload = {
+      sub: session.user.id,
+      jti,
+      node,
+      vmid,
+      port: vnc.port,
+      vncticket: vnc.ticket,
     };
-    console.log("🎫 JWT payload:", { ...tokenPayload, vncticket: `[${vnc.ticket.length} chars]` });
-    
+    console.log("🎫 JWT payload:", {
+      ...tokenPayload,
+      vncticket: `[${vnc.ticket.length} chars]`,
+    });
+
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: "60s" });
     console.log("✅ JWT token created successfully");
 
     const response = {
       wsUrl: `/console/ws?token=${encodeURIComponent(token)}`,
       vncPassword: vnc.ticket,
+      vmid,
     };
-    
+
     console.log("🎉 Console initialization completed successfully");
-    console.log("📤 Response:", { ...response, vncPassword: `[${vnc.ticket.length} chars]` });
+    console.log("📤 Response:", {
+      ...response,
+      vncPassword: `[${vnc.ticket.length} chars]`,
+    });
 
     return Response.json(response);
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("💥 Console initialization failed:", e);
-    console.error("📊 Error details:", {
-      message: e?.message,
-      code: e?.code,
-      status: e?.response?.status,
-      statusText: e?.response?.statusText,
-      data: e?.response?.data
-    });
-    
-    return Response.json({ error: e?.message || "console-init-failed" }, { status: 500 });
+
+    // Type-safe error handling
+    const errorMessage = e instanceof Error ? e.message : "console-init-failed";
+    const errorDetails: Record<string, unknown> = {
+      message: errorMessage,
+    };
+
+    // Handle axios errors specifically
+    if (e && typeof e === "object" && "response" in e) {
+      const axiosError = e as {
+        response?: {
+          status?: number;
+          statusText?: string;
+          data?: unknown;
+        };
+        code?: string;
+      };
+
+      errorDetails.code = axiosError.code;
+      errorDetails.status = axiosError.response?.status;
+      errorDetails.statusText = axiosError.response?.statusText;
+      errorDetails.data = axiosError.response?.data;
+    }
+
+    console.error("📊 Error details:", errorDetails);
+
+    return Response.json({ error: errorMessage }, { status: 500 });
   }
 }

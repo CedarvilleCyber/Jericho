@@ -6,6 +6,7 @@ export interface Scenario {
   createdAt: string;
   deletedAt?: string;
   topologyMap: string;
+  slug?: string;
 }
 
 export interface ScenarioTag {

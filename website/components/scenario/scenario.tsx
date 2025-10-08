@@ -12,7 +12,7 @@ export default function ScenarioLayout({ scenario }: { scenario: Scenario }) {
   const [consoleWsUrl, setConsoleWsUrl] = useState<string | null>(null);
 
   // NOTE: adjust this if your Scenario model uses a different id/slug field
-  const scenarioId = (scenario as any).id ?? (scenario as any).slug ?? scenario.name;
+  const scenarioId = scenario.id ?? scenario.slug ?? scenario.name;
 
   async function handleStart() {
     setBusy(true);
@@ -23,9 +23,12 @@ export default function ScenarioLayout({ scenario }: { scenario: Scenario }) {
       // 1) Start the scenario's core VMs (DC/web/db/etc.)
       //    Endpoint from our earlier code: POST /api/scenarios/:id/start
       {
-        const r = await fetch(`/api/scenarios/${encodeURIComponent(scenarioId)}/start`, {
-          method: "POST",
-        });
+        const r = await fetch(
+          `/api/scenarios/${encodeURIComponent(scenarioId)}/start`,
+          {
+            method: "POST",
+          }
+        );
         const data = await r.json();
         if (!r.ok) throw new Error(data?.error || `Start failed: ${r.status}`);
       }
@@ -35,11 +38,15 @@ export default function ScenarioLayout({ scenario }: { scenario: Scenario }) {
       setStatus("Provisioning your personal jump box…");
       let node: string, vmid: number;
       {
-        const r = await fetch(`/api/scenarios/${encodeURIComponent(scenarioId)}/jump/start`, {
-          method: "POST",
-        });
+        const r = await fetch(
+          `/api/scenarios/${encodeURIComponent(scenarioId)}/jump/start`,
+          {
+            method: "POST",
+          }
+        );
         const data = await r.json();
-        if (!r.ok) throw new Error(data?.error || `Jump VM failed: ${r.status}`);
+        if (!r.ok)
+          throw new Error(data?.error || `Jump VM failed: ${r.status}`);
         node = data.node;
         vmid = data.vmid;
       }
@@ -48,17 +55,23 @@ export default function ScenarioLayout({ scenario }: { scenario: Scenario }) {
       //    Endpoint from canvas: POST /api/console/qemu/[node]/[vmid]
       setStatus("Preparing web console…");
       {
-        const r = await fetch(`/api/console/qemu/${encodeURIComponent(node)}/${encodeURIComponent(String(vmid))}`, {
-          method: "POST",
-        });
+        const r = await fetch(
+          `/api/console/qemu/${encodeURIComponent(node)}/${encodeURIComponent(
+            String(vmid)
+          )}`,
+          {
+            method: "POST",
+          }
+        );
         const data = await r.json();
-        if (!r.ok) throw new Error(data?.error || `Console failed: ${r.status}`);
+        if (!r.ok)
+          throw new Error(data?.error || `Console failed: ${r.status}`);
         setConsoleWsUrl(data.wsUrl as string); // e.g., "/console/ws?token=…"
       }
 
       setStatus("Ready! Click “Open Console” to launch.");
-    } catch (e: any) {
-      setStatus(`Error: ${e.message || String(e)}`);
+    } catch (e: unknown) {
+      setStatus(`Error: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setBusy(false);
     }
@@ -72,7 +85,10 @@ export default function ScenarioLayout({ scenario }: { scenario: Scenario }) {
     // If you already have a dedicated console page, push router there with scenarioId & pass wsUrl via query or state.
     // For a quick test, just open a new tab that your console page can read from sessionStorage:
     sessionStorage.setItem("wsUrl", consoleWsUrl);
-    window.open(`/scenarios/${encodeURIComponent(scenarioId)}/console`, "_blank");
+    window.open(
+      `/scenarios/${encodeURIComponent(scenarioId)}/console`,
+      "_blank"
+    );
   }
 
   return (
