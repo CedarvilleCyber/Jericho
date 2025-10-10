@@ -113,7 +113,12 @@ export default async function AppBar() {
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      <ThemeToggle className="ml-auto my-auto mr-2" />
+      {user && (
+        <Button variant="secondary" className="ml-auto my-auto" asChild>
+          <Link href="/admin">Admin</Link>
+        </Button>
+      )}
+      <ThemeToggle className="ml-2 my-auto mr-2" />
       {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
