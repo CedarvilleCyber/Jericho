@@ -34,7 +34,7 @@ export default async function AppBar() {
           Jericho
         </Link>
       </div>
-      <NavigationMenu className="ml-4 my-auto">
+      <NavigationMenu className="ml-4 my-auto mr-auto">
         <NavigationMenuList className="gap-1">
           <NavigationMenuItem>
             <NavigationMenuTrigger className="h-9 px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent/50">
@@ -114,7 +114,7 @@ export default async function AppBar() {
         </NavigationMenuList>
       </NavigationMenu>
       {user && (
-        <Button variant="secondary" className="ml-auto my-auto" asChild>
+        <Button variant="secondary" className="my-auto" asChild>
           <Link href="/admin">Admin</Link>
         </Button>
       )}

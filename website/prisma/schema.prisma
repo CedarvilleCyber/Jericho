@@ -13,7 +13,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  proxmoxId     String?   @unique @default(cuid())
+  proxmoxId     String?
   accounts      Account[]
   sessions      Session[]
 
