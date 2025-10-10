@@ -26,7 +26,7 @@ export default async function AdminPage() {
   );
 
   return (
-    <div className="m-2 p-2 bg-muted rounded-lg w-2xl">
+    <div className="m-2 p-2 bg-muted rounded-lg w-4xl">
       <Table>
         <TableHeader>
           <TableRow>
