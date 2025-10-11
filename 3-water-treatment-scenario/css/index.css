@@ -1,3 +1,8 @@
 h1 {
     text-align: center;
 }
+
+.logo {
+    width: 1.5em;
+    height: 1.5em;
+}

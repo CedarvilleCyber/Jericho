@@ -12,14 +12,14 @@
 <html>
     <head>
         <title>Jericho Water Treatment Center</title>
+        <link rel="stylesheet" href="./css/bootstrap.min.css">
         <link rel="stylesheet" href="./css/global.css">
         <link rel="stylesheet" href="./css/index.css">
-        <link rel="stylesheet" href="./css/bootstrap.min.css">
     </head>
     <body>
         <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">Water Co.</a>
+                <a class="navbar-brand" href="#"><img src=./images/logo.svg class=logo></a>
                 <div class="navbar-header">
                     <a class="navbar-brand" href="#">Jericho Water</a>
                 </div>
