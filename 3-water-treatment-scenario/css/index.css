@@ -6,3 +6,24 @@ h1 {
     width: 1.5em;
     height: 1.5em;
 }
+
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+
+    gap: 1em;
+}
+
+img:hover {
+    filter:blur(0.2em) brightness(1.1);
+    box-shadow: 1em 0.5em black;
+}
+
+/* replace your CSS with something from this website: 
+ * https://css-tricks.com/design-considerations-text-images/
+ * Trust me, his examples look pretty good.
+ */

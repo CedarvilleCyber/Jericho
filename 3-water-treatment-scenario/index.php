@@ -27,6 +27,9 @@
             </div>
         </nav> 
         <h1>Jericho Water Treatment Center</h1>
-        <p>Fill this page out later.</p>
+        <div class="flex-container">
+            <p>Welcome to a world of possibility.</p>
+            <img src="./images/wtstock1.jpg"></img>
+        </div>
     </body>
 </html>
