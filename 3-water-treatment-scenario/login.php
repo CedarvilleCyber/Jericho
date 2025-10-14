@@ -26,15 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
   <title>Login</title>
-  <!-- NOTE: if the order of mdb and global changes, then their precedence -->
-  <!-- order would change, meaning the page would no longer be in dark mode. -->
-  <link rel="stylesheet" href="./css/mdb.min.css" />
-  <link rel="stylesheet" href="./css/global.css">
   <link rel="stylesheet" href="./css/login.css">
   <script src="./js/mdb.umd.min.js" defer></script>
 </head>
 
 <body>
+  <?php include "topnav.php"; ?>
   <h2>Jericho Water Co. Login</h2>
   <div class="flex-parent">
     <form method="POST">

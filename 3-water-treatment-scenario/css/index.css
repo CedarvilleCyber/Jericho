@@ -2,11 +2,6 @@ h1 {
     text-align: center;
 }
 
-.logo {
-    width: 1.5em;
-    height: 1.5em;
-}
-
 .flex-container {
     display: flex;
     flex-direction: column;
@@ -18,7 +13,7 @@ h1 {
     gap: 1em;
 }
 
-img:hover {
+.main-img:hover {
     filter:blur(0.2em) brightness(1.1);
     box-shadow: 1em 0.5em black;
 }

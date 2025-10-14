@@ -2,3 +2,18 @@ body {
     background-color: #1e1e1e;
     color: #ababab;
 }
+
+.topnav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+body {
+    padding-top: 4em;
+}
+
+.logo {
+    width: 1.5em;
+    height: 1.5em;
+}
