@@ -3,18 +3,14 @@ body {
     color: #ababab;
 }
 
-/* This  shouldn't be needed anymore. 
- .topnav {
-    position: fixed;
-    top: 0;
-    width: 100%;
-} */
-
-body {
-    padding-top: 4em;
-}
-
 .logo {
-    width: 1.5em;
-    height: 1.5em;
+    width: 2em;
+    height: 2em;
 }
+
+.page-title {
+    color: goldenrod;
+    text-decoration: none;
+}
+
+/* note to self: figure out how to override Bootstrap styling to make the buttons gold */

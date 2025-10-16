@@ -9,14 +9,14 @@
     }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>Jericho Water Treatment Center</title>
         <link rel="stylesheet" href="./css/index.css">
     </head>
     <body>
         <?php include 'topnav.php'; ?> 
-        <h1>Jericho Water Treatment Center</h1>
+        <!-- <h1>Jericho Water Treatment Center</h1> -->
         <div class="flex-container">
             <p>Welcome to a world of possibility.</p>
             <img src="./images/wtstock1.jpg" class="main-img"></img>

@@ -1,16 +1,23 @@
-<head>
-    <link rel="stylesheet" href="./css/bootstrap.min.css">
-    <link rel="stylesheet" href="./css/global.css">
-</head>
-<div class="topnav">
-    <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#"><img src=./images/logo.svg class=logo></a>
-            <div class="navbar-header">
-                <a class="navbar-brand mx-auto" href="#">Jericho Water</a>
-            </div>
-            <a href="./logout.php" class="ms-auto">Log Out</a>
-            <a href="./admin.php" class="ms-auto">Admin Page</a>
-        </div>
-    </nav>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Jericho</title>
+        <link rel="stylesheet" href="./css/bootstrap.min.css">
+        <link rel="stylesheet" href="./css/global.css">
+    </head>
+    <div class="container">
+        <header class="d-flex flex-wrap justify-content-center py-3">
+            <a class="d-flex align-items-center me-md-auto page-title" href="#">
+                <img src="./images/logo.svg" alt="Jericho Logo" class="logo">
+                <span class="ms-2">Jericho Water</span>
+            </a>
+            <ul class="nav nav-pills">
+                <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Home</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Features</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Pricing</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">FAQs</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">About</a></li>
+            </ul>
+        </header>
+    </div>
+</html>
