@@ -12,14 +12,15 @@
 <html lang="en">
     <head>
         <title>Jericho Water Treatment Center</title>
+
+        <!-- I put the PHP "include" here so the index css would override the global css. -->
+        <?php include 'topnav.php'; ?> 
         <link rel="stylesheet" href="./css/index.css">
     </head>
     <body>
-        <?php include 'topnav.php'; ?> 
-        <!-- <h1>Jericho Water Treatment Center</h1> -->
         <div class="flex-container">
-            <p>Welcome to a world of possibility.</p>
-            <img src="./images/wtstock1.jpg" class="main-img"></img>
+            <h1>Welcome to a world of possibility.</h1>
+            <!-- <img src="./images/wtstock1.jpg" class="main-img"> -->
         </div>
     </body>
 </html>

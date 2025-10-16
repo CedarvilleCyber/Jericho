@@ -12,12 +12,16 @@
                 <span class="ms-2">Jericho Water</span>
             </a>
             <ul class="nav nav-pills">
-                <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Home</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Features</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Pricing</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">FAQs</a></li>
+                <li class="nav-item"><a href="./index.php" class="nav-link active" aria-current="page">Home</a></li>
+                <li class="nav-item"><a href="./admin.php" class="nav-link">Admin</a></li>
                 <li class="nav-item"><a href="#" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">Employee of the Month</a></li>
+                <li class="nav-item"><a href="./logout.php" class="nav-link">Log Out</a></li>
             </ul>
+
+        <!-- TODO: bugfix. For some reason, when you're on the admin page, 
+        the nav bar is narrower than when you're on the index page. -->
+
         </header>
     </div>
 </html>

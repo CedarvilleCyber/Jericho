@@ -13,16 +13,16 @@
         $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
         if ($fileType === "php") {
-            echo "<p style='color: red;'> Wait a minute... This is a PHP file!! BEGONE, EVILDOERS!!!</p>";
+            $errorMsg = "<p style='color: red;'> Wait a minute... This is a PHP file!! BEGONE, EVILDOERS!!!</p>";
         }
         else if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
-            echo "<p style='color: green;'>Upload succeeded.</p>";
+            $errorMsg = "<p style='color: green;'>Upload succeeded.</p>";
         }
         else if ($_FILES["file"]["error"] !== UPLOAD_ERR_OK) {
-            echo "<p style='color: red;'>Upload failed: " . $_FILES["file"]["error"] . "</p>";
+            $errorMsg = "<p style='color: red;'>Upload failed: " . $_FILES["file"]["error"] . "</p>";
         }
         else {
-            echo "<p style='color: red;'>Something went wrong.</p>";
+            $errorMsg = "<p style='color: red;'>Something went wrong.</p>";
         }
     }
 ?>
@@ -33,11 +33,15 @@
         <title>Admin Page</title>
     </head>
     <body>
-        <?php include 'topnav.php'; ?> 
-        <h2>Upload a File</h2>
-        <form method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" id="file">
-            <input type="submit" name="submit" value="Upload">
-        </form>
+        <div class="container">
+            <?php include 'topnav.php'; ?> 
+            <h2>Upload a File</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" id="file">
+                <input type="submit" name="submit" value="Upload">
+            </form>
+            <br>
+            <?php echo $errorMsg ?>
+        </div>
     </body>
 </html>
