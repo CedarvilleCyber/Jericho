@@ -3,11 +3,12 @@ body {
     color: #ababab;
 }
 
-.topnav {
+/* This  shouldn't be needed anymore. 
+ .topnav {
     position: fixed;
     top: 0;
     width: 100%;
-}
+} */
 
 body {
     padding-top: 4em;
