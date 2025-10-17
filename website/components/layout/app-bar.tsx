@@ -1,4 +1,5 @@
 import Image from "next/image";
+export const runtime = "nodejs";
 import { ThemeToggle } from "../theme/theme-toggle";
 import Link from "next/link";
 import { auth, signIn, signOut } from "@/auth";
@@ -20,7 +21,9 @@ import {
 } from "../ui/navigation-menu";
 
 export default async function AppBar() {
-  const session = await auth();
+  let session = null;
+  try { session = await auth(); }
+  catch (e) { console.error("auth() failed:", e); }
   const user = session?.user;
 
   return (

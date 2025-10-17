@@ -1,5 +1,6 @@
 "use server";
 
+import prisma from "@/prisma";   
 import { proxmox } from "@/proxmox";
 import { revalidatePath } from "next/cache";
 
