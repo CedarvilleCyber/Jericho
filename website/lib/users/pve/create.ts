@@ -1,12 +1,13 @@
 "use server";
 
+import prisma from "@/prisma";            
 import { proxmox } from "@/proxmox";
 import { revalidatePath } from "next/cache";
 
 export async function createPVEUser(
   pveUserId: string,
-  initialAccess: Array<string>,
-  dbUserId?: number
+  initialAccess: string[],
+  dbUserId?: number            
 ) {
   await proxmox.access.users.$post({
     userid: `${pveUserId}@pve`,
@@ -15,7 +16,7 @@ export async function createPVEUser(
   });
 
   if (dbUserId) {
-    await prisma?.user.update({
+    await prisma.user.update({
       where: { id: dbUserId },
       data: { proxmoxId: pveUserId },
     });
