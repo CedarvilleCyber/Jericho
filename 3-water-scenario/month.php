@@ -1,5 +1,11 @@
 <?php
     session_start();
+
+    $date = (new DateTime())->modify('-1 month'); // set to previous month
+    $employees = ["Michael Rembrandt", "Redd Harlan", "Lauren Towner", 
+                  "Carla Winslow", "Hugh Farnham", "Anthony Smith", 
+                  "Erik Williams", "Clare Sidney", "Emma Chavez",
+                  "Annie Gregory", "Suzanne Bender", "Kevin Mitnick"];
 ?>
 
 <!DOCTYPE html>
@@ -12,8 +18,6 @@
     <p>Here, we honor our greatest employees.</p>
     <div class="grid-container">
         <?php
-            $date = (new DateTime())->modify('-1 month'); // set to previous month
-
             for ($i = 0; $i < 12; $i++) {
                 echo <<<HTML1
                     <div class="box">
