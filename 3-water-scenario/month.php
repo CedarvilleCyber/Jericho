@@ -19,19 +19,15 @@
     <div class="grid-container">
         <?php
             for ($i = 0; $i < 12; $i++) {
-                echo <<<HTML1
-                    <div class="box">
-                    <!-- figure out how to size the image better -->
-                    <img src="./images/m-rembrandt.jpg" width="200">
-                    <p>Michael Rembrandt</p>
-                    HTML1;
+                echo '<div class="box">';
 
-                    // add an array of employee names and print the employee names 
-                    // and stock images similarly to what you're doing below.
+                // Crop the images so they're all the same size.
+                printf("<img src='./images/employees/%d.jpg' width='200'>", $i);
 
-                    printf("<p>%s</p>\n</div>", $date->format('F Y'));
-
-                    $date->modify('-1 month');
+                printf("<p>%s</p>", $employees[$i]);
+                printf("<p>%s</p>", $date->format('F Y'));
+                echo '</div>';
+                $date->modify('-1 month');
             }
         ?>
     </div>
