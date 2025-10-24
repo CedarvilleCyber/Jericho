@@ -1,12 +1,6 @@
 <?php
     // index.php
     session_start();
-
-    // If not logged in, redirect to login.php
-    if (!isset($_SESSION['authenticated'])) {
-        header("Location: login.php");
-        exit;
-    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +14,6 @@
     <body>
         <div class="flex-container">
             <h1>Welcome to a world of possibility.</h1>
-            <!-- <img src="./images/wtstock1.jpg" class="main-img"> -->
         </div>
     </body>
 </html>

@@ -15,7 +15,7 @@
                 <li class="nav-item"><a href="./index.php" class="nav-link active" aria-current="page">Home</a></li>
                 <li class="nav-item"><a href="./admin.php" class="nav-link">Admin</a></li>
                 <li class="nav-item"><a href="#" class="nav-link">About</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Employee of the Month</a></li>
+                <li class="nav-item"><a href="./month.php" class="nav-link">Employee of the Month</a></li>
                 <li class="nav-item"><a href="./logout.php" class="nav-link">Log Out</a></li>
             </ul>
 
