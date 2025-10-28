@@ -4,6 +4,7 @@
 
     // If not logged in, redirect to login.php
     if (!isset($_SESSION['authenticated'])) {
+        $_SESSION['intended_destination'] = 'admin.php';
         header("Location: login.php");
         exit;
     }

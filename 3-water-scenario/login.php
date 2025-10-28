@@ -14,7 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Store login flag in session
         $_SESSION['authenticated'] = true;
         $_SESSION['user'] = $user; // used for admin page auth later
-        header("Location: index.php");
+        $redirect = $_SESSION['intended_destination'] ?? 'index.php';
+        unset($_SESSION['intended_destination']);
+        header("Location: $redirect");
         exit;
     } 
     else {
