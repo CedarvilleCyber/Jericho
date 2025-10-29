@@ -43,13 +43,3 @@ h1 {
     padding-top: 10em; /* Add padding to prevent content from going under navbar */
     gap: 1em;
 }
-
-/* .main-img:hover {
-    filter:blur(0.2em) brightness(1.1);
-    box-shadow: 1em 0.5em black;
-} */
-
-/* replace your CSS with something from this website: 
- * https://css-tricks.com/design-considerations-text-images/
- * Trust me, his examples look pretty good.
- */

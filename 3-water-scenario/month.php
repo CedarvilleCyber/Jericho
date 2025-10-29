@@ -35,7 +35,7 @@ $employees = [
       for ($i = 0; $i < 12; $i++) {
         echo '<section class="slide" aria-label="Employee of the Month">';
 
-        echo '<h1 class="page-title">Employee of the Month</h1>';
+        echo '<h1 class="card-title">Employee of the Month</h1>';
 
         printf(
           "<img class='employee-photo' src='./images/employees/%d.jpg' alt='%s' loading='lazy'>",
