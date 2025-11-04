@@ -8,7 +8,7 @@ $loggedIn = !empty($_SESSION['user']);
   style="position:sticky; top: 0; z-index: 100; height: 4.5rem;">
   <a class="d-flex align-items-center me-md-auto page-title" href="/">
     <img src="./images/logo.svg" alt="Jericho Logo" class="logo">
-    <span class="ms-2">Jericho Water</span>
+    <span class="ms-2">Jericho DOT</span>
   </a>
 
   <ul class="nav nav-pills">
