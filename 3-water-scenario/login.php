@@ -3,8 +3,8 @@
 session_start();
 
 // Simple hardcoded credentials (for Hydra brute force). Add better creds later
-$valid_users = ["admin", "john_doe", "root"];
-$valid_passwords = ["admin", "john_doen't", "root"];
+$valid_users = ["erik"];
+$valid_passwords = ["williams"];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $_POST['username'];
@@ -39,9 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="flex-parent">
         <h2>Jericho Water Co. Login</h2>
         <form method="POST">
-
-            <!-- TODO: make the input fields horizontally wider so the website doesn't look so old. -->
-            <!-- Compare against the mdb examples - you'll see what I mean. -->
 
             <!-- username input -->
             <div data-mdb-input-init class="form-outline mb-4">

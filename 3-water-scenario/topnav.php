@@ -26,6 +26,7 @@ $loggedIn = !empty($_SESSION['user']);
       </li>
     <?php else: ?>
       <li class="nav-item"><a href="#" class="nav-link">About</a></li>
+      <li class="nav-item"><a href="./month.php" class="nav-link">Employee of the Month</a></li>
       <li class="nav-item"><a href="./login.php" class="nav-link">Log In</a></li>
     <?php endif; ?>
   </ul>
