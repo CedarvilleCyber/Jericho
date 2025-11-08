@@ -1,4 +1,5 @@
 import Image from "next/image";
+export const runtime = "nodejs";
 import { ThemeToggle } from "../theme/theme-toggle";
 import Link from "next/link";
 import { auth, signIn, signOut } from "@/auth";
@@ -20,7 +21,9 @@ import {
 } from "../ui/navigation-menu";
 
 export default async function AppBar() {
-  const session = await auth();
+  let session = null;
+  try { session = await auth(); }
+  catch (e) { console.error("auth() failed:", e); }
   const user = session?.user;
 
   return (
@@ -34,7 +37,7 @@ export default async function AppBar() {
           Jericho
         </Link>
       </div>
-      <NavigationMenu className="ml-4 my-auto">
+      <NavigationMenu className="ml-4 my-auto mr-auto">
         <NavigationMenuList className="gap-1">
           <NavigationMenuItem>
             <NavigationMenuTrigger className="h-9 px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent/50">
@@ -113,7 +116,12 @@ export default async function AppBar() {
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      <ThemeToggle className="ml-auto my-auto mr-2" />
+      {user && (
+        <Button variant="secondary" className="my-auto" asChild>
+          <Link href="/admin">Admin</Link>
+        </Button>
+      )}
+      <ThemeToggle className="ml-2 my-auto mr-2" />
       {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
