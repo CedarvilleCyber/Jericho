@@ -1,6 +1,11 @@
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import PhysicalJericho from "@/public/physical-jericho.png";
+import Logo1024 from "@/public/logo1024.png";
+import NuclearPlant from "@/public/nuclear-plant.png";
+import WaterTreatment from "@/public/water-treatment.png";
+import TrafficLight from "@/public/traffic-light.png";
 
 export default function Home() {
   return (
@@ -10,7 +15,7 @@ export default function Home() {
         style={{ clipPath: "polygon(60% 0%, 100% 0%, 100% 100%, 40% 100%)" }}
       >
         <Image
-          src="/physical-jericho.png"
+          src={PhysicalJericho}
           alt="Jericho Logo"
           width={1920}
           height={1080}
@@ -22,7 +27,7 @@ export default function Home() {
         style={{ clipPath: "polygon(0% 0%, 60% 0%, 40% 100%, 0% 100%)" }}
       >
         <Image
-          src="/logo1024.png"
+          src={Logo1024}
           alt="Jericho Logo"
           width={1920}
           height={1080}
@@ -39,7 +44,7 @@ export default function Home() {
         </div>
         <div className="p-4 flex">
           <Image
-            src="/nuclear-plant.png"
+            src={NuclearPlant}
             alt="Nuclear Plant"
             width={256}
             height={256}
@@ -83,7 +88,7 @@ export default function Home() {
             </Link>
           </div>
           <Image
-            src="/water-treatment.png"
+            src={WaterTreatment}
             alt="Water Treatment"
             width={256}
             height={256}
@@ -92,7 +97,7 @@ export default function Home() {
         </div>
         <div className="p-4 flex">
           <Image
-            src="/traffic-light.png"
+            src={TrafficLight}
             alt="Traffic Light"
             width={256}
             height={256}
