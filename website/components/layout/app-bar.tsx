@@ -19,17 +19,21 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
+import LogoImage from "../../../public/logo.svg";
 
 export default async function AppBar() {
   let session = null;
-  try { session = await auth(); }
-  catch (e) { console.error("auth() failed:", e); }
+  try {
+    session = await auth();
+  } catch (e) {
+    console.error("auth() failed:", e);
+  }
   const user = session?.user;
 
   return (
     <div className="sticky top-0 z-50 w-full border-b border-solid border-black/[.08] dark:border-white/[.145] bg-background backdrop-blur-sm flex">
       <div className="ml-5 flex h-14 max-w-7xl items-center">
-        <Image src="/logo.svg" alt="Jericho Logo" width={40} height={40} />
+        <Image src={LogoImage} alt="Jericho Logo" width={40} height={40} />
         <Link
           href="/"
           className="font-medium font-[--crimson-pro] text-3xl ml-3"
