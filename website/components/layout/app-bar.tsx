@@ -19,7 +19,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
-import LogoImage from "../../../public/logo.svg";
+import LogoImage from "@/public/logo.svg";
 
 export default async function AppBar() {
   let session = null;
