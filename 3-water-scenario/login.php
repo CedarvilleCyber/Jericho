@@ -3,8 +3,8 @@
 session_start();
 
 // Simple hardcoded credentials (for Hydra brute force). Add better creds later
-$valid_users = ["erik"];
-$valid_passwords = ["williams"];
+$valid_users = ["erikwilliams"];
+$valid_passwords = ["dragon"];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $_POST['username'];
