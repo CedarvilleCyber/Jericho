@@ -7,9 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import OpenVMConsole from "@/components/vms/open-vm-console";
 import prisma from "@/prisma";
 import { proxmox } from "@/proxmox";
-import Link from "next/link";
 
 export default async function VMsPage() {
   const node = proxmox.nodes.$("jericho01");
@@ -51,18 +51,16 @@ export default async function VMsPage() {
             <TableCell>{vm.name}</TableCell>
             <TableCell>{vm.status}</TableCell>
             <TableCell>
-              <Link
-                href={`https://${process.env.PVE_HOST}:${
-                  process.env.PVE_PORT
-                }/?console=kvm&novnc=1&node=${process.env.PVE_NODE}&vmid=${
-                  vm.vmid
-                }&ticket=${encodeURIComponent(
+              <OpenVMConsole
+                proxmoxTicket={proxmoxTicket}
+                redirectUrl={`https://${
+                  process.env.PVE_HOST || "jericho.alexthetaylor.com"
+                }:${process.env.PVE_PORT || "443"}/?console=kvm&novnc=1&node=${
+                  process.env.PVE_NODE
+                }&vmid=${vm.vmid}&ticket=${encodeURIComponent(
                   proxmoxTicket.ticket || ""
                 )}`}
-                target="_blank"
-              >
-                Console
-              </Link>
+              />
             </TableCell>
           </TableRow>
         ))}
