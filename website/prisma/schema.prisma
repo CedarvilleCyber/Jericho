@@ -17,9 +17,11 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  UserRoles UserRoles[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  UserRoles     UserRoles[]
+  userScenarios UserScenario[]
+  userAnswers   UserAnswers[]
 }
 
 model UserRoles {
@@ -70,4 +72,78 @@ model Session {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Scenario {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  topologyMap  String?
+  questions   Curriculum[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  userScenarios UserScenario[]
+
+  @@map("scenario")
+}
+
+model Curriculum {
+  id          String   @id @default(cuid())
+  title       String
+  placeholder String
+  validation  String?
+  answer      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  scenario    Scenario?     @relation(fields: [scenarioId], references: [id])
+  scenarioId  String?
+  userAnswers UserAnswers[]
+
+  @@map("curriculum")
+}
+
+model UserScenario {
+  id          String  @id @default(cuid())
+  userId      Int
+  scenarioId  String
+  isCompleted Boolean @default(false)
+
+  vms VMs[]
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, scenarioId])
+  @@map("user_scenario")
+}
+
+model UserAnswers {
+  id           String @id @default(cuid())
+  userId       Int
+  curriculumId String
+  answer       String
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, curriculumId])
+  @@map("user_answers")
+}
+
+model VMs {
+  id             String        @id @default(cuid())
+  vmId           Int           @unique
+  name           String
+  userScenario   UserScenario? @relation(fields: [userScenarioId], references: [id])
+  userScenarioId String?
+
+  @@map("vms")
 }

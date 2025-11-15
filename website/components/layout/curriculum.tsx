@@ -1,34 +1,27 @@
 "use client";
 
+import { Curriculum } from "@prisma/client";
 import AnswerChecker from "../ui/answer-checker";
 
 export default function CurriculumLayout({
   curriculum,
 }: {
-  curriculum: string;
+  curriculum: Array<Curriculum>;
 }) {
-  const curriculumData = JSON.parse(curriculum);
-
   return (
     <div className="h-full flex flex-col">
       <h2 className="text-xl font-semibold mb-2">Curriculum</h2>
-      <div className="bg-black text-green-500 font-mono p-2 rounded h-full overflow-y-auto">
-        {curriculumData.map(
-          (item: { title: string; placeholder: string; answer: string }) => (
-            <div key={item.title} className="mb-2 flex">
-              <label
-                className="font-semibold text-nowrap my-auto mr-2"
-                htmlFor={item.title}
-              >
-                {item.title}
-              </label>
-              <AnswerChecker
-                correctAnswer={item.answer}
-                placeholder={item.placeholder}
-              />
-            </div>
-          )
-        )}
+      <div className="font-mono p-2 rounded h-full overflow-y-auto">
+        {curriculum.map((item) => (
+          <div key={item.id} className="mb-4">
+            <h3 className="text-sm mb-1">{item.title}</h3>
+            <AnswerChecker
+              correctAnswer={item.answer}
+              placeholder={item.placeholder}
+              validation={item.validation}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );

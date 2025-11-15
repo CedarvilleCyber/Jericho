@@ -9,9 +9,11 @@ import { toast } from "sonner";
 export default function AnswerChecker({
   correctAnswer,
   placeholder,
+  validation
 }: {
   correctAnswer: string;
   placeholder: string;
+  validation?: string;
 }) {
   const [userAnswer, setUserAnswer] = useState("");
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -20,6 +22,11 @@ export default function AnswerChecker({
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        const regex = validation ? new RegExp(validation) : null;
+        if (regex && !regex.test(userAnswer.trim())) {
+          toast.error("Answer format is incorrect.");
+          return;
+        }
         if (userAnswer.trim() === correctAnswer) {
           setIsCorrect(true);
           toast.success("Correct answer!");
@@ -47,11 +54,11 @@ export default function AnswerChecker({
           style={{ scale: isCorrect === null ? 1 : 0 }}
         />
         <CheckSquare
-          className="h-4 w-4 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all"
+          className="h-4 w-4 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-accent transition-all"
           style={{ scale: isCorrect === true ? 1 : 0 }}
         />
         <XSquare
-          className="h-4 w-4 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-red-500 transition-all"
+          className="h-4 w-4 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-destructive transition-all"
           style={{ scale: isCorrect === false ? 1 : 0 }}
         />
       </Button>

@@ -13,3 +13,8 @@ export async function setCookieAndRedirect(
 
   redirect(redirectPath);
 }
+
+export async function setCookie(name: string, value: string) {
+  const cookieStore = await cookies();
+  cookieStore.set(name, value, { path: "/" });
+}
