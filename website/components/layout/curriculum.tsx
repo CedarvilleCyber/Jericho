@@ -10,7 +10,7 @@ export default function CurriculumLayout({
 }) {
   return (
     <div className="h-full flex flex-col">
-      <h2 className="text-xl font-semibold mb-2">Curriculum</h2>
+      <h2 className="text-xl font-semibold mb-2">Flags</h2>
       <div className="font-mono p-2 rounded h-full overflow-y-auto">
         {curriculum.map((item) => (
           <div key={item.id} className="mb-4">
@@ -18,7 +18,7 @@ export default function CurriculumLayout({
             <AnswerChecker
               correctAnswer={item.answer}
               placeholder={item.placeholder}
-              validation={item.validation}
+              validation={item.validation || ""}
             />
           </div>
         ))}

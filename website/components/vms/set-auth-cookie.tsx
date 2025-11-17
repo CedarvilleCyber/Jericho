@@ -11,6 +11,7 @@ export default function SetAuthCookie({
 }) {
   useEffect(() => {
     setCookie("PVEAuthCookie", ticket.ticket || "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <></>;

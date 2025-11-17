@@ -40,7 +40,7 @@ const ScenarioData: ScenarioWithQuestions = {
       title: "What are the credentials you logged into the web server with?",
       placeholder: "username:password",
       validation: "^\\w+:\\w+$",
-      answer: "admin,password",
+      answer: "admin:password",
       createdAt: new Date("2025-11-14T12:00:00Z"),
       updatedAt: new Date("2025-11-14T12:00:00Z"),
     },
