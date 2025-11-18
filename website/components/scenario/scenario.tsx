@@ -14,24 +14,18 @@ export default function ScenarioLayout({
   return (
     <div className="grid grid-cols-2 gap-6 p-6 h-full">
       <div className="h-full flex flex-col">
-        <h1 className="text-2xl font-bold">{scenario.name}</h1>
-
-        <Tabs defaultValue="topology" className="mt-4 h-full flex flex-col">
-          <TabsList>
-            <TabsTrigger value="topology">Topology</TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="advanced">Advanced</TabsTrigger>
-            <TabsTrigger value="live">Live</TabsTrigger>
-          </TabsList>
-
-          <div className="border border-border rounded-md p-4 shadow-lg grow overflow-hidden">
+        <div className="border border-border rounded-md p-4 shadow-lg grow overflow-hidden flex flex-col">
+          <h1 className="text-2xl font-bold mb-2">{scenario.name}</h1>
+          <div className="mx-auto min-w-[35.5rem] mb-4">
+            <LiveStreamImage height="20rem" />
+          </div>
+          <hr />
+          <Tabs defaultValue="topology" className="mt-4 h-[50vh] flex flex-col">
             <TabsContent value="topology" className="h-full flex flex-col">
               <p>Topology Map: {scenario.topologyMap}</p>
               <Image
                 src={scenario.topologyMap || NotFound}
                 alt={`${scenario.name} Topology Map`}
-                width={600}
-                height={400}
                 className="m-auto object-contain bg-muted"
               />
             </TabsContent>
@@ -47,13 +41,14 @@ export default function ScenarioLayout({
               <p>Advanced settings and configurations will go here.</p>
             </TabsContent>
 
-            {/* NEW: Live stream tab */}
-
-            <TabsContent value="live" className="h-full">
-              <LiveStreamImage height="28rem" />
-            </TabsContent>
-          </div>
-        </Tabs>
+            <TabsList>
+              <TabsTrigger value="topology">Topology</TabsTrigger>
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              <TabsTrigger value="live">Live</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       <div className="border border-border rounded-md p-4 shadow-lg flex flex-col h-full">
