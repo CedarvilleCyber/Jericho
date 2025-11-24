@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  basePath: "/webapp",
+  allowedDevOrigins: ["jericho.alexthetaylor.com"],
 };
 
 export default nextConfig;
