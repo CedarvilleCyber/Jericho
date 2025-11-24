@@ -1,11 +1,9 @@
+import Logo1024 from "@/public/logo1024.png";
+import PhysicalJericho from "@/public/physical-jericho.png";
+import TrafficLight from "@/public/traffic-light.png";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import PhysicalJericho from "@/public/physical-jericho.png";
-import Logo1024 from "@/public/logo1024.png";
-import NuclearPlant from "@/public/nuclear-plant.png";
-import WaterTreatment from "@/public/water-treatment.png";
-import TrafficLight from "@/public/traffic-light.png";
 
 export default function Home() {
   return (

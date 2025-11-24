@@ -1,11 +1,10 @@
 import { auth } from "@/auth";
 import prisma from "@/prisma";
 import { proxmox } from "@/proxmox";
-import SetAuthCookie from "../vms/set-auth-cookie";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { HTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
+import SetAuthCookie from "../vms/set-auth-cookie";
 
 export default async function PVEViewer({
   vmid,

@@ -20,6 +20,7 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import LogoImage from "@/public/logo.svg";
+import { prisma } from "@/prisma";
 
 export default async function AppBar() {
   let session = null;
@@ -29,6 +30,12 @@ export default async function AppBar() {
     console.error("auth() failed:", e);
   }
   const user = session?.user;
+
+  // Fetch scenarios from database
+  const scenarios = await prisma.scenario.findMany({
+    select: { id: true, slug: true, name: true, teaser: true },
+    orderBy: { createdAt: "asc" },
+  });
 
   return (
     <div className="sticky top-0 z-50 w-full border-b border-solid border-black/[.08] dark:border-white/[.145] bg-background backdrop-blur-sm flex">
@@ -49,49 +56,27 @@ export default async function AppBar() {
             </NavigationMenuTrigger>
             <NavigationMenuContent className="min-w-[200px] p-2">
               <div className="grid gap-1">
-                {/* TODO: Need to figure out why the first NavigationMenuLink does not render on prod */}
                 <NavigationMenuLink asChild>
                   <Link href="/">Home</Link>
                 </NavigationMenuLink>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/scenarios/nuclear-plant"
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                  >
-                    <div className="text-sm font-medium leading-none">
-                      Nuclear Plant
-                    </div>
-                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
-                      Can you melt the core?
-                    </p>
-                  </Link>
-                </NavigationMenuLink>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/scenarios/water-treatment"
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                  >
-                    <div className="text-sm font-medium leading-none">
-                      Water Treatment
-                    </div>
-                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
-                      Can you dirty the water?
-                    </p>
-                  </Link>
-                </NavigationMenuLink>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/scenarios/traffic-light"
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                  >
-                    <div className="text-sm font-medium leading-none">
-                      Traffic Light
-                    </div>
-                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
-                      Can you change the lights?
-                    </p>
-                  </Link>
-                </NavigationMenuLink>
+                
+                {/* Dynamic scenarios from database */}
+                {scenarios.map((scenario) => (
+                  <NavigationMenuLink key={scenario.id} asChild>
+                    <Link
+                      href={`/scenarios/${scenario.slug}`}
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
+                      <div className="text-sm font-medium leading-none">
+                        {scenario.name}
+                      </div>
+                      <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                        {scenario.teaser || "No description available"}
+                      </p>
+                    </Link>
+                  </NavigationMenuLink>
+                ))}
+
                 <NavigationMenuLink asChild>
                   <Link
                     href="/scenarios"
