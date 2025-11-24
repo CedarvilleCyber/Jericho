@@ -2,10 +2,9 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const session = await auth();
   if (!session) return new Response("Unauthorized", { status: 401 });
 
