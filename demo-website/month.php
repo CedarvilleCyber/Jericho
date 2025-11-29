@@ -1,34 +1,59 @@
 <?php
-    session_start();
+session_start();
+
+$date = (new DateTime())->modify('-1 month'); // set to previous month
+$employees = [
+  "Michael Rembrandt",
+  "Redd Harlan",
+  "Lauren Towner",
+  "Carla Winslow",
+  "Hugh Farnham",
+  "Anthony Smith",
+  "Erik Williams",
+  "Clare Sidney",
+  "Emma Chavez",
+  "Annie Gregory",
+  "Suzanne Bender",
+  "Kevin Mitnick"
+];
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Employee of the Month</title>
-        <?php include 'topnav.php'; ?> 
-        <link rel="stylesheet" href="./css/month.css">
-    </head>
-    <p>Here, we honor our greatest employees.</p>
-    <div class="grid-container">
-        <?php
-            $date = (new DateTime())->modify('-1 month'); // set to previous month
 
-            for ($i = 0; $i < 12; $i++) {
-                echo <<<HTML1
-                    <div class="box">
-                    <!-- figure out how to size the image better -->
-                    <img src="./images/m-rembrandt.jpg" width="200">
-                    <p>Michael Rembrandt</p>
-                    HTML1;
+<head>
+  <title>Employee of the Month</title>
+  <?php include 'include.php'; ?>
+  <link rel="stylesheet" href="/css/month.css">
+</head>
 
-                    // add an array of employee names and print the employee names 
-                    // and stock images similarly to what you're doing below.
+<body>
+  <?php include 'topnav.php'; ?>
+  <div class="flex-container">
+    <div class="snap-container">
+      <?php
+      for ($i = 0; $i < 12; $i++) {
+        echo '<section class="slide" aria-label="Employee of the Month">';
 
-                    printf("<p>%s</p>\n</div>", $date->format('F Y'));
+        echo '<h1 class="card-title">Employee of the Month</h1>';
 
-                    $date->modify('-1 month');
-            }
-        ?>
+        printf(
+          "<img class='employee-photo' src='./images/employees/%d.jpg' alt='%s' loading='lazy'>",
+          $i,
+          htmlspecialchars($employees[$i], ENT_QUOTES)
+        );
+
+        printf("<p class='employee-name'>%s</p>", htmlspecialchars($employees[$i], ENT_QUOTES));
+        printf("<p class='employee-date'>%s</p>", $date->format('F Y'));
+        if ($i < 11) {
+          echo "<div class='scroll-hint' aria-hidden='true'>Scroll for more &#8595;</div>";
+        }
+        echo '</section>';
+        $date->modify('-1 month');
+      }
+      ?>
     </div>
+  </div>
+</body>
+
 </html>

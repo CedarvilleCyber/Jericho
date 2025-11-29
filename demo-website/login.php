@@ -3,8 +3,8 @@
 session_start();
 
 // Simple hardcoded credentials (for Hydra brute force). Add better creds later
-$valid_users = ["admin", "john_doe", "root"];
-$valid_passwords = ["admin", "john_doen't", "root"];
+$valid_users = ["erikwilliams"];
+$valid_passwords = ["dragon"];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $_POST['username'];
@@ -14,7 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Store login flag in session
         $_SESSION['authenticated'] = true;
         $_SESSION['user'] = $user; // used for admin page auth later
-        header("Location: index.php");
+        $redirect = $_SESSION['intended_destination'] ?? 'index.php';
+        unset($_SESSION['intended_destination']);
+        header("Location: $redirect");
         exit;
     } 
     else {
@@ -28,18 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <head>
         <title>Login</title>
         <link rel="stylesheet" href="./css/mdb.min.css">
-        <link rel="stylesheet" href="./css/global.css">
         <link rel="stylesheet" href="./css/login.css">
         <script src="./js/mdb.umd.min.js" defer></script>
+        <?php include 'include.php'; ?>
     </head>
 
 <body>
     <div class="flex-parent">
         <h2>Jericho Water Co. Login</h2>
         <form method="POST">
-
-            <!-- TODO: make the input fields horizontally wider so the website doesn't look so old. -->
-            <!-- Compare against the mdb examples - you'll see what I mean. -->
 
             <!-- username input -->
             <div data-mdb-input-init class="form-outline mb-4">

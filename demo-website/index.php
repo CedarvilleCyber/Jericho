@@ -1,19 +1,24 @@
 <?php
-    // index.php
-    session_start();
+// index.php
+session_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Jericho Water Treatment Center</title>
 
-        <!-- I put the PHP "include" here so the index css would override the global css. -->
-        <?php include 'topnav.php'; ?> 
-        <link rel="stylesheet" href="./css/index.css">
-    </head>
-    <body>
-        <div class="flex-container">
-            <h1>Welcome to a world of possibility.</h1>
-        </div>
-    </body>
+<head>
+  <title>Jericho Department of Transportation</title>
+
+  <?php include 'include.php'; ?>
+  <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body class="d-flex flex-column vh-100 overflow-hidden">
+  <?php include 'topnav.php'; ?>
+  <main id="main-content" class="flex-fill d-flex align-items-center justify-content-center w-100">
+    <div class="container-fluid text-center">
+      <h1 class="mb-0" id="possible">Welcome to a world of possibility.</h1>
+    </div>
+  </main>
+</body>
+
 </html>
