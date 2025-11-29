@@ -1,3 +1,6 @@
+import Logo1024 from "@/public/logo1024.png";
+import PhysicalJericho from "@/public/physical-jericho.png";
+import TrafficLight from "@/public/traffic-light.png";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,7 +13,7 @@ export default function Home() {
         style={{ clipPath: "polygon(60% 0%, 100% 0%, 100% 100%, 40% 100%)" }}
       >
         <Image
-          src="/physical-jericho.png"
+          src={PhysicalJericho}
           alt="Jericho Logo"
           width={1920}
           height={1080}
@@ -22,7 +25,7 @@ export default function Home() {
         style={{ clipPath: "polygon(0% 0%, 60% 0%, 40% 100%, 0% 100%)" }}
       >
         <Image
-          src="/logo1024.png"
+          src={Logo1024}
           alt="Jericho Logo"
           width={1920}
           height={1080}
@@ -37,9 +40,9 @@ export default function Home() {
             <ArrowRight className="inline ml-1" />
           </Link>
         </div>
-        <div className="p-4 flex">
+        {/* <div className="p-4 flex">
           <Image
-            src="/nuclear-plant.png"
+            src={NuclearPlant}
             alt="Nuclear Plant"
             width={256}
             height={256}
@@ -83,16 +86,16 @@ export default function Home() {
             </Link>
           </div>
           <Image
-            src="/water-treatment.png"
+            src={WaterTreatment}
             alt="Water Treatment"
             width={256}
             height={256}
             className="rounded-lg shadow-lg brightness-90 border border-solid border-black/[.08] dark:border-white/[.145]"
           />
-        </div>
+        </div> */}
         <div className="p-4 flex">
           <Image
-            src="/traffic-light.png"
+            src={TrafficLight}
             alt="Traffic Light"
             width={256}
             height={256}
@@ -101,10 +104,11 @@ export default function Home() {
           <div className="ml-6 my-auto bg-background/75 p-4 rounded-lg shadow-md border border-solid border-black/[.08] dark:border-white/[.145]">
             <h2 className="mt-4 text-2xl font-semibold">Traffic Light</h2>
             <p className="mt-2 text-lg max-w-xl">
-              You are a traffic engineer tasked with optimizing the flow of
-              vehicles at a busy intersection. Analyze traffic patterns and
-              adjust the timing of the traffic lights to minimize congestion and
-              improve safety for all road users.
+              You&apos;ve found a website for your local traffic advisory and
+              light control system. This website looks like it could be
+              vulnerable to some clever attacks. Build your skills in web
+              exploitation and white-hat hacking with this fun entry-level
+              scenario.
             </p>
             <Link
               href="/scenarios/traffic-light"
