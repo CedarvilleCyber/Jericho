@@ -30,9 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <head>
         <title>Login</title>
         <link rel="stylesheet" href="./css/mdb.min.css">
-        <link rel="stylesheet" href="./css/global.css">
         <link rel="stylesheet" href="./css/login.css">
         <script src="./js/mdb.umd.min.js" defer></script>
+        <?php include 'include.php'; ?>
     </head>
 
 <body>
