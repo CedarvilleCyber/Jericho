@@ -54,8 +54,8 @@ export default async function VMsPage() {
               <OpenVMConsole
                 proxmoxTicket={proxmoxTicket}
                 redirectUrl={`https://${
-                  process.env.PVE_HOST || "jericho.alexthetaylor.com"
-                }:${process.env.PVE_PORT || "443"}/?console=kvm&novnc=1&node=${
+                  process.env.PVE_HOST || "proxmox.alexthetaylor.com"
+                }:${process.env.PVE_PORT || "443"}?console=kvm&novnc=1&node=${
                   process.env.PVE_NODE
                 }&vmid=${vm.vmid}&ticket=${encodeURIComponent(
                   proxmoxTicket.ticket || ""

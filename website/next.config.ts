@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: "/webapp",
-  allowedDevOrigins: ["jericho.alexthetaylor.com"],
+  allowedDevOrigins: ["jericho.alexthetaylor.com", "proxmox.alexthetaylor.com"],
 };
 
 export default nextConfig;
