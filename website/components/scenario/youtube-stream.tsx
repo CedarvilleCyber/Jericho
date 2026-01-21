@@ -11,7 +11,7 @@ export default function YouTubeStream({ channelId }: { channelId: string | null 
   const embedUrl = `https://www.youtube.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=1`;
 
   return (
-    <div className="w-[90%] mx-auto aspect-video border border-border overflow-hidden bg-black shadow-sm">
+    <div className="w-[85%] mx-auto aspect-video border border-border overflow-hidden bg-black shadow-sm">
       <iframe
         width="100%"
         height="100%"

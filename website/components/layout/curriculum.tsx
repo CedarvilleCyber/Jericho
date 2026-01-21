@@ -57,9 +57,10 @@ export default function CurriculumLayout({
         <div className="font-mono p-2 rounded h-full overflow-y-auto">
           {visibleQuestions.map((item) => (
             <div key={item.id} className="mb-4">
-              <h3 className="text-sm mb-1">
+              <h3 className="text-sm mb-1 whitespace-pre-wrap">
                 {item.title}
                 {item.answered}
+                &nbsp;({item.pointValue} pts)
               </h3>
               <AnswerChecker
                 curriculumId={item.id}

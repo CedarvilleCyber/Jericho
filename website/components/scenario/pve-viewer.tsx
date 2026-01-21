@@ -5,6 +5,7 @@ import Link from "next/link";
 import { HTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 import SetAuthCookie from "../vms/set-auth-cookie";
+import WaitForCookie from "./wait-for-cookie";
 
 export default async function PVEViewer({
   vmid,
@@ -22,8 +23,8 @@ export default async function PVEViewer({
     password: process.env.PVE_CREATE_USER_PASSWORD || "password",
   });
   const noVncConsoleURL = `https://${
-    process.env.PVE_HOST || "jericho.alexthetaylor.com"
-  }:${process.env.PVE_PORT || "443"}/?console=kvm&novnc=1&node=${
+    process.env.PVE_HOST || "proxmox.alexthetaylor.com"
+  }:${process.env.PVE_PORT || "443"}/proxmox/?console=kvm&novnc=1&node=${
     process.env.PVE_NODE
   }&vmid=${vmid}`;
 
@@ -36,10 +37,12 @@ export default async function PVEViewer({
         rel="noopener noreferrer"
         className="flex-1"
       >
-        <iframe
-          src={noVncConsoleURL}
-          className="w-full h-full min-h-80 pointer-events-none"
-        />
+        <WaitForCookie cookieName="PVEAuthCookie">
+          <iframe
+            src={noVncConsoleURL}
+            className="w-full h-full min-h-80 pointer-events-none"
+          />
+        </WaitForCookie>
       </Link>
     </div>
   );

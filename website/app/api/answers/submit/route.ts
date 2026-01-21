@@ -3,14 +3,57 @@ import { prisma } from "@/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-// Force Node runtime so Prisma works
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
+// Normalize answer for flexible matching
+function normalizeAnswer(answer: string): string {
+  return answer.trim().toLowerCase();
+}
+
+// Check if answer matches (with flexibility)
+function answerMatches(userAnswer: string, correctAnswer: string): boolean {
+  const normalized = normalizeAnswer(userAnswer);
+  const correct = normalizeAnswer(correctAnswer);
+
+  // Exact match
+  if (normalized === correct) return true;
+
+  // For Yes/No questions - accept variations
+  if (correct === "yes" || correct === "no") {
+    const yesVariations = ["yes", "y", "true"];
+    const noVariations = ["no", "n", "false"];
+    
+    if (correct === "yes") {
+      return yesVariations.includes(normalized);
+    } else {
+      return noVariations.includes(normalized);
+    }
+  }
+
+  // For credentials (username:password) - case insensitive on username, case sensitive on password
+  if (correct.includes(":")) {
+    const [correctUser, correctPass] = correct.split(":");
+    const [userPart, passPart] = normalized.split(":");
+    
+    if (userPart && passPart) {
+      return normalizeAnswer(correctUser) === userPart && correctPass === passPart;
+    }
+  }
+
+  // For port lists - normalize and sort for comparison
+  if (/^\d{1,5}(,\d{1,5})*$/.test(correct)) {
+    const correctPorts = correct.split(",").map(p => p.trim()).sort();
+    const userPorts = normalized.split(",").map(p => p.trim()).sort();
+    return JSON.stringify(correctPorts) === JSON.stringify(userPorts);
+  }
+
+  return false;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Get the user session
     const session = await auth();
 
     if (!session?.user?.email) {
@@ -20,7 +63,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user from database
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
@@ -32,7 +74,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse request body
     const { curriculumId, answer } = await request.json();
 
     if (!curriculumId || answer === undefined) {
@@ -42,7 +83,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the curriculum (question)
     const curriculum = await prisma.curriculum.findUnique({
       where: { id: curriculumId },
     });
@@ -55,12 +95,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate format if validation regex exists
+    // Validate format if validation regex exists
     let isFormatValid = true;
     if (curriculum.validation) {
-      const regex = new RegExp(curriculum.validation);
+      // Remove trailing 'i' flag from the string if it exists
+      const validationPattern = curriculum.validation.endsWith('i') 
+        ? curriculum.validation.slice(0, -1) 
+        : curriculum.validation;
+  
+      // Create regex with 'i' flag for case-insensitive matching
+      const regex = new RegExp(validationPattern, 'i');
       isFormatValid = regex.test(answer.trim());
     }
-
     if (!isFormatValid) {
       return NextResponse.json(
         { error: "Answer format is incorrect", isCorrect: false },
@@ -85,11 +131,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if answer is correct
-    const isCorrect = answer.trim() === curriculum.answer;
+    // Check if answer is correct using flexible matching
+    const isCorrect = answerMatches(answer, curriculum.answer);
 
     // Upsert the user answer
-    await prisma.userAnswers.upsert({
+    /*const userAnswer = */await prisma.userAnswers.upsert({
       where: {
         userId_curriculumId: {
           userId: user.id,

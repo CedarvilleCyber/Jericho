@@ -1,8 +1,10 @@
 import ScenarioLayout from "@/components/scenario/scenario";
+import RefreshOnMount from "@/components/scenario/refresh-on-mount";
 import { prisma } from "@/prisma";
 import { auth } from "@/auth";
 import { notFound, redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
 export default async function ScenarioPage({
   params,
 }: {
@@ -59,5 +61,10 @@ export default async function ScenarioPage({
     answered: correctAnsweredIds.has(q.id),
   }));
 
-  return <ScenarioLayout scenario={{ ...scenario, questions: questionsWithStatus }} />;
+  return (
+	 <>
+	  <RefreshOnMount />
+	  <ScenarioLayout scenario={{ ...scenario, questions: questionsWithStatus }} />
+	 </>
+  );
 }

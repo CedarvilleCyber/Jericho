@@ -16,5 +16,5 @@ export async function setCookieAndRedirect(
 
 export async function setCookie(name: string, value: string) {
   const cookieStore = await cookies();
-  cookieStore.set(name, value, { path: "/" });
+  cookieStore.set(name, value, { path: "/", domain: ".alexthetaylor.com" });
 }

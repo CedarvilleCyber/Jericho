@@ -63,17 +63,6 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model SkillCategory {
-  id          Int          @id @default(autoincrement())
-  key         String       @unique
-  label       String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  curriculums Curriculum[]
-
-  @@map("skill_categories")
-}
-
 model Scenario {
   id               String         @id @default(cuid())
   name             String
@@ -85,6 +74,7 @@ model Scenario {
   slug             String         @unique
   teaser           String?
   youtubeChannelId String?
+  learningObjectives String?
   questions        Curriculum[]
   userScenarios    UserScenario[]
 
@@ -92,21 +82,46 @@ model Scenario {
 }
 
 model Curriculum {
-  id              String        @id @default(cuid())
-  title           String
-  placeholder     String
-  validation      String?
-  answer          String
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  scenarioId      String?
-  pointValue      Int           @default(10)
-  skillCategoryId Int
-  scenario        Scenario?     @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  skillCategory   SkillCategory @relation(fields: [skillCategoryId], references: [id])
-  userAnswers     UserAnswers[]
+  id            String        @id @default(cuid())
+  title         String
+  placeholder   String
+  validation    String?
+  answer        String
+  pointValue    Int           @default(10)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  scenario      Scenario?     @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenarioId    String?
+  skillCategories CurriculumSkillCategory[]  // NEW: many-to-many
+  userAnswers   UserAnswers[]
 
   @@map("curriculum")
+}
+
+model CurriculumSkillCategory {
+  id           Int           @id @default(autoincrement())
+  curriculum   Curriculum    @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  curriculumId String
+  skillCategory SkillCategory @relation(fields: [skillCategoryId], references: [id])
+  skillCategoryId Int
+
+  @@unique([curriculumId, skillCategoryId])
+  @@map("curriculum_skill_category")
+}
+
+model SkillCategory {
+  id           Int       @id @default(autoincrement())
+  key          String    @unique
+  label        String
+
+  curriculums  CurriculumSkillCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("skill_categories")
 }
 
 model UserScenario {
