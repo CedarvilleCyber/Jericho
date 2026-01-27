@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getSessionFromRequest } from "@/lib/auth-helpers";
 import { prisma } from "@/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,7 +13,7 @@ export async function GET(
   try {
     const { curriculumId } = await params; // Await params first
 
-    const session = await auth();
+    const session = await getSessionFromRequest(request.headers);
 
     if (!session?.user?.email) {
       return NextResponse.json({ answered: false });

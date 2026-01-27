@@ -2,10 +2,11 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-import { auth } from "@/auth";
+import { getSessionFromRequest } from "@/lib/auth-helpers";
+import { NextRequest } from "next/server";
 
-export async function GET() {
-  const session = await auth();
+export async function GET(request: NextRequest) {
+  const session = await getSessionFromRequest(request.headers);
   if (!session) return new Response("Unauthorized", { status: 401 });
 
   const STREAM_URL =

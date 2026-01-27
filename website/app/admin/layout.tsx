@@ -1,5 +1,4 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth-helpers";
 export const runtime = "nodejs";
 
 export default async function AdminLayout({
@@ -7,11 +6,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/");
-  }
+  await requireAuth();
 
   return <>{children}</>;
 }

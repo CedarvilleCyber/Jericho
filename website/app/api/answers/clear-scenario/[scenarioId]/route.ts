@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/prisma";
-import { auth } from "@/auth";
+import { getSessionFromRequest } from "@/lib/auth-helpers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ export async function DELETE(
 ) {
   try {
     const { scenarioId } = await params;
-    const session = await auth();
+    const session = await getSessionFromRequest(request.headers);
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

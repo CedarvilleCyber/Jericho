@@ -1,17 +1,12 @@
 import { prisma } from "@/prisma";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth-helpers";
 import SkillsMatrix from "./skills-matrix";
 
 export default async function UserStats() {
-  const session = await auth();
-
-  if (!session?.user?.email) {
-    redirect("/signin");
-  }
+  const { user: authenticatedUser } = await requireAuth();
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: authenticatedUser.id },
     include: {
       userAnswers: {
         where: { isCorrect: true },
@@ -23,10 +18,6 @@ export default async function UserStats() {
       },
     },
   });
-
-  if (!user) {
-    redirect("/signin");
-  }
 
   // Calculate total points
   const totalPoints = user.userAnswers.reduce(

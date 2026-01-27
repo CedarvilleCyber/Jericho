@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-helpers";
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ export default async function VMsPage() {
       status: vm.status,
     }));
 
-  const session = await auth();
+  const session = await getSession();
   if (!session?.user) {
     return <div>Please log in to view your VMs.</div>;
   }

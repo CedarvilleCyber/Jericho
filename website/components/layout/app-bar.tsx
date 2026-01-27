@@ -2,7 +2,8 @@ import Image from "next/image";
 export const runtime = "nodejs";
 import { ThemeToggle } from "../theme/theme-toggle";
 import Link from "next/link";
-import { auth, signIn, signOut } from "@/auth";
+import { getSession } from "@/lib/auth-helpers";
+import { signInAction, signOutAction } from "@/app/actions/auth";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
@@ -25,9 +26,9 @@ import { prisma } from "@/prisma";
 export default async function AppBar() {
   let session = null;
   try {
-    session = await auth();
+    session = await getSession();
   } catch (e) {
-    console.error("auth() failed:", e);
+    console.error("getSession() failed:", e);
   }
   const user = session?.user;
 
@@ -127,27 +128,14 @@ export default async function AppBar() {
               <Link href="/settings">Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <form
-                action={async () => {
-                  "use server";
-
-                  await signOut();
-                }}
-              >
+              <form action={signOutAction}>
                 <button type="submit">Sign out</button>
               </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <form
-          action={async () => {
-            "use server";
-
-            await signIn("microsoft-entra-id");
-          }}
-          className="my-auto mr-3"
-        >
+        <form action={signInAction} className="my-auto mr-3">
           <Button variant="secondary">Login</Button>
         </form>
       )}

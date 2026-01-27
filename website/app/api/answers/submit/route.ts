@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/prisma";
-import { auth } from "@/auth";
+import { getSessionFromRequest } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 
 export const runtime = "nodejs";
@@ -54,7 +54,7 @@ function answerMatches(userAnswer: string, correctAnswer: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
+    const session = await getSessionFromRequest(request.headers);
 
     if (!session?.user?.email) {
       return NextResponse.json(

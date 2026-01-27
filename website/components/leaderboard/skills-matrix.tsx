@@ -1,23 +1,18 @@
 import { prisma } from "@/prisma";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth-helpers";
 
 export default async function SkillsMatrix() {
-  const session = await auth();
-
-  if (!session?.user?.email) {
-    redirect("/signin");
-  }
+  const { user: authenticatedUser } = await requireAuth();
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: authenticatedUser.id },
     include: {
       userAnswers: {
         where: { isCorrect: true },
-        include: { 
-          curriculum: { 
-            select: { 
-              pointValue: true, 
+        include: {
+          curriculum: {
+            select: {
+              pointValue: true,
               skillCategories: {  // Changed from skillCategory
                 select: {
                   skillCategory: {
@@ -25,16 +20,12 @@ export default async function SkillsMatrix() {
                   }
                 }
               }
-            } 
-          } 
+            }
+          }
         },
       },
     },
   });
-
-  if (!user) {
-    redirect("/signin");
-  }
 
   // Fetch all skill categories with ALL their questions
 const allCategories = await prisma.skillCategory.findMany({

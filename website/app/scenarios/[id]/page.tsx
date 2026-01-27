@@ -1,8 +1,8 @@
 import ScenarioLayout from "@/components/scenario/scenario";
 import RefreshOnMount from "@/components/scenario/refresh-on-mount";
 import { prisma } from "@/prisma";
-import { auth } from "@/auth";
-import { notFound, redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth-helpers";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export default async function ScenarioPage({
@@ -12,18 +12,7 @@ export default async function ScenarioPage({
 }) {
   const { id } = await params;
 
-  const session = await auth();
-  if (!session?.user?.email) {
-    redirect("/signin");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-
-  if (!user) {
-    redirect("/signin");
-  }
+  const { user } = await requireAuth();
 
   const scenario = await prisma.scenario.findUnique({
     where: { slug: id },
