@@ -1,9 +1,0 @@
-[22:26:31 2026-01-26] FETCHING Version 2.42.7
-[22:26:31 2026-01-26] CREATING /home/awtpi/.spicetify
-[22:26:31 2026-01-26] DOWNLOADING https://github.com/spicetify/cli/releases/download/v2.42.7/spicetify-2.42.7-linux-amd64.tar.gz
-[22:26:31 2026-01-26] EXTRACTING /home/awtpi/.spicetify/spicetify.tar.gz
-[22:26:31 2026-01-26] SETTING EXECUTABLE PERMISSIONS TO /home/awtpi/.spicetify/spicetify
-[22:26:31 2026-01-26] REMOVING /home/awtpi/.spicetify/spicetify.tar.gz
-[22:26:31 2026-01-26] APPENDING /home/awtpi/.spicetify to PATH in /home/awtpi/.config/fish/config.fish
-[22:26:31 2026-01-26] spicetify v2.42.7 was installed successfully to /home/awtpi/.spicetify
-[22:26:31 2026-01-26] Run 'spicetify --help' to get started

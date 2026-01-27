@@ -1,125 +1,65 @@
-import Logo1024 from "@/public/logo1024.png";
-import PhysicalJericho from "@/public/physical-jericho.png";
-import TrafficLight from "@/public/traffic-light.png";
-import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="relative flex h-full w-full">
-      <div
-        className="w-full h-full antialiased fixed left-0 top-0 overflow-hidden -z-10"
-        style={{ clipPath: "polygon(60% 0%, 100% 0%, 100% 100%, 40% 100%)" }}
-      >
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
         <Image
-          src={PhysicalJericho}
-          alt="Jericho Logo"
-          width={1920}
-          height={1080}
-          className="object-cover h-full blur-md"
+          className="dark:invert"
+          src="/next.svg"
+          alt="Next.js logo"
+          width={100}
+          height={20}
+          priority
         />
-      </div>
-      <div
-        className="w-full h-full antialiased fixed left-0 top-0 overflow-hidden -z-10"
-        style={{ clipPath: "polygon(0% 0%, 60% 0%, 40% 100%, 0% 100%)" }}
-      >
-        <Image
-          src={Logo1024}
-          alt="Jericho Logo"
-          width={1920}
-          height={1080}
-          className="object-cover h-full blur-md"
-        />
-      </div>
-      <div className="w-full">
-        <div className="sticky top-0 p-4 w-full bg-background/95 flex z-10">
-          <h1 className="ml-2 text-4xl font-semibold">Scenarios</h1>
-          <Link href="/scenarios" className="text-accent ml-auto my-auto">
-            View all scenarios
-            <ArrowRight className="inline ml-1" />
-          </Link>
-        </div>
-        {/* <div className="p-4 flex">
-          <Image
-            src={NuclearPlant}
-            alt="Nuclear Plant"
-            width={256}
-            height={256}
-            className="rounded-lg shadow-lg brightness-90 border border-solid border-black/[.08] dark:border-white/[.145]"
-          />
-          <div className="ml-6 my-auto bg-background/75 p-4 rounded-lg shadow-md border border-solid border-black/[.08] dark:border-white/[.145]">
-            <h2 className="mt-4 text-2xl font-semibold">Nuclear Plant</h2>
-            <p className="mt-2 text-lg max-w-xl">
-              You are a technician at a nuclear power plant. A critical system
-              has failed, and you must quickly diagnose and repair the issue to
-              prevent a meltdown. Use your knowledge of nuclear physics and
-              engineering to navigate the plant&apos;s complex systems and
-              restore safety.
-            </p>
-            <Link
-              href="/scenarios/nuclear-plant"
-              className="mt-4 inline-block text-primary font-medium"
+        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+            To get started, edit the page.tsx file.
+          </h1>
+          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+            Looking for a starting point or more instructions? Head over to{" "}
+            <a
+              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+              className="font-medium text-zinc-950 dark:text-zinc-50"
             >
-              Start Scenario
-              <ArrowRight className="inline ml-1" />
-            </Link>
-          </div>
-        </div>
-        <div className="p-4 flex justify-end">
-          <div className="mr-6 my-auto bg-background/75 p-4 rounded-lg shadow-md border border-solid border-black/[.08] dark:border-white/[.145]">
-            <h2 className="mt-4 text-2xl font-semibold">Water Treatment</h2>
-            <p className="mt-2 text-lg max-w-xl">
-              You are an engineer at a municipal water treatment facility. A
-              sudden contamination has been detected in the water supply, and
-              you must identify the source and implement a solution to ensure
-              safe drinking water for the community. Utilize your expertise in
-              environmental engineering and chemistry to tackle this urgent
-              challenge.
-            </p>
-            <Link
-              href="/scenarios/water-treatment"
-              className="mt-4 inline-block text-primary font-medium"
+              Templates
+            </a>{" "}
+            or the{" "}
+            <a
+              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+              className="font-medium text-zinc-950 dark:text-zinc-50"
             >
-              Start Scenario
-              <ArrowRight className="inline ml-1" />
-            </Link>
-          </div>
-          <Image
-            src={WaterTreatment}
-            alt="Water Treatment"
-            width={256}
-            height={256}
-            className="rounded-lg shadow-lg brightness-90 border border-solid border-black/[.08] dark:border-white/[.145]"
-          />
-        </div> */}
-        <div className="p-4 flex">
-          <Image
-            src={TrafficLight}
-            alt="Traffic Light"
-            width={256}
-            height={256}
-            className="rounded-lg shadow-lg brightness-90 border border-solid border-black/[.08] dark:border-white/[.145]"
-          />
-          <div className="ml-6 my-auto bg-background/75 p-4 rounded-lg shadow-md border border-solid border-black/[.08] dark:border-white/[.145]">
-            <h2 className="mt-4 text-2xl font-semibold">Traffic Light</h2>
-            <p className="mt-2 text-lg max-w-xl">
-              You&apos;ve found a website for your local traffic advisory and
-              light control system. This website looks like it could be
-              vulnerable to some clever attacks. Build your skills in web
-              exploitation and white-hat hacking with this fun entry-level
-              scenario.
-            </p>
-            <Link
-              href="/scenarios/traffic-light"
-              className="mt-4 inline-block text-primary font-medium"
-            >
-              Start Scenario
-              <ArrowRight className="inline ml-1" />
-            </Link>
-          </div>
+              Learning
+            </a>{" "}
+            center.
+          </p>
         </div>
-      </div>
+        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+          <a
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
+            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              className="dark:invert"
+              src="/vercel.svg"
+              alt="Vercel logomark"
+              width={16}
+              height={16}
+            />
+            Deploy Now
+          </a>
+          <a
+            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
+            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Documentation
+          </a>
+        </div>
+      </main>
     </div>
   );
 }
