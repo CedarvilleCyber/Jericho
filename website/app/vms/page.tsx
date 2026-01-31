@@ -1,27 +1,25 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
+import { getUser } from "@/lib/db/user";
+import { getTicket } from "@/lib/proxmox-api/ticket";
+import { getUserVMs } from "@/lib/vms/get";
 import {
-  ActionIcon,
   Button,
   Container,
-  Group,
   Paper,
   Tabs,
   TabsList,
   TabsPanel,
-  TabsTab,
+  TabsTab
 } from "@mantine/core";
-import { useEffect, useState } from "react";
-import { VM } from "../generated/prisma/client";
-import { getUserVMs } from "@/lib/vms/get";
-import { authClient } from "@/lib/auth-client";
 import {
   IconExternalLink,
   IconFidgetSpinner,
   IconX,
 } from "@tabler/icons-react";
-import { getTicket } from "@/lib/proxmox-api/ticket";
-import { getUser } from "@/lib/db/user";
+import { useEffect, useState } from "react";
+import { VM } from "../generated/prisma/client";
 
 export default function VMsPage() {
   const [openVMs, setOpenVMs] = useState<string[]>([]);
@@ -65,8 +63,10 @@ export default function VMsPage() {
           {openVMs.map((vmId) => (
             <TabsTab key={vmId} value={vmId}>
               <div className="flex items-center gap-2">
-                <p className="my-auto text-xs">{userVMs.find((vm) => vm.proxmoxId.toString() === vmId)?.name ||
-                  `VM ${vmId}`}</p>
+                <p className="my-auto text-xs">
+                  {userVMs.find((vm) => vm.proxmoxId.toString() === vmId)
+                    ?.name || `VM ${vmId}`}
+                </p>
                 <IconX
                   onClick={(e) => {
                     e.stopPropagation();
@@ -100,8 +100,10 @@ export default function VMsPage() {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
+                    boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
+                    borderRadius: "0.375rem",
+                    border: "1px solid #4B5563",
                   }}
-                  bg={"gray"}
                 >
                   <h2 className="text-lg font-semibold mb-2">
                     VM ID: {vm.proxmoxId}

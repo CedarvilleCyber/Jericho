@@ -1,9 +1,7 @@
+import VMsEditor from "@/components/admin/vms-editor";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import {
-  ActionIcon,
   Box,
   Container,
   Table,
@@ -13,8 +11,8 @@ import {
   TableThead,
   TableTr,
 } from "@mantine/core";
-import { IconPencil } from "@tabler/icons-react";
-import VMsEditor from "@/components/admin/vms-editor";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
   const session = await auth.api.getSession({
@@ -34,9 +32,9 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const users = await prisma.user.findMany({
+  const users = (await prisma.user.findMany({
     include: { userRoles: true, vms: true },
-  });
+  })).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   return (
     <Container size="lg">
@@ -62,7 +60,7 @@ export default async function AdminPage() {
                 </TableTd>
                 <TableTd>
                   <Box className="flex items-center gap-2">
-                    <span>{user.vms.length} VMs</span> 
+                    <span>{user.vms.length} VMs</span>
                     <VMsEditor user={user} />
                   </Box>
                 </TableTd>

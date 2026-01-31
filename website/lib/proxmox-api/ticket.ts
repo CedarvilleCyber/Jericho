@@ -9,11 +9,10 @@ export async function getTicket(proxmoxId: string) {
     password: process.env.PVE_CREATE_USER_PASSWORD || "DefaultPassword123!",
   });
   const cookieStore = await cookies();
-  cookieStore.set("PVEAuthToken", ticket.ticket ?? "", {
+  cookieStore.set("PVEAuthCookie", ticket.ticket ?? "", {
     path: "/",
     domain: ".alexthetaylor.com",
     httpOnly: true,
     secure: true,
-    sameSite: "none",
   });
 }
