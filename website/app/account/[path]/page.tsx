@@ -1,18 +1,14 @@
+"use client";
+
 import { AccountView } from "@daveyplate/better-auth-ui";
-import { accountViewPaths } from "@daveyplate/better-auth-ui/server";
+import { use } from "react";
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return Object.values(accountViewPaths).map((path) => ({ path }));
-}
-
-export default async function AccountPage({
+export default function AccountPage({
   params,
 }: {
   params: Promise<{ path: string }>;
 }) {
-  const { path } = await params;
+  const { path } = use(params);
 
   return (
     <main className="container p-4 md:p-6">
