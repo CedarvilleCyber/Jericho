@@ -1,10 +1,11 @@
 import "@mantine/core/styles.css";
 import "./globals.css";
 
+import AppBar from "@/components/app-bar";
+import Providers from "@/components/providers";
 import {
   ColorSchemeScript,
-  MantineProvider,
-  mantineHtmlProps,
+  mantineHtmlProps
 } from "@mantine/core";
 import type { Metadata } from "next";
 
@@ -21,10 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
-        <ColorSchemeScript />
+        <ColorSchemeScript defaultColorScheme="auto" />
       </head>
-      <body>
-        <MantineProvider>{children}</MantineProvider>
+      <body className="min-h-screen bg-[--mantine-color-body] text-[--mantine-color-text]">
+        <Providers>
+          <AppBar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
