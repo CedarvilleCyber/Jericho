@@ -2,7 +2,6 @@
 
 import { User, VM } from "@/app/generated/prisma/client";
 import { ensureUserHasProxmoxId } from "@/lib/proxmox-api/user";
-import { getAllVMs } from "@/lib/proxmox-api/vms";
 import { addExistingVMToUser, cloneVMTemplateToUser } from "@/lib/vms/add";
 import { deleteVMFromProxmox, removeVM } from "@/lib/vms/remove";
 import {
@@ -43,15 +42,12 @@ import {
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-export default function VMsEditor({ user }: { user: User & { vms: VM[] } }) {
+export default function VMsEditor({ user, proxmoxVMs }: { user: User & { vms: VM[] }; proxmoxVMs: Array<{ vmid: number; name: string; template: boolean }> }) {
   const [opened, { open, close }] = useDisclosure(false);
   const [popoverOpened, { open: openPopover, close: closePopover }] =
     useDisclosure(false);
-  const [proxmoxVMs, setProxmoxVMs] = useState<
-    Array<{ vmid: number; name: string; template: boolean }>
-  >([]);
   const [newVMName, setNewVMName] = useState("");
 
   const comboboxExisting = useCombobox({
@@ -116,20 +112,6 @@ export default function VMsEditor({ user }: { user: User & { vms: VM[] } }) {
 
   const valuesExisting = getFilteredVMs(vmSearchExisting, false);
   const valuesTemplate = getFilteredVMs(vmSearchTemplate, true);
-
-  useEffect(() => {
-    async function fetchVMs() {
-      const vms = await getAllVMs();
-      console.log("Fetched VMs:", vms);
-      const data = vms.map((vm) => ({
-        vmid: vm.vmid,
-        name: vm.name ?? "",
-        template: vm.template === 1,
-      }));
-      setProxmoxVMs(data);
-    }
-    fetchVMs();
-  }, [user.vms]);
 
   return (
     <>

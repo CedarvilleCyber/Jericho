@@ -1,6 +1,7 @@
 import VMsEditor from "@/components/admin/vms-editor";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { getAllVMs } from "@/lib/proxmox-api/vms";
 import {
   Box,
   Container,
@@ -36,6 +37,12 @@ export default async function AdminPage() {
     include: { userRoles: true, vms: true },
   })).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
+  const allVMs = (await getAllVMs()).map((vm) => ({
+    vmid: vm.vmid,
+    name: vm.name ?? "",
+    template: vm.template === 1,
+  }));
+
   return (
     <Container size="lg">
       <h1 className="text-xl my-5">Admin Dashboard</h1>
@@ -61,7 +68,7 @@ export default async function AdminPage() {
                 <TableTd>
                   <Box className="flex items-center gap-2">
                     <span>{user.vms.length} VMs</span>
-                    <VMsEditor user={user} />
+                    <VMsEditor user={user} proxmoxVMs={allVMs} />
                   </Box>
                 </TableTd>
               </TableTr>
