@@ -1,3 +1,4 @@
+import ScenarioTriggers from "@/components/admin/scenario-triggers";
 import VMsEditor from "@/components/admin/vms-editor";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -10,7 +11,7 @@ import {
   TableTd,
   TableTh,
   TableThead,
-  TableTr,
+  TableTr
 } from "@mantine/core";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -33,9 +34,11 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const users = (await prisma.user.findMany({
-    include: { userRoles: true, vms: true },
-  })).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  const users = (
+    await prisma.user.findMany({
+      include: { userRoles: true, vms: true },
+    })
+  ).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   const allVMs = (await getAllVMs()).map((vm) => ({
     vmid: vm.vmid,
@@ -47,7 +50,7 @@ export default async function AdminPage() {
     <Container size="lg">
       <h1 className="text-xl my-5">Admin Dashboard</h1>
 
-      <Box className="border border-gray-700 shadow-lg rounded-md p-4">
+      <Box className="border border-gray-700 shadow-lg rounded-md p-4 mb-4">
         <Table miw={700}>
           <TableThead>
             <TableTr>
@@ -76,6 +79,7 @@ export default async function AdminPage() {
           </TableTbody>
         </Table>
       </Box>
+      <ScenarioTriggers />
     </Container>
   );
 }
