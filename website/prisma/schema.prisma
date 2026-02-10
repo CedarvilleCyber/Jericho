@@ -22,15 +22,18 @@ model User {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   proxmoxId     String?      @unique
-  
   sessions      Session[]
   accounts      Account[]
   vms           VM[]
   userRoles     UserRole[]
   userAnswers   UserAnswer[]
 
+  username        String?
+  displayUsername String?
+
   @@unique([email])
   @@map("user")
+  @@unique([username])
 }
 
 enum Role {
@@ -140,8 +143,8 @@ model Question {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  scenarioId   String
-  scenario     Scenario     @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenarioId String
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
   competencies Competency[]
   userAnswers  UserAnswer[]

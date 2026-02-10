@@ -45,12 +45,12 @@ function LandingPage() {
           Cyber-physical city infrastructure lab environment for hands-on learning and experimentation.
         </Text>
         <Group gap="md">
-          <Link href="/auth/sign-in">
+          <Link href="/sign-in">
             <Button size="lg" variant="filled">
               Sign In
             </Button>
           </Link>
-          <Link href="/auth/sign-up">
+          <Link href="/sign-in?mode=signup">
             <Button size="lg" variant="light">
               Sign Up
             </Button>

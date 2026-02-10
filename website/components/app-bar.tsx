@@ -75,8 +75,7 @@ export default function AppBar() {
                   )}
                   <Menu.Divider />
                   <Menu.Item
-                    component={Link}
-                    href="/auth/sign-out"
+                    onClick={() => authClient.signOut()}
                     leftSection={<IconLogout size={16} />}
                     color="red"
                   >
@@ -85,7 +84,7 @@ export default function AppBar() {
                 </Menu.Dropdown>
               </Menu>
             ) : (
-              <Link href="/auth/sign-in">
+              <Link href="/sign-in">
                 <Button variant="outline" size="sm">
                   Sign In
                 </Button>
