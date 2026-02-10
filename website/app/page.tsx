@@ -1,125 +1,160 @@
-import Logo1024 from "@/public/logo1024.png";
-import PhysicalJericho from "@/public/physical-jericho.png";
-import TrafficLight from "@/public/traffic-light.png";
-import { ArrowRight } from "lucide-react";
-import Image from "next/image";
+"use client";
+
+import { authClient } from "@/lib/auth-client";
+import { getUserRoles } from "@/lib/user/roles";
+import {
+  Badge,
+  Button,
+  Card,
+  Container,
+  Group,
+  SimpleGrid,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title,
+} from "@mantine/core";
+import {
+  IconDeviceDesktop,
+  IconLogout,
+  IconShieldCheck,
+  IconShieldLock,
+  IconUser,
+} from "@tabler/icons-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+function LandingPage() {
+  return (
+    <Container size="sm" className="py-20 text-center">
+      <Stack align="center" gap="lg">
+        <ThemeIcon size={64} radius="xl" variant="light" color="blue">
+          <IconShieldCheck size={36} />
+        </ThemeIcon>
+        <Badge variant="light" color="blue" size="lg">
+          Cyber-Physical City
+        </Badge>
+        <Title
+          order={1}
+          className="text-4xl font-bold"
+          variant="gradient"
+        >
+          Jericho
+        </Title>
+        <Text size="lg" c="dimmed" className="max-w-md">
+          Cyber-physical city infrastructure lab environment for hands-on learning and experimentation.
+        </Text>
+        <Group gap="md">
+          <Link href="/sign-in">
+            <Button size="lg" variant="filled">
+              Sign In
+            </Button>
+          </Link>
+          <Link href="/sign-in?mode=signup">
+            <Button size="lg" variant="light">
+              Sign Up
+            </Button>
+          </Link>
+        </Group>
+      </Stack>
+    </Container>
+  );
+}
+
+function NavigationHub({
+  userName,
+  isAdmin,
+}: {
+  userName: string;
+  isAdmin: boolean;
+}) {
+  return (
+    <Container size="sm" className="py-12">
+      <Stack gap="xs" className="mb-6">
+        <Title order={2}>Welcome, {userName}</Title>
+        <Text c="dimmed">What would you like to do?</Text>
+      </Stack>
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+        <Link href="/vms" className="no-underline">
+          <Card
+            shadow="sm"
+            padding="lg"
+            radius="md"
+            withBorder
+            className="h-full transition-transform duration-200 hover:scale-[1.03]"
+          >
+            <ThemeIcon size={48} radius="md" variant="light" color="blue" className="mb-3">
+              <IconDeviceDesktop size={24} />
+            </ThemeIcon>
+            <Title order={4} className="mb-2">
+              My Virtual Machines
+            </Title>
+            <Text size="sm" c="dimmed">
+              Access and manage your virtual machine labs.
+            </Text>
+          </Card>
+        </Link>
+        {isAdmin && (
+          <Link href="/admin" className="no-underline">
+            <Card
+              shadow="sm"
+              padding="lg"
+              radius="md"
+              withBorder
+              className="h-full transition-transform duration-200 hover:scale-[1.03]"
+            >
+              <ThemeIcon size={48} radius="md" variant="light" color="red" className="mb-3">
+                <IconShieldLock size={24} />
+              </ThemeIcon>
+              <Title order={4} className="mb-2">
+                Admin Dashboard
+              </Title>
+              <Text size="sm" c="dimmed">
+                Manage users, VMs, and platform settings.
+              </Text>
+            </Card>
+          </Link>
+        )}
+      </SimpleGrid>
+      <Group gap="sm" className="mt-8">
+        <Link href="/account/settings">
+          <Button variant="subtle" leftSection={<IconUser size={16} />}>
+            Account
+          </Button>
+        </Link>
+        <Button
+          variant="subtle"
+          color="red"
+          leftSection={<IconLogout size={16} />}
+          onClick={() => authClient.signOut()}
+        >
+          Sign Out
+        </Button>
+      </Group>
+    </Container>
+  );
+}
 
 export default function Home() {
+  const { data } = authClient.useSession();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (data?.user?.id) {
+      getUserRoles(data.user.id).then((roles) => {
+        setIsAdmin(roles.includes("ADMIN"));
+      });
+    }
+  }, [data?.user?.id]);
+
+  if (!data?.session) {
+    return <LandingPage />;
+  }
+
   return (
-    <div className="relative flex h-full w-full">
-      <div
-        className="w-full h-full antialiased fixed left-0 top-0 overflow-hidden -z-10"
-        style={{ clipPath: "polygon(60% 0%, 100% 0%, 100% 100%, 40% 100%)" }}
-      >
-        <Image
-          src={PhysicalJericho}
-          alt="Jericho Logo"
-          width={1920}
-          height={1080}
-          className="object-cover h-full blur-md"
-        />
-      </div>
-      <div
-        className="w-full h-full antialiased fixed left-0 top-0 overflow-hidden -z-10"
-        style={{ clipPath: "polygon(0% 0%, 60% 0%, 40% 100%, 0% 100%)" }}
-      >
-        <Image
-          src={Logo1024}
-          alt="Jericho Logo"
-          width={1920}
-          height={1080}
-          className="object-cover h-full blur-md"
-        />
-      </div>
-      <div className="w-full">
-        <div className="sticky top-0 p-4 w-full bg-background/95 flex z-10">
-          <h1 className="ml-2 text-4xl font-semibold">Scenarios</h1>
-          <Link href="/scenarios" className="text-accent ml-auto my-auto">
-            View all scenarios
-            <ArrowRight className="inline ml-1" />
-          </Link>
-        </div>
-        {/* <div className="p-4 flex">
-          <Image
-            src={NuclearPlant}
-            alt="Nuclear Plant"
-            width={256}
-            height={256}
-            className="rounded-lg shadow-lg brightness-90 border border-solid border-black/[.08] dark:border-white/[.145]"
-          />
-          <div className="ml-6 my-auto bg-background/75 p-4 rounded-lg shadow-md border border-solid border-black/[.08] dark:border-white/[.145]">
-            <h2 className="mt-4 text-2xl font-semibold">Nuclear Plant</h2>
-            <p className="mt-2 text-lg max-w-xl">
-              You are a technician at a nuclear power plant. A critical system
-              has failed, and you must quickly diagnose and repair the issue to
-              prevent a meltdown. Use your knowledge of nuclear physics and
-              engineering to navigate the plant&apos;s complex systems and
-              restore safety.
-            </p>
-            <Link
-              href="/scenarios/nuclear-plant"
-              className="mt-4 inline-block text-primary font-medium"
-            >
-              Start Scenario
-              <ArrowRight className="inline ml-1" />
-            </Link>
-          </div>
-        </div>
-        <div className="p-4 flex justify-end">
-          <div className="mr-6 my-auto bg-background/75 p-4 rounded-lg shadow-md border border-solid border-black/[.08] dark:border-white/[.145]">
-            <h2 className="mt-4 text-2xl font-semibold">Water Treatment</h2>
-            <p className="mt-2 text-lg max-w-xl">
-              You are an engineer at a municipal water treatment facility. A
-              sudden contamination has been detected in the water supply, and
-              you must identify the source and implement a solution to ensure
-              safe drinking water for the community. Utilize your expertise in
-              environmental engineering and chemistry to tackle this urgent
-              challenge.
-            </p>
-            <Link
-              href="/scenarios/water-treatment"
-              className="mt-4 inline-block text-primary font-medium"
-            >
-              Start Scenario
-              <ArrowRight className="inline ml-1" />
-            </Link>
-          </div>
-          <Image
-            src={WaterTreatment}
-            alt="Water Treatment"
-            width={256}
-            height={256}
-            className="rounded-lg shadow-lg brightness-90 border border-solid border-black/[.08] dark:border-white/[.145]"
-          />
-        </div> */}
-        <div className="p-4 flex">
-          <Image
-            src={TrafficLight}
-            alt="Traffic Light"
-            width={256}
-            height={256}
-            className="rounded-lg shadow-lg brightness-90 border border-solid border-black/[.08] dark:border-white/[.145]"
-          />
-          <div className="ml-6 my-auto bg-background/75 p-4 rounded-lg shadow-md border border-solid border-black/[.08] dark:border-white/[.145]">
-            <h2 className="mt-4 text-2xl font-semibold">Traffic Light</h2>
-            <p className="mt-2 text-lg max-w-xl">
-              You&apos;ve found a website for your local traffic advisory and
-              light control system. This website looks like it could be
-              vulnerable to some clever attacks. Build your skills in web
-              exploitation and white-hat hacking with this fun entry-level
-              scenario.
-            </p>
-            <Link
-              href="/scenarios/traffic-light"
-              className="mt-4 inline-block text-primary font-medium"
-            >
-              Start Scenario
-              <ArrowRight className="inline ml-1" />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+    <NavigationHub
+      userName={data.user.name ?? "User"}
+      isAdmin={isAdmin}
+    />
   );
 }

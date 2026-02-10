@@ -1,172 +1,180 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  name          String?
-  email         String         @unique
-  emailVerified DateTime?
+  id            String       @id @default(cuid())
+  name          String
+  email         String
+  emailVerified Boolean      @default(false)
   image         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  proxmoxId     String?
-  accounts      Account[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  proxmoxId     String?      @unique
   sessions      Session[]
-  UserRoles     UserRoles[]
-  userAnswers   UserAnswers[]
-  userScenarios UserScenario[]
+  accounts      Account[]
+  vms           VM[]
+  userRoles     UserRole[]
+  userAnswers   UserAnswer[]
+
+  username        String?
+  displayUsername String?
+
+  @@unique([email])
+  @@map("user")
+  @@unique([username])
 }
 
-model UserRoles {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, role])
+enum Role {
+  STUDENT
+  FACULTY
+  ADMIN
 }
 
-model Account {
-  userId            Int
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model UserRole {
+  id   String @id @default(cuid())
+  role Role
 
-  @@id([provider, providerAccountId])
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VM {
+  id         String    @id @default(cuid())
+  proxmoxId  Int
+  name       String?
+  powerOffAt DateTime?
+  deleteAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("vm")
 }
 
 model Session {
-  id           Int      @id @default(autoincrement())
-  sessionToken String   @unique
-  userId       Int
-  expires      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }
 
 model Scenario {
-  id               String         @id @default(cuid())
-  name             String
-  description      String?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  topologyMap      String?
-  advanced         String?
-  slug             String         @unique
-  teaser           String?
-  youtubeChannelId String?
+  id          String @id @default(cuid())
+  name        String
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  topologyURL        String?
+  slug               String     @unique
+  teaserText         String?
+  teaserImageURL     String?
+  youtubeChannelId   String?
   learningObjectives String?
-  questions        Curriculum[]
-  userScenarios    UserScenario[]
+  questions          Question[]
 
   @@map("scenario")
 }
 
-model Curriculum {
-  id            String        @id @default(cuid())
-  title         String
-  placeholder   String
-  validation    String?
-  answer        String
-  pointValue    Int           @default(10)
-
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  scenario      Scenario?     @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  scenarioId    String?
-  skillCategories CurriculumSkillCategory[]  // NEW: many-to-many
-  userAnswers   UserAnswers[]
-
-  @@map("curriculum")
-}
-
-model CurriculumSkillCategory {
-  id           Int           @id @default(autoincrement())
-  curriculum   Curriculum    @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  curriculumId String
-  skillCategory SkillCategory @relation(fields: [skillCategoryId], references: [id])
-  skillCategoryId Int
-
-  @@unique([curriculumId, skillCategoryId])
-  @@map("curriculum_skill_category")
-}
-
-model SkillCategory {
-  id           Int       @id @default(autoincrement())
-  key          String    @unique
-  label        String
-
-  curriculums  CurriculumSkillCategory[]
+model Question {
+  id              String  @id @default(cuid())
+  title           String
+  placeholder     String
+  validationRegex String?
+  answer          String
+  pointValue      Int     @default(10)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("skill_categories")
+  scenarioId String
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  competencies Competency[]
+  userAnswers  UserAnswer[]
+
+  @@map("question")
 }
 
-model UserScenario {
-  id          String   @id @default(cuid())
-  userId      Int
-  scenarioId  String
-  isCompleted Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vms         VMs[]
+model UserAnswer {
+  id        String   @id @default(cuid())
+  answer    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@unique([userId, scenarioId])
-  @@map("user_scenario")
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("user_answer")
 }
 
-model UserAnswers {
-  id           String     @id @default(cuid())
-  userId       Int
-  curriculumId String
-  answer       String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  isCorrect    Boolean
-  curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Competency {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@unique([userId, curriculumId])
-  @@map("user_answers")
-}
+  questions Question[]
 
-model VMs {
-  id             String        @id @default(cuid())
-  vmId           Int           @unique
-  name           String
-  userScenarioId String?
-  userScenario   UserScenario? @relation(fields: [userScenarioId], references: [id], onDelete: Cascade)
-
-  @@map("vms")
-}
-
-enum Role {
-  ADMIN
-  TEACHER
-  STUDENT
-  GUEST
+  @@map("competency")
 }
