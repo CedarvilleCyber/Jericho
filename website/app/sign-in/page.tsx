@@ -14,9 +14,9 @@ import {
   Title,
 } from "@mantine/core";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function SignInPage() {
+function SignInForm() {
   const searchParams = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(false);
 
@@ -176,5 +176,17 @@ export default function SignInPage() {
         </Stack>
       </Card>
     </Container>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <Container size="xs" className="flex min-h-screen items-center justify-center py-12">
+        <Text>Loading...</Text>
+      </Container>
+    }>
+      <SignInForm />
+    </Suspense>
   );
 }
