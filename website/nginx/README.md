@@ -6,10 +6,19 @@ This nginx setup provides a development environment that mirrors the production 
 
 ### Configuration
 
-- **localhost** → Next.js app (port 3000)
-- **pve.localhost** → Proxmox VE at 192.168.2.218:8006
+- **jericho.local** → Next.js app (port 3000)
+- **pve.jericho.local** → Proxmox VE at 192.168.2.218:8006
 
-Cookies are automatically rewritten to the `.localhost` domain to enable SSO between the main site and Proxmox.
+Cookies are automatically rewritten to the `.jericho.local` domain to enable SSO between the main site and Proxmox.
+
+Ensure that the following lines are in your hosts file:
+
+```
+127.0.0.1 jericho.local
+127.0.0.1 pve.jericho.local
+```
+
+__NOTE__: You will have to visit both the sites outside of an iframe to get rid of the self-signed cert message.
 
 ### Usage
 
