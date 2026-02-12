@@ -11,7 +11,7 @@ import {
   Tabs,
   TabsList,
   TabsPanel,
-  TabsTab
+  TabsTab,
 } from "@mantine/core";
 import {
   IconExternalLink,
@@ -132,9 +132,9 @@ export default function VMsPage() {
           <TabsPanel key={vmId} value={vmId} className="h-full pt-3">
             <iframe
               src={
-                `https://${process.env.PVE_HOST || "jericho-pve.alexthetaylor.com"}` +
-                `:${process.env.PVE_PORT || "443"}?console=kvm&novnc=1&` +
-                `node=${process.env.PVE_NODE || "jericho01"}&vmid=${vmId}`
+                `https://${process.env.NEXT_PUBLIC_PVE_HOST || "jericho-pve.alexthetaylor.com"}` +
+                `:${process.env.NEXT_PUBLIC_PVE_PORT || "443"}?console=kvm&novnc=1&` +
+                `node=${process.env.NEXT_PUBLIC_PVE_NODE || "jericho01"}&vmid=${vmId}`
               }
               className="w-full h-[calc(100%-2rem)] border-0 rounded-md shadow-lg"
             />
