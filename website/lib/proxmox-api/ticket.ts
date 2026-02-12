@@ -16,9 +16,14 @@ export async function getTicket(proxmoxId: string) {
     password,
   });
   const cookieStore = await cookies();
+  const hostParts = (process.env.PVE_HOST || "localhost").split(".");
+  const baseDomain = hostParts.length <= 2
+    ? `.${hostParts[hostParts.length - 1]}`
+    : `.${hostParts.slice(-2).join(".")}`;
+
   cookieStore.set("PVEAuthCookie", ticket.ticket ?? "", {
     path: "/",
-    domain: ".alexthetaylor.com",
+    domain: baseDomain,
     httpOnly: true,
     secure: true,
   });
