@@ -10,7 +10,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { IconArrowBack } from "@tabler/icons-react";
+import { IconArrowBack, IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -77,14 +77,18 @@ export default async function ScenarioPage({
           <form action={joinScenario}>
             <input type="hidden" name="userId" value={session.user.id} />
             <input type="hidden" name="scenarioId" value={id} />
-            <Button
-              variant="filled"
-              mt="md"
-              disabled={alreadyJoined}
-              type="submit"
-            >
-              {alreadyJoined ? "Already Joined" : "Join Scenario"}
-            </Button>
+            {alreadyJoined ? (
+              <Link href={`/me/scenarios/${id}`}>
+                <Button variant="outline" mt="md">
+                  <IconExternalLink size={16} className="mr-1" />
+                  View Scenario
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="filled" mt="md" type="submit">
+                {alreadyJoined ? "Already Joined" : "Join Scenario"}
+              </Button>
+            )}
           </form>
         </Group>
       )}
