@@ -2,11 +2,9 @@ import "@mantine/core/styles.css";
 import "./globals.css";
 
 import AppBar from "@/components/app-bar";
+import Footer from "@/components/footer";
 import Providers from "@/components/providers";
-import {
-  ColorSchemeScript,
-  mantineHtmlProps
-} from "@mantine/core";
+import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -23,11 +21,34 @@ export default function RootLayout({
     <html lang="en" {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript defaultColorScheme="auto" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="min-h-screen bg-[--mantine-color-body] text-[--mantine-color-text]">
         <Providers>
-          <AppBar />
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <AppBar />
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>

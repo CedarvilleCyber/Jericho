@@ -2,15 +2,19 @@
 
 import { authClient } from "@/lib/auth-client";
 import {
+  Box,
+  Breadcrumbs,
   Button,
   Card,
   Container,
   Group,
+  Loader,
   Stack,
   Text,
   TextInput,
   Title,
 } from "@mantine/core";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -63,8 +67,10 @@ export default function MePage() {
 
   if (isPending) {
     return (
-      <Container size="sm" className="py-12">
-        <Text>Loading...</Text>
+      <Container size="sm" className="py-8">
+        <Box h="50vh" className="flex flex-col justify-center items-center">
+          <Loader size="xl" />
+        </Box>
       </Container>
     );
   }
@@ -74,7 +80,11 @@ export default function MePage() {
   }
 
   return (
-    <Container size="sm" className="py-12">
+    <Container size="sm" className="py-8">
+      <Breadcrumbs mb="lg">
+        <Link href="/">Home</Link>
+        <Text>My Profile</Text>
+      </Breadcrumbs>
       <Stack gap="lg">
         <div>
           <Title order={2} className="mb-2">

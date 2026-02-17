@@ -13,6 +13,8 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { getUserRoles } from "@/lib/user/roles";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import logo from "@/public/logo256.png";
 
 export default function AppBar() {
   const { data } = authClient.useSession();
@@ -27,10 +29,17 @@ export default function AppBar() {
   }, [data?.user?.id]);
 
   return (
-    <header className="h-14 bg-mantine-color-body border-b border-b-(--mantine-color-gray-3) dark:border-b-(--mantine-color-dark-4)">
+    <header
+      className="h-14 border-b sticky top-0 z-50"
+      style={{
+        backgroundColor: 'var(--mantine-color-body)',
+        borderColor: 'var(--mantine-color-default-border)'
+      }}
+    >
       <Container size="md">
         <div className="flex justify-between items-center h-14">
-          <Link href={data?.session ? "/" : "/"}>
+          <Link href={data?.session ? "/" : "/"} className="flex gap-3">
+            <Image src={logo} alt="Jericho Logo" width={32} height={32} />
             <h1 className="text-2xl font-semibold">Jericho</h1>
           </Link>
           <div className="flex items-center gap-2">
