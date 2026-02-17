@@ -11,3 +11,12 @@ https://ludus.cloud and read their documentation.
 
 To deploy a Jericho scenario, download the scenario's configuration file
 onto your server and use Ludus to instantiate it.
+
+1. Install "bun"
+3. in the "website" directory, run "bun install"
+4. Copy the .env file into "website/.env"
+5. cd prisma
+6. run "bun prisma generate"
+7. cd .. (the "website" directory)
+8. run "bun dev"
+9. Check nginx for setting up and running the nginx stuff
