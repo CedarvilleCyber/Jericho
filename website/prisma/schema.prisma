@@ -30,10 +30,11 @@ model User {
 
   username        String?
   displayUsername String?
+  userScenarios   UserScenario[]
 
   @@unique([email])
-  @@map("user")
   @@unique([username])
+  @@map("user")
 }
 
 enum Role {
@@ -59,8 +60,9 @@ model VM {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userScenarios UserScenario[]
 
   @@map("vm")
 }
@@ -122,14 +124,34 @@ model Scenario {
   updatedAt DateTime @updatedAt
 
   topologyURL        String?
-  slug               String     @unique
+  slug               String         @unique
   teaserText         String?
   teaserImageURL     String?
   youtubeChannelId   String?
   learningObjectives String?
   questions          Question[]
+  // We will need to add something here to signify what Ludus API call
+  // this will be associated with. 
+  userScenarios      UserScenario[]
 
   @@map("scenario")
+}
+
+model UserScenario {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId  String
+  scenario    Scenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  // This is the user's attacking VM. We will add another table for 
+  // figuring out what Ludus VMs are associated with the scenario.
+  vmId        String?
+  vm          VM?       @relation(fields: [vmId], references: [id], onDelete: SetNull)
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, scenarioId])
+  @@map("user_scenario")
 }
 
 model Question {

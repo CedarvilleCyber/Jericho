@@ -326,7 +326,7 @@ export default function VMsEditor({ user, proxmoxVMs }: { user: User & { vms: VM
       </Modal>
 
       <ActionIcon
-        className="ml-auto"
+        className="ml-2"
         variant="outline"
         size="sm"
         onClick={() => {
