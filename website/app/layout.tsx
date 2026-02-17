@@ -1,8 +1,8 @@
 import "@mantine/core/styles.css";
 import "./globals.css";
 
-import AppBar from "@/components/app-bar";
-import Footer from "@/components/footer";
+import AppBar from "@/components/layout/app-bar";
+import Footer from "@/components/layout/footer";
 import Providers from "@/components/providers";
 import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import type { Metadata } from "next";

@@ -65,6 +65,9 @@ export default async function MyScenarios() {
               <Text size="sm" c="dimmed" mb={"sm"}>
                 Joined on {us.startedAt.toLocaleDateString()}
               </Text>
+              <Text>
+                {us.scenario.teaserText}
+              </Text>
             </Card>
           </Link>
         ))}

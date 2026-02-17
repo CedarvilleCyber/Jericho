@@ -8,7 +8,7 @@ import {
   IconShieldLock,
   IconUser,
 } from "@tabler/icons-react";
-import ColorSchemeToggle from "./color-scheme-toggle";
+import ColorSchemeToggle from "../color-scheme-toggle";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { getUserRoles } from "@/lib/user/roles";

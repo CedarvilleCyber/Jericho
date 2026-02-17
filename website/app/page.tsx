@@ -7,8 +7,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Logo1024 from "@/public/logo1024.png";
 import PhysicalJericho from "@/public/physical-jericho.png";
-import { LandingPage } from "@/components/landing-page";
-import { NavigationHub } from "@/components/navigation-hub";
+import { LandingPage } from "@/components/home/landing-page";
+import { NavigationHub } from "@/components/home/navigation-hub";
 
 export default function Home() {
   const { data, isPending } = authClient.useSession();
