@@ -15,10 +15,9 @@ def play_sound(sound: str, duration: float | None = None) -> None:
     # fill in later - add duration-based looping
 
 def validate_request(body: dict | None) -> tuple[dict, int] | None:
-    """
-    Validate the play request body.
-    Returns None if valid, or (error_dict, status_code) if invalid.
-    """
+    # Validate the play request body.
+    # Returns None if valid, or (error_dict, status_code) if invalid.
+    
     if not body or not isinstance(body, dict):
         return {"error": "Request body must be a JSON object"}, 400
     
