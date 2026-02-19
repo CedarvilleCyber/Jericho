@@ -15,8 +15,8 @@ and ownership on the project directory to your chosen user.
 To set the sound API up, do this (assuming the user is named "pi"):
 ```
 mv sound-api /opt
-chmod 755 sound-api
-chown pi:pi sound-api
+chmod 755 /opt/sound-api/
+chown pi:pi /opt/sound-api/
 ```
 
 Next, set up the project with `uv` and run it with `gunicorn`:
@@ -24,12 +24,19 @@ Run these commands from the project directory.
 ```
 uv sync
 uv run gunicorn -b 0.0.0.0:8000 main:app
+
+# to log to /var/log/api: 
+uv run gunicorn -b 0.0.0.0:8000 main:app --access-logfile /var/log/api
 ```
-
-If you get an error about a Python interpreter version, make sure the project's
-pyproject.toml doesn't require a Python version that's higher than the version
-on your Pi. 
-
-To log to a file, use the --access-logfile option to specify a path.
-(Example: --access-logfile /var/log/scenario.log).
-- Note: you'll have to configure permissions on the log file.
+# Python Interpreter Errors
+If you get an error about a Python interpreter version:
+- `uv python list` -> write down python version
+- make sure python version in pyproject.toml is less than or equal to your version
+- `rm .python-version` (could be a relic from a machine with a higher python version)
+# Logging
+Note that if you choose to set up logging with --acccess-logfile, you will likely
+have to configure permissions to allow gunicorn to access that file. Ex: 
+```
+sudo chown pi:pi /var/log/api
+sudo chmod 644 /var/log/api
+```

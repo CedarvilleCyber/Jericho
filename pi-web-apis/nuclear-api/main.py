@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify # type: ignore (remove this later)
+from flask import Flask, request, jsonify # type: ignore (remove before deployment)
 import time
-from gpiozero import LED # type: ignore (remove this later - suppresses an error)
+from gpiozero import LED # type: ignore (remove this before deployment)
 
 app = Flask(__name__)
 

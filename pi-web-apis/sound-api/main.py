@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify # type: ignore (remove this later)
+from flask import Flask, request, jsonify # type: ignore (remove before deployment)
 import os
 import subprocess
 import time
