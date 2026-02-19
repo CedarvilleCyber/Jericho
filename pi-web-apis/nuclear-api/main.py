@@ -1,0 +1,81 @@
+from flask import Flask, request, jsonify # type: ignore (remove this later)
+import time
+from gpiozero import LED # type: ignore (remove this later - suppresses an error)
+
+app = Flask(__name__)
+
+time_of_last_request = time.time()
+
+# Helper Functions ------------------------------------------------------------
+
+def validate_request(body: dict | None) -> tuple[dict, int] | None:
+    # Validate the request body.
+    # Returns None if valid, or (error_dict, status_code) if invalid.
+
+    global time_of_last_request
+
+    if not body or not isinstance(body, dict):
+        return {"error": "Request body must be a JSON object"}, 400
+    
+    # Validate duration field
+    if "duration" not in body:
+        return {"error": "'duration' field is required"}, 400
+    
+    duration = body["duration"]
+
+    if not isinstance(duration, (int, float)):
+        return {"error": "'duration' must be a number"}, 400
+    if duration <= 0 or duration > 15:
+        return {"error": "'duration' must be between 0 and 15 seconds"}, 400
+    
+        # This prevents multiple students from triggering the smoke simultaneously.
+    if time.time() < time_of_last_request + duration + 3:
+        return {"system busy": "Another request is being processed. Wait 5-10 seconds, then retry."}, 200
+    else:
+        time_of_last_request = time.time()
+
+    return None
+
+def trigger_smoke(duration: int | float) -> None:
+    # Note - we're using Python's gpiozero library to control the nuclear smoke.
+    # The LED function is used to issue simple on/off commands to the nuclear pin.
+    
+    pin = LED(21)
+
+    try: 
+        pin.on()
+        time.sleep(duration)
+        pin.off()
+    except: 
+        pin.off()
+
+# Routes ----------------------------------------------------------------------
+
+@app.route("/smoke", methods=["POST"])
+def smoke():
+    body = request.get_json(silent=True)
+
+    # Validate request
+    error_result = validate_request(body)
+    if error_result is not None:
+        error_dict, status_code = error_result
+        return jsonify(error_dict), status_code
+
+    duration = body["duration"]
+    trigger_smoke(duration)
+
+    # TODO: update this so the user gets the request immediately? They currently 
+    # don't get a response until the smoke is done.
+    return jsonify({
+        "ok": True,
+        "duration": duration
+    }), 200
+
+@app.route("/health")
+def ping(): 
+    return jsonify({"status": "ok"}), 200
+
+# Initialize Program ----------------------------------------------------------
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000, debug=False)
