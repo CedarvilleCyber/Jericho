@@ -4,10 +4,15 @@ app = Flask(__name__)
 
 VALID_DIRECTIONS = {"clockwise", "counterclockwise"}
 
+# Helper Functions ------------------------------------------------------------
+
 def set_motor(arm_id: str, direction: str, speed: int) -> None:
     # This function drives a single motor.
     # You need to figure out how Kaicheng set things up on the Pi, then add some
     # code here to make the motor spin the way you want it to. 
+    
+    print("TODO: write set_motor function")
+    
     if speed == 0:
         print(f"[{arm_id}] stopped")
     else:
@@ -29,7 +34,7 @@ def validate_arm(arm_id: str, config: dict) -> str | None:
 
     return None
 
-
+# Routes ----------------------------------------------------------------------
 
 @app.route("/health")
 def ping(): 
@@ -70,6 +75,9 @@ def control_motors():
         }
 
     return jsonify({"ok": True, "motors": results}), 200
+
+# Initialize Program ----------------------------------------------------------
+print("water API initialized")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=False)

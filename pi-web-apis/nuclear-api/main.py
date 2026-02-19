@@ -39,8 +39,9 @@ def validate_request(body: dict | None) -> tuple[dict, int] | None:
 def trigger_smoke(duration: int | float) -> None:
     # Note - we're using Python's gpiozero library to control the nuclear smoke.
     # The LED function is used to issue simple on/off commands to the nuclear pin.
-    
-    pin = LED(21)
+    # We used to use pin 21, but then it stopped working, so we switched to pin 16
+
+    pin = LED(16)    
 
     try: 
         pin.on()
@@ -76,6 +77,7 @@ def ping():
     return jsonify({"status": "ok"}), 200
 
 # Initialize Program ----------------------------------------------------------
+print("nuclear API initialized")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=False)

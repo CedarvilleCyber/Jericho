@@ -15,7 +15,7 @@ and ownership on the project directory to your chosen user.
 To set the sound API up, do this (assuming the user is named "pi"):
 ```
 mv sound-api /opt
-chmod 755 /opt/sound-api/
+chmod 644 /opt/sound-api/
 chown pi:pi /opt/sound-api/
 ```
 
