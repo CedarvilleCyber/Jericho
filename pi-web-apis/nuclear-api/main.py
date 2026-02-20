@@ -77,6 +77,7 @@ def ping():
     return jsonify({"status": "ok"}), 200
 
 # Initialize Program ----------------------------------------------------------
+
 print("nuclear API initialized")
 
 if __name__ == "__main__":
