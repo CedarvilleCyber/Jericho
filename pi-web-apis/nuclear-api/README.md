@@ -8,6 +8,9 @@ uv run main.py    # start the server for testing OR use gunicorn (below)
 uv run gunicorn -b 0.0.0.0:8000 main:app  # run server for prod
 ```
 
+### Warning: Conflicts with Old Nuclear Script
+If the old team's nuclear.py script is running, this API will not function properly.
+
 ---
 ## Endpoints
 ### `POST /smoke`

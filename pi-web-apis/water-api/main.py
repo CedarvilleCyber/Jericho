@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify # type: ignore (remove before deployment)
+from time import sleep
 
 app = Flask(__name__)
 
@@ -12,11 +13,6 @@ def set_motor(arm_id: str, direction: str, speed: int) -> None:
     # code here to make the motor spin the way you want it to. 
     
     print("TODO: write set_motor function")
-    
-    if speed == 0:
-        print(f"[{arm_id}] stopped")
-    else:
-        print(f"[{arm_id}] {direction} @ {speed} RPM")
 
 def validate_arm(arm_id: str, config: dict) -> str | None:
 
@@ -36,11 +32,8 @@ def validate_arm(arm_id: str, config: dict) -> str | None:
 
 # Routes ----------------------------------------------------------------------
 
-@app.route("/health")
-def ping(): 
-    return jsonify({"status": "ok"}), 200
-
-@app.route("/motors", methods=["POST"])
+# This route does not work yet. 
+#@app.route("/motors", methods=["POST"])
 def control_motors():
     # This route expects a POST request with the following JSON format: 
     # {
@@ -75,6 +68,17 @@ def control_motors():
         }
 
     return jsonify({"ok": True, "motors": results}), 200
+
+@app.route("/stop")
+def stop():
+    with open("/home/pi/Documents/env/trigger.txt", "w") as file:
+        file.write("00")
+        sleep(10)
+        file.write("11")
+
+@app.route("/health")
+def ping(): 
+    return jsonify({"status": "ok"}), 200
 
 # Initialize Program ----------------------------------------------------------
 print("water API initialized")

@@ -75,13 +75,16 @@ curl http://localhost:8000/play \
      -H "Content-Type: application/json" \
      -d '{"sound": "nuclear5.wav"}'
 
-# Loop for 10 seconds
+# Loop for 10 seconds (note: currently unimplemented)
 curl http://localhost:8000/play \
      -H "Content-Type: application/json" \
      -d '{"sound": "steal.wav", "duration": 10}'
 
 # List available sounds
 curl http://localhost:8000/sounds
+
+# Health check
+curl http://localhost:8000/health
 ```
 
 ---
