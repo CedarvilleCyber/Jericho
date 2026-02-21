@@ -73,8 +73,9 @@ def control_motors():
 def stop():
     with open("/home/pi/Documents/env/trigger.txt", "w") as file:
         file.write("00")
-        sleep(10)
+        sleep(5)
         file.write("11")
+    return jsonify({"status": "ok"}), 200
 
 @app.route("/health")
 def ping(): 

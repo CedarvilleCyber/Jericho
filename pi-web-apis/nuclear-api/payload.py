@@ -3,13 +3,10 @@ from threading import Thread
 
 # Note: the below IPs are the raspberry Pis' Ludus-accessible IPs. 
 nuclear_url = 'http://192.0.2.101:8000/smoke'
-nuclear_payload = { "duration": 8 }
+nuclear_payload = { "duration": 5 }
 
 sound_url = 'http://192.0.2.104:8000/play'
-sound_payload = { "sound": "nuclear8.wav" }
-
-# TODO: update this so that the POST requests are simultaneous.
-# Maybe use asynchronous requests or threading?
+sound_payload = { "sound": "nuclear5.wav" }
 
 def play_nuclear():
     nuclear_response = requests.post(nuclear_url, json=nuclear_payload)
@@ -27,6 +24,3 @@ nuclear_fog.start()
 nuclear_sound.start()
 nuclear_fog.join()
 nuclear_sound.join()
-
-# make the POST requests, using JSON mode
-

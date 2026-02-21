@@ -17,6 +17,8 @@ The API will be available at `http://<pi-ip>:5000`.
 
 ### `POST /motors`
 
+NOTE: this endpoint is currently incomplete and does not work. 
+
 Control one or more arms in a single request.
 
 **Request body:**
@@ -60,6 +62,10 @@ Control one or more arms in a single request.
 ### `GET /health`
 
 Returns `{"status": "ok"}` — useful for checking the Pi is reachable.
+
+### `GET /stop`
+
+Stops the water treatment spinners for five seconds. 
 
 ---
 
