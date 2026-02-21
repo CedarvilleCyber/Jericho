@@ -32,7 +32,7 @@ def validate_request(body: dict | None) -> tuple[dict, int] | None:
     
         # This prevents multiple students from triggering the smoke simultaneously.
     if time.time() < time_of_last_request + previous_duration + 3:
-        return {"system busy": "Another request is being processed. Wait 5-10 seconds, then retry."}, 200
+        return {"system busy": "Another request is being processed. Wait 5-10 seconds, then retry."}, 429
     else:
         time_of_last_request = time.time()
         previous_duration = duration

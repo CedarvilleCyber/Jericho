@@ -38,7 +38,7 @@ def validate_request(request) -> tuple[dict, int] | None:
     
     # This prevents multiple students from controlling the lights simultaneously.
     if time.time() <= time_of_last_request + 3 and current_id != previous_id:
-        return {"system busy": "Another request is being processed. Wait a few seconds, then retry."}, 200
+        return {"system busy": "Another request is being processed. Wait a few seconds, then retry."}, 429
     else:
         time_of_last_request = time.time()
         previous_id = current_id

@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify # type: ignore (remove before deployme
 import os
 import subprocess
 import time
+import threading
 
 app = Flask(__name__)
 
@@ -52,8 +53,8 @@ def validate_request(body: dict | None) -> tuple[dict, int] | None:
             return {"error": "'duration' must be positive"}, 400
     
     # This prevents students from playing multiple sounds simultaneously.
-    if time.time() < time_of_last_request + 10:
-        return {"system busy": "Another request is being processed. Wait 5-10 seconds, then retry."}, 200
+    if time.time() < time_of_last_request + 8:
+        return {"system busy": "Another request is being processed. Wait a few seconds, then retry."}, 429
     else:
         time_of_last_request = time.time()
 
@@ -96,7 +97,9 @@ def play():
     sound = body["sound"]
     duration = body.get("duration")
     
-    play_sound(sound, duration)
+    # Start sound playback in a background thread so client gets response immediately
+    sound_thread = threading.Thread(target=play_sound, args=(sound, duration), daemon=True)
+    sound_thread.start()
     
     return jsonify({
         "ok": True,

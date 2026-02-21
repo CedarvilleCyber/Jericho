@@ -27,6 +27,9 @@ uv run gunicorn -b 0.0.0.0:8000 main:app
 
 # to log to /var/log/api: 
 uv run gunicorn -b 0.0.0.0:8000 main:app --access-logfile /var/log/api
+
+# to log to stdout (the terminal): 
+uv run gunicorn -b 0.0.0.0:8000 main:app --access-logfile -
 ```
 # Python Interpreter Errors
 If you get an error about a Python interpreter version:

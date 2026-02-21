@@ -69,12 +69,13 @@ def control_motors():
 
     return jsonify({"ok": True, "motors": results}), 200
 
+# Note: this route relies on the presence of a deprecated and undocumented script
+# on the Raspberry Pi. If you're not working with the original Cedarville Jericho
+# project, we highly recommend fixing the above routes instead of trying to use this one.
 @app.route("/stop")
 def stop():
     with open("/home/pi/Documents/env/trigger.txt", "w") as file:
-        file.write("00")
-        sleep(5)
-        file.write("11")
+        file.write("0")
     return jsonify({"status": "ok"}), 200
 
 @app.route("/health")

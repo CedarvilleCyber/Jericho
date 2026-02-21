@@ -18,9 +18,9 @@ def play_sound():
     print(f"Sound status code: {sound_response.status_code}")
     print(f"Sound response body: {sound_response.json()}")
 
-nuclear_fog = Thread(target=play_nuclear)
+nuclear_effect = Thread(target=play_nuclear)
 nuclear_sound = Thread(target=play_sound)
-nuclear_fog.start()
+nuclear_effect.start()
 nuclear_sound.start()
-nuclear_fog.join()
+nuclear_effect.join()
 nuclear_sound.join()

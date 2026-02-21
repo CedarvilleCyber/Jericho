@@ -83,16 +83,19 @@ actual GPIO / PWM / motor-controller calls. Common choices on Pi Zero:
 ## Quick curl examples
 
 ```bash
-# Start two arms
-curl http://<pi-ip>:5000/motors \
+# Start two arms (not working yet)
+curl http://<pi-ip>:8000/motors \
      -H "Content-Type: application/json" \
      -d '{"arm1":{"direction":"clockwise","speed":5},"arm2":{"direction":"counterclockwise","speed":3}}'
 
-# Stop arm1
-curl http://<pi-ip>:5000/motors \
+# Stop arm1 (not working yet)
+curl http://<pi-ip>:8000/motors \
      -H "Content-Type: application/json" \
      -d '{"arm1":{"direction":"clockwise","speed":0}}'
 
+# Stop the arms for ten seconds using the simple STOP route
+curl http://<pi-ip>:8000/stop
+
 # Health check
-curl http://<pi-ip>:5000/health
+curl http://<pi-ip>:8000/health
 ```
