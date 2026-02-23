@@ -97,7 +97,7 @@ def play():
     sound = body["sound"]
     duration = body.get("duration")
     
-    # Start sound playback in a background thread so client gets response immediately
+    # Start effect playback in a background thread so client gets response immediately
     sound_thread = threading.Thread(target=play_sound, args=(sound, duration), daemon=True)
     sound_thread.start()
     

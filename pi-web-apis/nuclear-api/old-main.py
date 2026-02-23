@@ -1,10 +1,6 @@
-# ADDED FEATURE: 
-# This version of main.py uses multi-threading to make the smokestack lights blink. 
-
 from flask import Flask, request, jsonify # type: ignore (remove before deployment)
 import time
 from gpiozero import LED # type: ignore (remove this before deployment)
-import threading
 
 app = Flask(__name__)
 
@@ -46,6 +42,7 @@ def validate_request(body: dict | None) -> tuple[dict, int] | None:
 def trigger_smoke(duration: int | float) -> dict[str,str] | None:
     # Note - we're using Python's gpiozero library to control the nuclear smoke.
     # The LED function is used to issue simple on/off commands to the nuclear pin.
+    # We used to use pin 21, but then it stopped working, so we switched to pin 16
 
     pin = LED(21)    
 
@@ -62,18 +59,6 @@ def trigger_smoke(duration: int | float) -> dict[str,str] | None:
         }
         return error_response
 
-# this makes the lights on the top of the smokestacks blink off and on
-def blink():
-    lights = LED(4)
-    try:
-        while True:
-            lights.on()
-            time.sleep(1)
-            lights.off()
-            time.sleep(1)
-    except:
-        lights.off()
-
 # Routes ----------------------------------------------------------------------
 
 @app.route("/smoke", methods=["POST"])
@@ -87,14 +72,15 @@ def smoke():
         return jsonify(error_dict), status_code
 
     duration = body["duration"]
-
-    # Start effect playback. Make this threaded in the future.
     trigger_error = trigger_smoke(duration)
 
     if trigger_error is not None: 
         return jsonify(trigger_error), 500
+
+    # TODO: update this so the user gets the request immediately? They currently 
+    # don't get a response until the smoke is done.
     return jsonify({
-        "Effect status": "triggered",
+        "ok": True,
         "duration": duration
     }), 200
 
@@ -105,11 +91,6 @@ def ping():
 # Initialize Program ----------------------------------------------------------
 
 print("nuclear API initialized")
-
-# Start a thread to make the lights blink on the top of the smokestacks
-blink_thread = threading.Thread(target=blink, name="Blink")
-blink_thread.start()
-time.sleep(1)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=False)
