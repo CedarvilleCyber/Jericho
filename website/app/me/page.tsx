@@ -1,19 +1,6 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import {
-  Box,
-  Breadcrumbs,
-  Button,
-  Card,
-  Container,
-  Group,
-  Loader,
-  Stack,
-  Text,
-  TextInput,
-  Title,
-} from "@mantine/core";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -67,11 +54,14 @@ export default function MePage() {
 
   if (isPending) {
     return (
-      <Container size="sm" className="py-8">
-        <Box h="50vh" className="flex flex-col justify-center items-center">
-          <Loader size="xl" />
-        </Box>
-      </Container>
+      <div className="max-w-xl mx-auto px-4 py-8">
+        <div
+          className="flex flex-col justify-center items-center"
+          style={{ minHeight: "50vh" }}
+        >
+          <span className="loading loading-spinner loading-xl" />
+        </div>
+      </div>
     );
   }
 
@@ -80,79 +70,101 @@ export default function MePage() {
   }
 
   return (
-    <Container size="sm" className="py-8">
-      <Breadcrumbs mb="lg">
-        <Link href="/">Home</Link>
-        <Text>My Profile</Text>
-      </Breadcrumbs>
-      <Stack gap="lg">
+    <div className="max-w-xl mx-auto px-4 py-8">
+      <div className="breadcrumbs text-sm mb-6">
+        <ul>
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li>My Profile</li>
+        </ul>
+      </div>
+      <div className="flex flex-col gap-6">
         <div>
-          <Title order={2} className="mb-2">
-            My Profile
-          </Title>
-          <Text size="sm" c="dimmed">
+          <h2 className="text-2xl font-bold mb-2">My Profile</h2>
+          <p className="text-sm text-base-content/60">
             Update your account information
-          </Text>
+          </p>
         </div>
 
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <form onSubmit={handleSubmit}>
-            <Stack gap="md">
-              <TextInput
-                label="Name"
-                placeholder="Your full name"
-                required
-                value={name}
-                onChange={(e) => setName(e.currentTarget.value)}
-                disabled={loading}
-              />
+        <div className="card bg-base-100 border border-base-300 shadow-sm">
+          <div className="card-body p-6">
+            <form onSubmit={handleSubmit}>
+              <div className="flex flex-col gap-4">
+                <label className="form-control">
+                  <div className="label">
+                    <span className="label-text">Name</span>
+                  </div>
+                  <input
+                    className="input input-bordered w-full"
+                    placeholder="Your full name"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.currentTarget.value)}
+                    disabled={loading}
+                  />
+                </label>
 
-              <TextInput
-                label="Username"
-                placeholder="Your username"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.currentTarget.value)}
-                disabled={loading}
-              />
+                <label className="form-control">
+                  <div className="label">
+                    <span className="label-text">Username</span>
+                  </div>
+                  <input
+                    className="input input-bordered w-full"
+                    placeholder="Your username"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.currentTarget.value)}
+                    disabled={loading}
+                  />
+                </label>
 
-              <TextInput
-                label="Email"
-                placeholder="Your email address"
-                type="email"
-                value={email}
-                disabled
-                description="Email cannot be changed"
-              />
+                <label className="form-control">
+                  <div className="label">
+                    <span className="label-text">Email</span>
+                  </div>
+                  <input
+                    className="input input-bordered w-full"
+                    placeholder="Your email address"
+                    type="email"
+                    value={email}
+                    disabled
+                  />
+                  <div className="label">
+                    <span className="label-text-alt">
+                      Email cannot be changed
+                    </span>
+                  </div>
+                </label>
 
-              {error && (
-                <Text size="sm" c="red">
-                  {error}
-                </Text>
-              )}
+                {error && <p className="text-sm text-error">{error}</p>}
+                {success && <p className="text-sm text-success">{success}</p>}
 
-              {success && (
-                <Text size="sm" c="green">
-                  {success}
-                </Text>
-              )}
-
-              <Group justify="flex-end" gap="sm">
-                <Button
-                  variant="subtle"
-                  onClick={() => router.push("/")}
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" loading={loading}>
-                  Save Changes
-                </Button>
-              </Group>
-            </Stack>
-          </form>
-        </Card>
-      </Stack>
-    </Container>
+                <div className="flex gap-2 justify-end">
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => router.push("/")}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={loading}
+                  >
+                    {loading && (
+                      <span className="loading loading-spinner loading-xs" />
+                    )}
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

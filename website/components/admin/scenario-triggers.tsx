@@ -6,7 +6,6 @@ import {
   triggerTraffic,
   triggerWaterTreatment,
 } from "@/lib/scenarios/demo";
-import { Box, Button } from "@mantine/core";
 import {
   IconRadioactive,
   IconRotate,
@@ -16,28 +15,31 @@ import {
 
 export default function ScenarioTriggers() {
   return (
-    <Box className="border border-gray-700 shadow-lg rounded-md p-4 flex flex-col gap-2 mb-3">
+    <div className="border border-base-300 shadow-lg rounded-md p-4 flex flex-col gap-2 mb-3">
       <h2 className="text-xl">Trigger Scenarios</h2>
       <div>
-        <Button onClick={() => triggerNuclear()} color="red">
+        <button className="btn btn-error" onClick={() => triggerNuclear()}>
           <IconRadioactive className="mr-3" /> Trigger Nuclear Scenario
-        </Button>
+        </button>
       </div>
       <div>
-        <Button onClick={() => triggerTraffic()} color="yellow">
+        <button className="btn btn-warning" onClick={() => triggerTraffic()}>
           <IconTrafficLights className="mr-3" /> Trigger Traffic Scenario
-        </Button>
+        </button>
       </div>
       <div>
-        <Button onClick={() => triggerWaterTreatment()} color="blue">
+        <button
+          className="btn btn-info"
+          onClick={() => triggerWaterTreatment()}
+        >
           <IconRotate className="mr-3" /> Trigger Water Treatment Scenario
-        </Button>
+        </button>
       </div>
       <div>
-        <Button onClick={() => triggerDatacenter()} color="green">
+        <button className="btn btn-success" onClick={() => triggerDatacenter()}>
           <IconServer className="mr-3" /> Trigger Datacenter Sound
-        </Button>
+        </button>
       </div>
-    </Box>
+    </div>
   );
 }
