@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
+import { requestPasswordResetByIdentifier } from "@/lib/password-reset/request";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -23,7 +24,22 @@ function SignInForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetIdentifier, setResetIdentifier] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
+
+  const handleRequestReset = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setResetMessage("");
+    await requestPasswordResetByIdentifier(resetIdentifier);
+    setResetLoading(false);
+    setResetMessage("If an account exists, a reset request has been submitted. Ask an admin to set a temporary password for you.");
+    setResetIdentifier("");
+  };
+
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -170,6 +186,59 @@ function SignInForm() {
                 </button>
               </div>
             </form>
+
+            {!isSignUp && !showResetForm && (
+              <p className="text-xs text-base-content/50 text-center">
+                Forgot your password?{" "}
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() => setShowResetForm(true)}
+                >
+                  Request an admin reset.
+                </button>
+              </p>
+            )}
+
+            {!isSignUp && showResetForm && (
+              <div className="flex flex-col gap-3">
+                <p className="text-xs text-base-content/60 text-center">
+                  Enter your email or username and an admin will set a temporary password for you.
+                </p>
+                {resetMessage ? (
+                  <p className="text-xs text-base-content/60 text-center">{resetMessage}</p>
+                ) : (
+                  <form onSubmit={handleRequestReset} className="flex flex-col gap-2">
+                    <input
+                      className="input input-bordered input-sm w-full"
+                      placeholder="Email or username"
+                      value={resetIdentifier}
+                      onChange={(e) => setResetIdentifier(e.currentTarget.value)}
+                      required
+                      disabled={resetLoading}
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm flex-1"
+                        onClick={() => setShowResetForm(false)}
+                        disabled={resetLoading}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-primary btn-sm flex-1"
+                        disabled={resetLoading}
+                      >
+                        {resetLoading && <span className="loading loading-spinner loading-xs" />}
+                        Submit
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
 
             <div className="flex justify-center gap-2">
               <p className="text-sm text-base-content/60">
