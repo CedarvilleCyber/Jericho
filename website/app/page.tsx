@@ -2,7 +2,6 @@
 
 import { authClient } from "@/lib/auth-client";
 import { getUserRoles } from "@/lib/user/roles";
-import { Container, Loader, useComputedColorScheme } from "@mantine/core";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Logo1024 from "@/public/logo1024.png";
@@ -14,7 +13,6 @@ export default function Home() {
   const { data, isPending } = authClient.useSession();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false);
-  const computedColorScheme = useComputedColorScheme("dark");
 
   useEffect(() => {
     if (data?.user?.id) {
@@ -44,7 +42,7 @@ export default function Home() {
           alt="Jericho Physical"
           fill
           priority
-          className={`object-cover blur-md ${computedColorScheme === "dark" ? "dark:brightness-50" : ""}`}
+          className="object-cover blur-md"
         />
       </div>
       <div
@@ -56,17 +54,17 @@ export default function Home() {
           alt="Jericho Logo"
           fill
           priority
-          className={`object-cover blur-md ${computedColorScheme === "dark" ? "dark:brightness-50" : ""}`}
+          className="object-cover blur-md"
         />
       </div>
 
       {/* Content */}
       {isPending || isLoadingAdmin ? (
-        <Container size="sm" className="py-12">
+        <div className="max-w-xl mx-auto px-4 py-12">
           <div className="flex justify-center items-center min-h-[60vh]">
-            <Loader size="xl" />
+            <span className="loading loading-spinner loading-xl" />
           </div>
-        </Container>
+        </div>
       ) : !data?.session ? (
         <LandingPage />
       ) : (

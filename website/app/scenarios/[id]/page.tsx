@@ -1,16 +1,7 @@
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { joinScenario } from "@/lib/scenarios/join";
-import {
-  Box,
-  Breadcrumbs,
-  Button,
-  Container,
-  Group,
-  Text,
-  Title,
-} from "@mantine/core";
-import { IconArrowBack, IconExternalLink } from "@tabler/icons-react";
+import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,52 +37,60 @@ export default async function ScenarioPage({
   );
 
   return (
-    <Container size="md" className="py-8">
-      <Breadcrumbs mb="lg">
-        <Link href="/">Home</Link>
-        <Link href="/scenarios">Scenarios</Link>
-        <Text>{scenario?.name || "Scenario Not Found"}</Text>
-      </Breadcrumbs>
-      <Group mb="md">
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="breadcrumbs text-sm mb-6">
+        <ul>
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li>
+            <Link href="/scenarios">Scenarios</Link>
+          </li>
+          <li>{scenario?.name || "Scenario Not Found"}</li>
+        </ul>
+      </div>
+      <div className="flex items-center gap-4 mb-4">
         {scenario?.teaserImageURL ? (
           <Image
-            src={scenario?.teaserImageURL || "/default-scenario.png"}
-            alt={scenario?.name || "Scenario Image"}
+            src={scenario.teaserImageURL}
+            alt={scenario.name || "Scenario Image"}
             width={64}
             height={64}
             className="rounded-md"
           />
         ) : (
-          <div className="w-16 h-16 bg-gray-200 rounded-md flex items-center justify-center">
-            <span className="text-gray-500">No Image</span>
+          <div className="w-16 h-16 bg-base-300 rounded-md flex items-center justify-center">
+            <span className="text-base-content/60">No Image</span>
           </div>
         )}
-        <Title order={2}>{scenario?.name || "Scenario Not Found"}</Title>
-      </Group>
-      <Text size="md" c="dimmed">
+        <h2 className="text-2xl font-bold">
+          {scenario?.name || "Scenario Not Found"}
+        </h2>
+      </div>
+      <p className="text-base-content/60 mb-4">
         {scenario?.description ||
           "The scenario you are looking for does not exist."}
-      </Text>
+      </p>
       {scenario && (
-        <Group w="100%" justify="end">
+        <div className="flex justify-end w-full">
           <form action={joinScenario}>
             <input type="hidden" name="userId" value={session.user.id} />
             <input type="hidden" name="scenarioId" value={id} />
             {alreadyJoined ? (
               <Link href={`/me/scenarios/${id}`}>
-                <Button variant="outline" mt="md">
+                <button className="btn btn-outline mt-4">
                   <IconExternalLink size={16} className="mr-1" />
                   View Scenario
-                </Button>
+                </button>
               </Link>
             ) : (
-              <Button variant="filled" mt="md" type="submit">
+              <button className="btn btn-primary mt-4" type="submit">
                 {alreadyJoined ? "Already Joined" : "Join Scenario"}
-              </Button>
+              </button>
             )}
           </form>
-        </Group>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }

@@ -1,29 +1,17 @@
 "use client";
 
-import { ActionIcon, useMantineColorScheme, useComputedColorScheme, Box } from "@mantine/core";
-import { IconSun, IconMoon } from "@tabler/icons-react";
+import { useTheme } from "@/lib/use-theme";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 
 export default function ColorSchemeToggle() {
-  const { setColorScheme } = useMantineColorScheme();
-  const computedColorScheme = useComputedColorScheme("light", {
-    getInitialValueInEffect: true,
-  });
-
+  const { theme, toggleTheme } = useTheme();
   return (
-    <ActionIcon
-      onClick={() =>
-        setColorScheme(computedColorScheme === "light" ? "dark" : "light")
-      }
-      variant="default"
-      size="lg"
+    <button
+      onClick={toggleTheme}
+      className="btn btn-ghost btn-square"
       aria-label="Toggle color scheme"
     >
-      <Box darkHidden>
-        <IconSun size={20} />
-      </Box>
-      <Box lightHidden>
-        <IconMoon size={20} />
-      </Box>
-    </ActionIcon>
+      {theme === "business" ? <IconSun size={20} /> : <IconMoon size={20} />}
+    </button>
   );
 }

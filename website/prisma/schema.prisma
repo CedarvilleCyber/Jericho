@@ -32,6 +32,13 @@ model User {
   displayUsername String?
   userScenarios   UserScenario[]
 
+  role      String?
+  banned    Boolean?  @default(false)
+  banReason String?
+  banExpires DateTime?
+
+  passwordResetRequests PasswordResetRequest[]
+
   @@unique([email])
   @@unique([username])
   @@map("user")
@@ -78,6 +85,8 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  impersonatedBy String?
+
   @@unique([token])
   @@index([userId])
   @@map("session")
@@ -101,6 +110,22 @@ model Account {
 
   @@index([userId])
   @@map("account")
+}
+
+enum PasswordResetStatus {
+  PENDING
+  RESOLVED
+}
+
+model PasswordResetRequest {
+  id         String              @id @default(cuid())
+  userId     String
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status     PasswordResetStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  resolvedAt DateTime?
+
+  @@map("password_reset_request")
 }
 
 model Verification {

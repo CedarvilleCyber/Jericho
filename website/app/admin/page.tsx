@@ -1,23 +1,11 @@
 import EditUserButton from "@/components/admin/edit-user-button";
+import ResolvePasswordResetButton from "@/components/admin/resolve-password-reset-button";
 import ScenarioTriggers from "@/components/admin/scenario-triggers";
 import VMsEditor from "@/components/admin/vms-editor";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getAllVMs } from "@/lib/proxmox-api/vms";
-import {
-  Box,
-  Button,
-  Container,
-  Table,
-  TableTbody,
-  TableTd,
-  TableTh,
-  TableThead,
-  TableTr,
-} from "@mantine/core";
-import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
@@ -50,46 +38,85 @@ export default async function AdminPage() {
     template: vm.template === 1,
   }));
 
+  const pendingResets = await prisma.passwordResetRequest.findMany({
+    where: { status: "PENDING" },
+    include: { user: true },
+    orderBy: { createdAt: "asc" },
+  });
+
   return (
-    <Container size="lg">
+    <div className="max-w-5xl mx-auto px-4">
       <h1 className="text-xl my-5">Admin Dashboard</h1>
 
-      <Box className="border border-gray-700 shadow-lg rounded-md p-4 mb-4">
-        <Box mah="50vh" className="overflow-auto">
-          <Table miw={700} stickyHeader>
-            <TableThead>
-              <TableTr>
-                <TableTh>Name</TableTh>
-                <TableTh>Email</TableTh>
-                <TableTh>Roles</TableTh>
-                <TableTh>VM Management</TableTh>
-                <TableTh>User Management</TableTh>
-              </TableTr>
-            </TableThead>
-            <TableTbody>
+      <div className="border border-base-300 shadow-lg rounded-md p-4 mb-4">
+        <div className="overflow-auto max-h-[50vh]">
+          <table className="table" style={{ minWidth: 700 }}>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>VM Management</th>
+                <th>User Management</th>
+              </tr>
+            </thead>
+            <tbody>
               {users.map((user) => (
-                <TableTr key={user.id}>
-                  <TableTd>{user.name}</TableTd>
-                  <TableTd>{user.email}</TableTd>
-                  <TableTd>
+                <tr key={user.id}>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>
                     {user.userRoles.map((role) => role.role).join(", ")}
-                  </TableTd>
-                  <TableTd>
-                    <Box className="flex items-center gap-2">
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2">
                       <span>{user.vms.length} VMs</span>
                       <VMsEditor user={user} proxmoxVMs={allVMs} />
-                    </Box>
-                  </TableTd>
-                  <TableTd>
+                    </div>
+                  </td>
+                  <td>
                     <EditUserButton userId={user.id} />
-                  </TableTd>
-                </TableTr>
+                  </td>
+                </tr>
               ))}
-            </TableTbody>
-          </Table>
-        </Box>
-      </Box>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {pendingResets.length > 0 && (
+        <div className="border border-base-300 shadow-lg rounded-md p-4 mb-4">
+          <h2 className="text-lg mb-3">Pending Password Reset Requests</h2>
+          <div className="overflow-auto">
+            <table className="table" style={{ minWidth: 500 }}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Requested</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingResets.map((req) => (
+                  <tr key={req.id}>
+                    <td>{req.user.name}</td>
+                    <td>{req.user.email}</td>
+                    <td>{req.createdAt.toLocaleDateString()}</td>
+                    <td>
+                      <ResolvePasswordResetButton
+                        requestId={req.id}
+                        userName={req.user.name}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <ScenarioTriggers />
-    </Container>
+    </div>
   );
 }

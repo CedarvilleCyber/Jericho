@@ -2,16 +2,7 @@
 
 import { setUserScenarioVM } from "@/lib/scenarios/admin";
 import { VM } from "@/app/generated/prisma/browser";
-import {
-  Badge,
-  Button,
-  Card,
-  Group,
-  Modal,
-  Stack,
-  Text,
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useRef } from "react";
 
 export default function UserScenarioVMEditor({
   userScenarioId,
@@ -22,7 +13,15 @@ export default function UserScenarioVMEditor({
   currentVM: VM | null;
   availableVMs: VM[];
 }) {
-  const [opened, { open, close }] = useDisclosure(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  function open() {
+    dialogRef.current?.showModal();
+  }
+
+  function close() {
+    dialogRef.current?.close();
+  }
 
   async function assign(vmId: string) {
     const formData = new FormData();
@@ -40,58 +39,81 @@ export default function UserScenarioVMEditor({
 
   return (
     <>
-      <Modal opened={opened} onClose={close} size="xl" title="Assign VM to Scenario">
-        {availableVMs.length > 0 ? (
-          <Stack>
-            {availableVMs.map((vm) => (
-              <Card key={vm.id} shadow="sm" padding="lg" radius="md" withBorder>
-                <Group justify="space-between" align="center">
-                  <Text>
-                    VM ID: {vm.proxmoxId} - {vm.name}
-                  </Text>
-                  <Button
-                    variant={currentVM?.id === vm.id ? "filled" : "outline"}
-                    size="xs"
-                    onClick={() => assign(vm.id)}
-                  >
-                    {currentVM?.id === vm.id ? "Assigned" : "Assign"}
-                  </Button>
-                </Group>
-              </Card>
-            ))}
-          </Stack>
-        ) : (
-          <Text>No VMs available for this user.</Text>
-        )}
-      </Modal>
+      <dialog ref={dialogRef} className="modal">
+        <div className="modal-box max-w-2xl">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={close}
+          >
+            ✕
+          </button>
+          <h3 className="font-bold text-lg mb-4">Assign VM to Scenario</h3>
+          {availableVMs.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {availableVMs.map((vm) => (
+                <div
+                  key={vm.id}
+                  className="card bg-base-100 border border-base-300 shadow-sm"
+                >
+                  <div className="card-body p-4">
+                    <div className="flex justify-between items-center">
+                      <span>
+                        VM ID: {vm.proxmoxId} - {vm.name}
+                      </span>
+                      <button
+                        className={`btn btn-xs ${
+                          currentVM?.id === vm.id
+                            ? "btn-primary"
+                            : "btn-outline"
+                        }`}
+                        onClick={() => assign(vm.id)}
+                      >
+                        {currentVM?.id === vm.id ? "Assigned" : "Assign"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No VMs available for this user.</p>
+          )}
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={close}>close</button>
+        </form>
+      </dialog>
 
-      <Stack gap="sm">
-        <Text fw={500}>Assigned VM</Text>
+      <div className="flex flex-col gap-3">
+        <p className="font-medium">Assigned VM</p>
         {currentVM ? (
-          <Card shadow="sm" padding="lg" radius="md" withBorder>
-            <Group justify="space-between" align="center">
-              <Group gap="sm">
-                <Text>
-                  VM ID: {currentVM.proxmoxId} - {currentVM.name}
-                </Text>
-                <Badge color="green">Assigned</Badge>
-              </Group>
-              <Group gap="xs">
-                <Button variant="outline" color="red" size="xs" onClick={unassign}>
+          <div className="card bg-base-100 border border-base-300 shadow-sm">
+            <div className="card-body p-4">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span>
+                    VM ID: {currentVM.proxmoxId} - {currentVM.name}
+                  </span>
+                  <span className="badge badge-success">Assigned</span>
+                </div>
+                <button
+                  className="btn btn-outline btn-error btn-xs"
+                  onClick={unassign}
+                >
                   Remove
-                </Button>
-              </Group>
-            </Group>
-          </Card>
+                </button>
+              </div>
+            </div>
+          </div>
         ) : (
-          <Text c="dimmed">No VM assigned.</Text>
+          <p className="text-base-content/60">No VM assigned.</p>
         )}
-        <Group>
-          <Button variant="outline" onClick={open}>
+        <div className="flex gap-2">
+          <button className="btn btn-outline" onClick={open}>
             {currentVM ? "Change VM" : "Assign VM"}
-          </Button>
-        </Group>
-      </Stack>
+          </button>
+        </div>
+      </div>
     </>
   );
 }

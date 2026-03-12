@@ -1,11 +1,3 @@
-import {
-  Button,
-  Card,
-  Container,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
 import { IconArrowRight } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,68 +31,62 @@ export function LandingPage() {
   ];
 
   return (
-    <Container size="lg" className="py-12 pb-24">
+    <div className="max-w-5xl mx-auto px-4 py-12 pb-24">
       {/* Header */}
-      <Card className="mb-6" shadow="md" padding="xl" radius="md" withBorder>
-        <Title order={1} className="text-4xl font-bold mb-4">
-          Explore Scenarios
-        </Title>
-        <Text size="lg" c="dimmed" className="mb-6 max-w-2xl">
-          Hands-on cyber-physical infrastructure scenarios for learning and
-          experimentation. Sign up to get started with interactive labs.
-        </Text>
-      </Card>
+      <div className="card bg-base-100 border border-base-300 shadow-md mb-6">
+        <div className="card-body p-6">
+          <h1 className="text-4xl font-bold mb-4">Explore Scenarios</h1>
+          <p className="text-lg text-base-content/60 mb-6 max-w-2xl">
+            Hands-on cyber-physical infrastructure scenarios for learning and
+            experimentation. Sign up to get started with interactive labs.
+          </p>
+        </div>
+      </div>
 
       {/* Scenarios Grid */}
-      <Stack gap="lg">
+      <div className="flex flex-col gap-6">
         {scenarios.map((scenario) => (
-          <Card
+          <div
             key={scenario.title}
-            shadow="md"
-            padding="xl"
-            radius="md"
-            withBorder
+            className="card bg-base-100 border border-base-300 shadow-md"
           >
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="shrink-0">
-                <Image
-                  src={scenario.image}
-                  alt={scenario.title}
-                  width={256}
-                  height={256}
-                  className="rounded-lg shadow-lg w-64 h-64 object-cover"
-                />
-              </div>
-              <div className="flex-1 flex flex-col justify-between gap-4">
-                <div>
-                  <Title order={2} className="text-2xl font-semibold mb-3">
-                    {scenario.title}
-                  </Title>
-                  <Text size="md" className="leading-relaxed">
-                    {scenario.description}
-                  </Text>
+            <div className="card-body p-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="shrink-0">
+                  <Image
+                    src={scenario.image}
+                    alt={scenario.title}
+                    width={256}
+                    height={256}
+                    className="rounded-lg shadow-lg w-64 h-64 object-cover"
+                  />
                 </div>
-                <div className="flex gap-3">
-                  <Link href="/sign-in?mode=signup">
-                    <Button
-                      variant="filled"
-                      size="md"
-                      rightSection={<IconArrowRight size={18} />}
-                    >
-                      Sign Up to Get Started
-                    </Button>
-                  </Link>
-                  <Link href="/sign-in">
-                    <Button variant="subtle" size="md">
-                      Already have an account?
-                    </Button>
-                  </Link>
+                <div className="flex-1 flex flex-col justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-semibold mb-3">
+                      {scenario.title}
+                    </h2>
+                    <p className="leading-relaxed">{scenario.description}</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <Link href="/sign-in?mode=signup">
+                      <button className="btn btn-primary">
+                        Sign Up to Get Started
+                        <IconArrowRight size={18} />
+                      </button>
+                    </Link>
+                    <Link href="/sign-in">
+                      <button className="btn btn-ghost">
+                        Already have an account?
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
         ))}
-      </Stack>
-    </Container>
+      </div>
+    </div>
   );
 }

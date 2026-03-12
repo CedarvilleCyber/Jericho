@@ -1,13 +1,4 @@
 import prisma from "@/lib/prisma";
-import {
-  Container,
-  Title,
-  SimpleGrid,
-  Card,
-  ThemeIcon,
-  Text,
-  Breadcrumbs,
-} from "@mantine/core";
 import { IconDeviceDesktop } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,57 +7,47 @@ export default async function ScenariosPage() {
   const scenarios = await prisma.scenario.findMany();
 
   return (
-    <Container size="md" className="py-8">
-      <Breadcrumbs mb="lg">
-        <Link href="/">Home</Link>
-        <Text>Scenarios</Text>
-      </Breadcrumbs>
-      <Title order={2} style={{ marginBottom: "1rem" }}>
-        Available Scenarios
-      </Title>
-      <SimpleGrid cols={2} spacing="lg">
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="breadcrumbs text-sm mb-6">
+        <ul>
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li>Scenarios</li>
+        </ul>
+      </div>
+      <h2 className="text-2xl font-bold mb-4">Available Scenarios</h2>
+      <div className="grid grid-cols-2 gap-6">
         {scenarios.map((scenario) => (
           <Link
             key={scenario.id}
             href={`/scenarios/${scenario.id}`}
             className="no-underline"
           >
-            <Card
-              shadow="sm"
-              padding="lg"
-              radius="md"
-              withBorder
-              className="h-full transition-transform duration-200 hover:scale-[1.03]"
-            >
-              {scenario.teaserImageURL ? (
-                <Image
-                  src={scenario.teaserImageURL}
-                  alt={scenario.name}
-                  width={48}
-                  height={48}
-                  className="mb-3 rounded-md"
-                />
-              ) : (
-                <ThemeIcon
-                  size={48}
-                  radius="md"
-                  variant="light"
-                  color="blue"
-                  className="mb-3"
-                >
-                  <IconDeviceDesktop size={24} />
-                </ThemeIcon>
-              )}
-              <Title order={4} className="mb-2" mb={"xs"}>
-                {scenario.name}
-              </Title>
-              <Text size="sm" c="dimmed">
-                {scenario.teaserText || "No description available."}
-              </Text>
-            </Card>
+            <div className="card bg-base-100 border border-base-300 shadow-sm h-full transition-transform duration-200 hover:scale-[1.03]">
+              <div className="card-body p-6">
+                {scenario.teaserImageURL ? (
+                  <Image
+                    src={scenario.teaserImageURL}
+                    alt={scenario.name}
+                    width={48}
+                    height={48}
+                    className="mb-3 rounded-md"
+                  />
+                ) : (
+                  <div className="p-3 rounded-lg bg-blue-500/10 text-blue-500 inline-block mb-3">
+                    <IconDeviceDesktop size={24} />
+                  </div>
+                )}
+                <h4 className="text-lg font-semibold mb-2">{scenario.name}</h4>
+                <p className="text-sm text-base-content/60">
+                  {scenario.teaserText || "No description available."}
+                </p>
+              </div>
+            </div>
           </Link>
         ))}
-      </SimpleGrid>
-    </Container>
+      </div>
+    </div>
   );
 }
