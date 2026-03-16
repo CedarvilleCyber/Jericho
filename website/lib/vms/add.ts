@@ -1,8 +1,8 @@
 "use server";
 
+import prisma from "@/lib/prisma";
+import { proxmox } from "@/lib/proxmox";
 import { revalidatePath } from "next/cache";
-import prisma from "../prisma";
-import { proxmox } from "../proxmox";
 
 export async function addExistingVMToUser(vmId: number, userId: string) {
   const user = await prisma.user.findFirst({ where: { id: userId } });
@@ -12,7 +12,8 @@ export async function addExistingVMToUser(vmId: number, userId: string) {
 
   const pveVM = await proxmox.nodes
     .$(process.env.PVE_NODE || "jericho01")
-    .qemu.$(vmId).config.$get();
+    .qemu.$(vmId)
+    .config.$get();
 
   if (!pveVM) {
     throw new Error("VM does not exist in Proxmox");
@@ -46,12 +47,8 @@ export async function cloneVMTemplateToUser(
     throw new Error("User does not have a Proxmox ID");
   }
 
-  const newId =
-    (await prisma.vM.findMany())
-      .map((vm) => vm.proxmoxId)
-      .reduce((max, id) => {
-        return id > max ? id : max;
-      }, 1200) + 1;
+  const aggregate = await prisma.vM.aggregate({ _max: { proxmoxId: true } });
+  const newId = Math.max(aggregate._max.proxmoxId ?? 0, 1200) + 1;
 
   await proxmox.nodes
     .$(process.env.PVE_NODE || "jericho01")

@@ -1,15 +1,6 @@
+import UserScenarioVMEditor from "@/components/admin/vm-editor";
 import prisma from "@/lib/prisma";
-import {
-  Breadcrumbs,
-  Container,
-  Tabs,
-  TabsList,
-  TabsPanel,
-  TabsTab,
-  Text,
-} from "@mantine/core";
 import Link from "next/link";
-import UserScenarioVMEditor from "./vm-editor";
 
 export default async function UserScenarioPage({
   params,
@@ -31,23 +22,33 @@ export default async function UserScenarioPage({
   });
 
   return (
-    <Container size="lg">
-      <Breadcrumbs mb="lg" mt="md">
-        <Link href="/">Home</Link>
-        <Link href="/admin">Admin</Link>
-        <Text>
-          {userScenario?.user.name} - {userScenario?.scenario.name}
-        </Text>
-      </Breadcrumbs>
-      <Text size="xl" mb="md">
+    <div className="max-w-5xl mx-auto px-4">
+      <div className="breadcrumbs text-sm mb-6 mt-4">
+        <ul>
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li>
+            <Link href="/admin">Admin</Link>
+          </li>
+          <li>
+            {userScenario?.user.name} - {userScenario?.scenario.name}
+          </li>
+        </ul>
+      </div>
+      <p className="text-xl mb-4">
         {userScenario?.scenario.name} scenario for {userScenario?.user.name}
-      </Text>
-      <Tabs defaultValue="vms">
-        <TabsList>
-          <TabsTab value="vms">VMs</TabsTab>
-          <TabsTab value="questions">Questions</TabsTab>
-        </TabsList>
-        <TabsPanel value="vms" p="sm">
+      </p>
+      <div className="tabs tabs-bordered">
+        <input
+          type="radio"
+          name="us_tabs"
+          role="tab"
+          className="tab"
+          aria-label="VMs"
+          defaultChecked
+        />
+        <div role="tabpanel" className="tab-content py-4">
           {userScenario && (
             <UserScenarioVMEditor
               userScenarioId={userScenario.id}
@@ -55,8 +56,16 @@ export default async function UserScenarioPage({
               availableVMs={userScenario.user.vms}
             />
           )}
-        </TabsPanel>
-      </Tabs>
-    </Container>
+        </div>
+        <input
+          type="radio"
+          name="us_tabs"
+          role="tab"
+          className="tab"
+          aria-label="Questions"
+        />
+        <div role="tabpanel" className="tab-content py-4"></div>
+      </div>
+    </div>
   );
 }

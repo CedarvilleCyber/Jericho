@@ -1,7 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./prisma";
-import { username } from "better-auth/plugins";
+import { admin, username } from "better-auth/plugins";
+import { sendEmail, verificationEmailHtml } from "./email";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -9,8 +10,40 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your password — Jericho",
+        html: verificationEmailHtml({
+          url,
+          heading: "Reset your password",
+          body: `We received a request to reset the password for your Jericho account (<strong>${user.email}</strong>). Click the button below to choose a new password. This link expires in 1 hour.`,
+          buttonLabel: "Reset Password",
+        }),
+      });
+    },
   },
-  plugins: [
-    username()
-  ]
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your email address — Jericho",
+        html: verificationEmailHtml({
+          url,
+          heading: "Verify your email address",
+          body: `Please verify the email address associated with your Jericho account (<strong>${user.email}</strong>). This link expires in 1 hour.`,
+          buttonLabel: "Verify Email Address",
+        }),
+      });
+    },
+  },
+  user: {
+    deleteUser: {
+      enabled: true,
+    },
+  },
+  plugins: [username(), admin()],
 });

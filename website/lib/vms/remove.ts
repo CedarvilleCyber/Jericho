@@ -1,8 +1,8 @@
 "use server";
 
+import prisma from "@/lib/prisma";
+import { proxmox } from "@/lib/proxmox";
 import { revalidatePath } from "next/cache";
-import prisma from "../prisma";
-import { proxmox } from "../proxmox";
 
 export async function removeVM(proxmoxId: number, userId: string) {
   const user = await prisma.user.findFirst({ where: { id: userId } });

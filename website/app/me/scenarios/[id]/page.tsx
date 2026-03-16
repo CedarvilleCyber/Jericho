@@ -2,20 +2,6 @@ import AddExistingVMToScenarioPage from "@/components/scenario/add-existing-vm";
 import PVEViewer from "@/components/view/pve-viewer";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import {
-  Breadcrumbs,
-  Button,
-  Card,
-  Container,
-  Group,
-  SimpleGrid,
-  Stack,
-  Tabs,
-  TabsList,
-  TabsPanel,
-  TabsTab,
-  Text,
-} from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
 import Image from "next/image";
@@ -59,85 +45,116 @@ export default async function ScenarioLabPage({
   }
 
   return (
-    <Container size="lg" className="py-8">
-      <Breadcrumbs mb="lg">
-        <Link href="/">Home</Link>
-        <Link href="/me/scenarios">My Scenarios</Link>
-        <Text>{scenario.name}</Text>
-      </Breadcrumbs>
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="breadcrumbs text-sm mb-6">
+        <ul>
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li>
+            <Link href="/me/scenarios">My Scenarios</Link>
+          </li>
+          <li>{scenario.name}</li>
+        </ul>
+      </div>
       <h1 className="text-2xl font-bold mb-4">{scenario.name}</h1>
-      <SimpleGrid cols={2} spacing="lg" mb="md">
-        <Card>
-          <Tabs defaultValue="details">
-            <TabsList mb="md">
-              <TabsTab value="details">Details</TabsTab>
+      <div className="grid grid-cols-2 gap-6 mb-4">
+        <div className="card bg-base-100 border border-base-300">
+          <div className="card-body p-4">
+            <div className="tabs tabs-bordered">
+              <input
+                type="radio"
+                name="scenario_tabs"
+                role="tab"
+                className="tab"
+                aria-label="Details"
+                defaultChecked
+              />
+              <div role="tabpanel" className="tab-content py-4">
+                <p>{scenario.description}</p>
+              </div>
               {scenario.topologyURL && (
-                <TabsTab value="topology">Topology</TabsTab>
+                <>
+                  <input
+                    type="radio"
+                    name="scenario_tabs"
+                    role="tab"
+                    className="tab"
+                    aria-label="Topology"
+                  />
+                  <div role="tabpanel" className="tab-content py-4">
+                    <Image
+                      src={scenario.topologyURL}
+                      alt={`${scenario.name} topology`}
+                      width={800}
+                      height={600}
+                    />
+                  </div>
+                </>
               )}
               {scenario.questions.length > 0 && (
-                <TabsTab value="questions">Questions</TabsTab>
+                <>
+                  <input
+                    type="radio"
+                    name="scenario_tabs"
+                    role="tab"
+                    className="tab"
+                    aria-label="Questions"
+                  />
+                  <div role="tabpanel" className="tab-content py-4"></div>
+                </>
               )}
-              <TabsTab value="livestream">Livestream</TabsTab>
-            </TabsList>
-            <TabsPanel value="details">
-              <Text>{scenario.description}</Text>
-            </TabsPanel>
-            {scenario.topologyURL && (
-              <TabsPanel value="topology">
-                <Image
-                  src={scenario.topologyURL}
-                  alt={`${scenario.name} topology`}
-                  width={800}
-                  height={600}
-                />
-              </TabsPanel>
+              <input
+                type="radio"
+                name="scenario_tabs"
+                role="tab"
+                className="tab"
+                aria-label="Livestream"
+              />
+              <div role="tabpanel" className="tab-content py-4">
+                <div className="flex flex-col gap-3">
+                  <p>Livestream coming soon!</p>
+                  <div className="flex justify-end">
+                    <button className="btn" disabled>
+                      <IconExternalLink className="mr-2" />
+                      Pop out
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="card bg-base-100 border border-base-300">
+          <div className="card-body p-4">
+            {scenario.userScenarios[0]?.vmId ? (
+              <>
+                <p className="mb-2 text-base-content/60">
+                  Click on the preview below to launch the VM console.
+                </p>
+                {scenario.userScenarios[0].vm ? (
+                  <PVEViewer vmId={scenario.userScenarios[0].vm?.proxmoxId} />
+                ) : null}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-4">
+                <p className="text-lg text-base-content/60">
+                  You do not have a VM associated with this scenario.
+                </p>
+                <div className="flex gap-3">
+                  <AddExistingVMToScenarioPage
+                    scenarioId={scenario.id}
+                    vms={prismaUser?.vms}
+                  />
+                  <button className="btn">
+                    Request a new VM <IconExternalLink className="ml-2" />
+                  </button>
+                </div>
+              </div>
             )}
-            {scenario.questions.length > 0 && (
-              <TabsPanel value="questions">
-                <></>
-              </TabsPanel>
-            )}
-            <TabsPanel value="livestream">
-              <Stack>
-                <Text>Livestream coming soon!</Text>
-                <Group justify="end">
-                  <Button disabled>
-                    <IconExternalLink className="mr-2" />
-                    Pop out
-                  </Button>
-                </Group>
-              </Stack>
-            </TabsPanel>
-          </Tabs>
-        </Card>
-        <Card>
-          {scenario.userScenarios[0]?.vmId ? (
-            <>
-              <Text mb="xs" c="dimmed">
-                Click on the preview below to launch the VM console.
-              </Text>
-              {scenario.userScenarios[0].vm ? (
-                <PVEViewer vmId={scenario.userScenarios[0].vm?.proxmoxId} />
-              ) : null}
-            </>
-          ) : (
-            <Stack align="center" justify="center" className="h-full">
-              <Text size="lg" c="dimmed">
-                You do not have a VM associated with this scenario.
-              </Text>
-              <Group>
-                <AddExistingVMToScenarioPage
-                  scenarioId={scenario.id}
-                  vms={prismaUser?.vms}
-                />
-                <Button>
-                  Request a new VM <IconExternalLink className="ml-2" />
-                </Button>
-              </Group>
-            </Stack>
-          )}
-        </Card>
-      </SimpleGrid>
-    </Container>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

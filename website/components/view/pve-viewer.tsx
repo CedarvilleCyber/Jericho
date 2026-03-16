@@ -3,7 +3,6 @@
 import { authClient } from "@/lib/auth-client";
 import { getUser } from "@/lib/db/user";
 import { getTicket } from "@/lib/proxmox-api/ticket";
-import { Loader, Stack } from "@mantine/core";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -30,9 +29,9 @@ export default function PVEViewer({ vmId }: { vmId: number }) {
 
   if (loading) {
     return (
-      <Stack align="center" justify="center" className="h-full">
-        <Loader size="xl" />
-      </Stack>
+      <div className="flex flex-col items-center justify-center h-full">
+        <span className="loading loading-spinner loading-xl" />
+      </div>
     );
   }
 
