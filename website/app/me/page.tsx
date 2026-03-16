@@ -6,6 +6,36 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+type Session = {
+  id: string;
+  token: string;
+  userAgent?: string | null;
+  ipAddress?: string | null;
+  createdAt: Date;
+};
+
+function parseUserAgent(ua: string): string {
+  const browser =
+    /Edg\//.test(ua) ? "Edge" :
+    /OPR\/|Opera/.test(ua) ? "Opera" :
+    /Firefox\//.test(ua) ? "Firefox" :
+    /Chrome\//.test(ua) ? "Chrome" :
+    /Safari\//.test(ua) ? "Safari" :
+    "Unknown browser";
+
+  const os =
+    /Windows NT 10/.test(ua) ? "Windows 10/11" :
+    /Windows NT 6\.3/.test(ua) ? "Windows 8.1" :
+    /Windows/.test(ua) ? "Windows" :
+    /Mac OS X/.test(ua) ? "macOS" :
+    /Android/.test(ua) ? "Android" :
+    /iPhone|iPad/.test(ua) ? "iOS" :
+    /Linux/.test(ua) ? "Linux" :
+    "Unknown OS";
+
+  return `${browser} on ${os}`;
+}
+
 export default function MePage() {
   const { data, isPending } = authClient.useSession();
   const router = useRouter();
@@ -26,6 +56,90 @@ export default function MePage() {
 
   const [resetMessage, setResetMessage] = useState("");
 
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [revokeAllLoading, setRevokeAllLoading] = useState(false);
+
+  const [newEmail, setNewEmail] = useState("");
+  const [emailChangeLoading, setEmailChangeLoading] = useState(false);
+  const [emailChangeMessage, setEmailChangeMessage] = useState("");
+  const [emailChangeError, setEmailChangeError] = useState("");
+
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const loadSessions = async () => {
+    setSessionsLoading(true);
+    try {
+      const result = await authClient.listSessions();
+      if (result.data) {
+        setSessions(result.data as Session[]);
+      }
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  const handleRevokeSession = async (token: string) => {
+    await authClient.revokeSession({ token });
+    await loadSessions();
+  };
+
+  const handleRevokeOtherSessions = async () => {
+    setRevokeAllLoading(true);
+    try {
+      await authClient.revokeOtherSessions();
+      await loadSessions();
+    } finally {
+      setRevokeAllLoading(false);
+    }
+  };
+
+  const handleChangeEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailChangeError("");
+    setEmailChangeMessage("");
+    setEmailChangeLoading(true);
+    try {
+      const result = await authClient.changeEmail({
+        newEmail,
+        callbackURL: "/me",
+      });
+      if (result.error) {
+        setEmailChangeError(result.error.message || "Failed to request email change");
+      } else {
+        setEmailChangeMessage(
+          `A verification link has been sent to ${newEmail}. Click it to confirm the change.`
+        );
+        setNewEmail("");
+      }
+    } catch (err) {
+      setEmailChangeError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setEmailChangeLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteError("");
+    setDeleteLoading(true);
+    try {
+      const result = await authClient.deleteUser({
+        password: deletePassword || undefined,
+        callbackURL: "/sign-in",
+      });
+      if (result.error) {
+        setDeleteError(result.error.message || "Failed to delete account");
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isPending && !data?.session) {
       router.push("/sign-in");
@@ -35,6 +149,10 @@ export default function MePage() {
       setName(data.user.name || "");
       setEmail(data.user.email || "");
       setUsername(data.user.username || "");
+    }
+
+    if (data?.session) {
+      loadSessions();
     }
   }, [data, isPending, router]);
 
@@ -222,6 +340,71 @@ export default function MePage() {
 
         <div className="card bg-base-100 border border-base-300 shadow-sm">
           <div className="card-body p-6">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-bold text-lg">Active Sessions</h3>
+              <button
+                className="btn btn-ghost btn-sm text-error"
+                onClick={handleRevokeOtherSessions}
+                disabled={revokeAllLoading || sessions.length <= 1}
+              >
+                {revokeAllLoading && (
+                  <span className="loading loading-spinner loading-xs" />
+                )}
+                Revoke All Others
+              </button>
+            </div>
+            <p className="text-sm text-base-content/60 mb-4">
+              Manage devices and sessions with access to your account.
+            </p>
+            {sessionsLoading ? (
+              <div className="flex justify-center py-4">
+                <span className="loading loading-spinner loading-sm" />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {sessions.map((session) => {
+                  const isCurrent = session.token === data.session.token;
+                  return (
+                    <div
+                      key={session.id}
+                      className="flex items-center justify-between py-2 border-b border-base-200 last:border-0"
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">
+                            {session.userAgent
+                              ? parseUserAgent(session.userAgent)
+                              : "Unknown device"}
+                          </span>
+                          {isCurrent && (
+                            <span className="badge badge-primary badge-sm">
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-base-content/50">
+                          {session.ipAddress ?? "Unknown IP"} &middot;{" "}
+                          {new Date(session.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {!isCurrent && (
+                        <button
+                          className="btn btn-ghost btn-xs text-error"
+                          onClick={() => handleRevokeSession(session.token)}
+                        >
+                          Revoke
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="card bg-base-100 border border-base-300 shadow-sm">
+          <div className="card-body p-6">
             <h3 className="font-bold text-lg mb-1">Change Password</h3>
             <p className="text-sm text-base-content/60 mb-4">
               You must know your current password to change it.
@@ -311,6 +494,128 @@ export default function MePage() {
             </p>
             {resetMessage && (
               <p className="text-sm text-base-content/60 mt-1">{resetMessage}</p>
+            )}
+          </div>
+        </div>
+        <div className="card bg-base-100 border border-base-300 shadow-sm">
+          <div className="card-body p-6">
+            <h3 className="font-bold text-lg mb-1">Change Email</h3>
+            <p className="text-sm text-base-content/60 mb-4">
+              A verification link will be sent to your new address. Your email
+              won&apos;t change until you click it.
+            </p>
+            <form onSubmit={handleChangeEmail}>
+              <div className="flex flex-col gap-4">
+                <label className="form-control">
+                  <div className="label">
+                    <span className="label-text">Current Email</span>
+                  </div>
+                  <input
+                    className="input input-bordered w-full"
+                    type="email"
+                    value={email}
+                    disabled
+                  />
+                </label>
+                <label className="form-control">
+                  <div className="label">
+                    <span className="label-text">New Email</span>
+                  </div>
+                  <input
+                    className="input input-bordered w-full"
+                    type="email"
+                    placeholder="New email address"
+                    required
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.currentTarget.value)}
+                    disabled={emailChangeLoading}
+                  />
+                </label>
+                {emailChangeError && (
+                  <p className="text-sm text-error">{emailChangeError}</p>
+                )}
+                {emailChangeMessage && (
+                  <p className="text-sm text-success">{emailChangeMessage}</p>
+                )}
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={emailChangeLoading}
+                  >
+                    {emailChangeLoading && (
+                      <span className="loading loading-spinner loading-xs" />
+                    )}
+                    Send Verification
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 border border-base-300 border-error/30 shadow-sm">
+          <div className="card-body p-6">
+            <h3 className="font-bold text-lg mb-1 text-error">
+              Delete Account
+            </h3>
+            <p className="text-sm text-base-content/60 mb-4">
+              Permanently delete your account and all associated data. This
+              cannot be undone.
+            </p>
+            {!showDeleteConfirm ? (
+              <div className="flex justify-end">
+                <button
+                  className="btn btn-error btn-outline btn-sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  Delete My Account
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <label className="form-control">
+                  <div className="label">
+                    <span className="label-text">
+                      Confirm with your password
+                    </span>
+                  </div>
+                  <input
+                    className="input input-bordered w-full"
+                    type="password"
+                    placeholder="Your current password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.currentTarget.value)}
+                    disabled={deleteLoading}
+                  />
+                </label>
+                {deleteError && (
+                  <p className="text-sm text-error">{deleteError}</p>
+                )}
+                <div className="flex gap-2 justify-end">
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setDeletePassword("");
+                      setDeleteError("");
+                    }}
+                    disabled={deleteLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-error btn-sm"
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading}
+                  >
+                    {deleteLoading && (
+                      <span className="loading loading-spinner loading-xs" />
+                    )}
+                    Permanently Delete
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

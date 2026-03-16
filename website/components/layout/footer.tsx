@@ -13,7 +13,7 @@ export default function Footer() {
 
   return (
     <div className="sticky bottom-0 left-0 right-0 flex gap-2 justify-end px-4 py-3 border-t backdrop-blur-sm z-10 bg-base-100/80 border-base-300">
-      <Link href="/account/settings">
+      <Link href="/me">
         <button className="btn btn-ghost btn-sm">
           <IconUser size={16} />
           Account

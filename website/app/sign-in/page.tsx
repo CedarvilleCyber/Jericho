@@ -1,9 +1,12 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { requestPasswordResetByIdentifier } from "@/lib/password-reset/request";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+
+function RequiredMark() {
+  return <span className="text-error ml-0.5">*</span>;
+}
 
 function SignInForm() {
   const searchParams = useSearchParams();
@@ -18,6 +21,7 @@ function SignInForm() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [error, setError] = useState("");
@@ -25,30 +29,42 @@ function SignInForm() {
   const router = useRouter();
 
   const [showResetForm, setShowResetForm] = useState(false);
-  const [resetIdentifier, setResetIdentifier] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
 
-  const handleRequestReset = async (e: React.SyntheticEvent) => {
+  const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setResetLoading(true);
     setResetMessage("");
-    await requestPasswordResetByIdentifier(resetIdentifier);
+    await authClient.requestPasswordReset({
+      email: resetEmail,
+      redirectTo: "/reset-password",
+    });
     setResetLoading(false);
-    setResetMessage("If an account exists, a reset request has been submitted. Ask an admin to set a temporary password for you.");
-    setResetIdentifier("");
+    // Always show the same message to avoid user enumeration
+    setResetMessage(
+      "If an account with that email exists, a reset link has been sent."
+    );
+    setResetEmail("");
   };
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (isSignUp && password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     try {
       if (isSignUp) {
         const result = await authClient.signUp.email({
           email,
-          username,
+          username: username || undefined,
           password,
           name,
         });
@@ -105,7 +121,9 @@ function SignInForm() {
                 {isSignUp && (
                   <label className="form-control">
                     <div className="label">
-                      <span className="label-text">Name</span>
+                      <span className="label-text">
+                        Name <RequiredMark />
+                      </span>
                     </div>
                     <input
                       className="input input-bordered w-full"
@@ -122,11 +140,11 @@ function SignInForm() {
                   <label className="form-control">
                     <div className="label">
                       <span className="label-text">Username</span>
+                      <span className="label-text-alt text-base-content/30">Optional</span>
                     </div>
                     <input
                       className="input input-bordered w-full"
                       placeholder="Your username"
-                      required
                       value={username}
                       onChange={(e) => setUsername(e.currentTarget.value)}
                       disabled={loading}
@@ -137,7 +155,8 @@ function SignInForm() {
                 <label className="form-control">
                   <div className="label">
                     <span className="label-text">
-                      {isSignUp ? "Email" : "Email or Username"}
+                      {isSignUp ? "Email" : "Email or Username"}{" "}
+                      <RequiredMark />
                     </span>
                   </div>
                   <input
@@ -159,18 +178,43 @@ function SignInForm() {
 
                 <label className="form-control">
                   <div className="label">
-                    <span className="label-text">Password</span>
+                    <span className="label-text">
+                      Password <RequiredMark />
+                    </span>
                   </div>
                   <input
                     className="input input-bordered w-full"
                     type="password"
                     placeholder="Your password"
                     required
+                    minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.currentTarget.value)}
                     disabled={loading}
                   />
                 </label>
+
+                {isSignUp && (
+                  <label className="form-control">
+                    <div className="label">
+                      <span className="label-text">
+                        Confirm Password <RequiredMark />
+                      </span>
+                    </div>
+                    <input
+                      className="input input-bordered w-full"
+                      type="password"
+                      placeholder="Confirm your password"
+                      required
+                      minLength={8}
+                      value={confirmPassword}
+                      onChange={(e) =>
+                        setConfirmPassword(e.currentTarget.value)
+                      }
+                      disabled={loading}
+                    />
+                  </label>
+                )}
 
                 {error && <p className="text-sm text-error">{error}</p>}
 
@@ -195,56 +239,64 @@ function SignInForm() {
                   className="link"
                   onClick={() => setShowResetForm(true)}
                 >
-                  Request an admin reset.
+                  Reset it via email.
                 </button>
               </p>
             )}
 
             {!isSignUp && showResetForm && (
               <div className="flex flex-col gap-3">
-                <p className="text-xs text-base-content/60 text-center">
-                  Enter your email or username and an admin will set a temporary password for you.
-                </p>
                 {resetMessage ? (
-                  <p className="text-xs text-base-content/60 text-center">{resetMessage}</p>
+                  <p className="text-xs text-base-content/60 text-center">
+                    {resetMessage}
+                  </p>
                 ) : (
-                  <form onSubmit={handleRequestReset} className="flex flex-col gap-2">
-                    <input
-                      className="input input-bordered input-sm w-full"
-                      placeholder="Email or username"
-                      value={resetIdentifier}
-                      onChange={(e) => setResetIdentifier(e.currentTarget.value)}
-                      required
-                      disabled={resetLoading}
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm flex-1"
-                        onClick={() => setShowResetForm(false)}
+                  <>
+                    <p className="text-xs text-base-content/60 text-center">
+                      Enter your email and we&apos;ll send you a reset link.
+                    </p>
+                    <form
+                      onSubmit={handleRequestReset}
+                      className="flex flex-col gap-2"
+                    >
+                      <input
+                        className="input input-bordered input-sm w-full"
+                        type="email"
+                        placeholder="Your email address"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.currentTarget.value)}
+                        required
                         disabled={resetLoading}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="btn btn-primary btn-sm flex-1"
-                        disabled={resetLoading}
-                      >
-                        {resetLoading && <span className="loading loading-spinner loading-xs" />}
-                        Submit
-                      </button>
-                    </div>
-                  </form>
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm flex-1"
+                          onClick={() => setShowResetForm(false)}
+                          disabled={resetLoading}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="btn btn-primary btn-sm flex-1"
+                          disabled={resetLoading}
+                        >
+                          {resetLoading && (
+                            <span className="loading loading-spinner loading-xs" />
+                          )}
+                          Send Link
+                        </button>
+                      </div>
+                    </form>
+                  </>
                 )}
               </div>
             )}
 
             <div className="flex justify-center gap-2">
               <p className="text-sm text-base-content/60">
-                {isSignUp
-                  ? "Already have an account?"
-                  : "Don't have an account?"}
+                {isSignUp ? "Already have an account?" : "Don't have an account?"}
               </p>
               <button
                 className="link text-sm"
@@ -252,6 +304,7 @@ function SignInForm() {
                 onClick={() => {
                   setIsSignUp(!isSignUp);
                   setError("");
+                  setConfirmPassword("");
                 }}
               >
                 {isSignUp ? "Sign In" : "Sign Up"}

@@ -1,10 +1,8 @@
 import EditUserButton from "@/components/admin/edit-user-button";
 import ResolvePasswordResetButton from "@/components/admin/resolve-password-reset-button";
 import ScenarioTriggers from "@/components/admin/scenario-triggers";
-import VMsEditor from "@/components/admin/vms-editor";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getAllVMs } from "@/lib/proxmox-api/vms";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -28,15 +26,9 @@ export default async function AdminPage() {
 
   const users = (
     await prisma.user.findMany({
-      include: { userRoles: true, vms: true },
+      include: { userRoles: true },
     })
   ).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-
-  const allVMs = (await getAllVMs()).map((vm) => ({
-    vmid: vm.vmid,
-    name: vm.name ?? "",
-    template: vm.template === 1,
-  }));
 
   const pendingResets = await prisma.passwordResetRequest.findMany({
     where: { status: "PENDING" },
@@ -56,7 +48,6 @@ export default async function AdminPage() {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Roles</th>
-                <th>VM Management</th>
                 <th>User Management</th>
               </tr>
             </thead>
@@ -67,12 +58,6 @@ export default async function AdminPage() {
                   <td>{user.email}</td>
                   <td>
                     {user.userRoles.map((role) => role.role).join(", ")}
-                  </td>
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <span>{user.vms.length} VMs</span>
-                      <VMsEditor user={user} proxmoxVMs={allVMs} />
-                    </div>
                   </td>
                   <td>
                     <EditUserButton userId={user.id} />

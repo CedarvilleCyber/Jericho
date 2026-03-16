@@ -68,7 +68,7 @@ export default function AppBar() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/account/settings">
+                    <Link href="/me">
                       <IconSettings size={16} />
                       Account
                     </Link>
@@ -81,7 +81,6 @@ export default function AppBar() {
                       </Link>
                     </li>
                   )}
-                  <li className="divider my-0"></li>
                   <li>
                     <button
                       onClick={() => authClient.signOut()}
