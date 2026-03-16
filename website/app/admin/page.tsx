@@ -1,3 +1,4 @@
+import BulkCreateUsers from "@/components/admin/bulk-create-users";
 import EditUserButton from "@/components/admin/edit-user-button";
 import ScenarioTriggers from "@/components/admin/scenario-triggers";
 import { auth } from "@/lib/auth";
@@ -31,7 +32,10 @@ export default async function AdminPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4">
-      <h1 className="text-xl my-5">Admin Dashboard</h1>
+      <div className="flex items-center justify-between my-5">
+        <h1 className="text-xl">Admin Dashboard</h1>
+        <BulkCreateUsers />
+      </div>
 
       <div className="border border-base-300 shadow-lg rounded-md p-4 mb-4">
         <div className="overflow-auto max-h-[50vh]">
