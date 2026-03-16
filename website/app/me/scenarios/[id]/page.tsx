@@ -133,9 +133,7 @@ export default async function ScenarioLabPage({
                   Click on the preview below to launch the VM console.
                 </p>
                 {scenario.userScenarios[0].vm ? (
-                  <PVEViewer
-                    vmId={scenario.userScenarios[0].vm?.proxmoxId}
-                  />
+                  <PVEViewer vmId={scenario.userScenarios[0].vm?.proxmoxId} />
                 ) : null}
               </>
             ) : (
@@ -149,8 +147,7 @@ export default async function ScenarioLabPage({
                     vms={prismaUser?.vms}
                   />
                   <button className="btn">
-                    Request a new VM{" "}
-                    <IconExternalLink className="ml-2" />
+                    Request a new VM <IconExternalLink className="ml-2" />
                   </button>
                 </div>
               </div>

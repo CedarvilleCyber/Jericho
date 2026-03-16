@@ -3,6 +3,7 @@
 import { User, VM } from "@/app/generated/prisma/client";
 import { ensureUserHasProxmoxId } from "@/lib/proxmox-api/user";
 import { addExistingVMToUser, cloneVMTemplateToUser } from "@/lib/vms/add";
+import { getFilteredVMs, ProxmoxVM } from "@/lib/vms/filter";
 import { deleteVMFromProxmox, removeVM } from "@/lib/vms/remove";
 import {
   IconDeviceFloppy,
@@ -18,7 +19,7 @@ export default function VMsEditor({
   proxmoxVMs,
 }: {
   user: User & { vms: VM[] };
-  proxmoxVMs: Array<{ vmid: number; name: string; template: boolean }>;
+  proxmoxVMs: ProxmoxVM[];
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -40,31 +41,8 @@ export default function VMsEditor({
     dialogRef.current?.close();
   }
 
-  const getFilteredVMs = (searchValue: string, templatesOnly: boolean) => {
-    const search = searchValue.toLowerCase().trim();
-    const parts = search.length
-      ? search.split(/\s+/).filter((p: string) => p.length > 2)
-      : [];
-
-    const filtered = proxmoxVMs.filter((vm) => {
-      if (templatesOnly && !vm.template) return false;
-      if (!search) return true;
-      const name = vm.name.toLowerCase();
-      const id = vm.vmid.toString();
-
-      if (parts.length > 0) {
-        return parts.some((p: string) => name.includes(p) || id.includes(p));
-      }
-
-      return name.includes(search) || id.includes(search);
-    });
-
-    filtered.sort((a, b) => a.vmid - b.vmid);
-    return filtered;
-  };
-
-  const filteredExisting = getFilteredVMs(vmSearchExisting, false);
-  const filteredTemplates = getFilteredVMs(vmSearchTemplate, true);
+  const filteredExisting = getFilteredVMs(proxmoxVMs, vmSearchExisting, false);
+  const filteredTemplates = getFilteredVMs(proxmoxVMs, vmSearchTemplate, true);
 
   return (
     <>
@@ -115,9 +93,7 @@ export default function VMsEditor({
                           <div className="tooltip" data-tip="Delete VM">
                             <button
                               className="btn btn-outline btn-error btn-xs"
-                              onClick={() =>
-                                deleteVMFromProxmox(vm.proxmoxId)
-                              }
+                              onClick={() => deleteVMFromProxmox(vm.proxmoxId)}
                             >
                               <IconTrash size={16} />
                             </button>
@@ -205,9 +181,7 @@ export default function VMsEditor({
                           setPopoverOpen(false);
                           if (
                             vmSearchExisting &&
-                            !isNaN(
-                              parseInt(vmSearchExisting.split(" - ")[0]),
-                            )
+                            !isNaN(parseInt(vmSearchExisting.split(" - ")[0]))
                           ) {
                             addExistingVMToUser(
                               parseInt(vmSearchExisting.split(" - ")[0]),

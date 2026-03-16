@@ -1,5 +1,6 @@
 "use client";
 
+import { VM } from "@/app/generated/prisma/client";
 import { authClient } from "@/lib/auth-client";
 import { getUser } from "@/lib/db/user";
 import { getTicket } from "@/lib/proxmox-api/ticket";
@@ -10,7 +11,6 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { VM } from "../generated/prisma/client";
 
 export default function VMsPage() {
   const [openVMs, setOpenVMs] = useState<string[]>([]);
@@ -40,9 +40,9 @@ export default function VMsPage() {
   }, [session?.user]);
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 pb-5 mt-3 h-[90vh] border border-base-300 rounded-md shadow-lg flex flex-col">
+    <div className="max-w-7xl mx-auto px-4 pb-5 mt-3 h-[90vh] border border-base-300 rounded-md shadow-lg flex flex-col">
       {/* Tab list */}
-      <div role="tablist" className="tabs tabs-bordered flex-shrink-0">
+      <div role="tablist" className="tabs tabs-bordered shrink-0">
         <button
           role="tab"
           className={`tab ${selectedTab === "open-new" ? "tab-active" : ""}`}
@@ -59,8 +59,8 @@ export default function VMsPage() {
           >
             <div className="flex items-center gap-2">
               <p className="my-auto text-xs">
-                {userVMs.find((vm) => vm.proxmoxId.toString() === vmId)
-                  ?.name || `VM ${vmId}`}
+                {userVMs.find((vm) => vm.proxmoxId.toString() === vmId)?.name ||
+                  `VM ${vmId}`}
               </p>
               <IconX
                 onClick={(e) => {
@@ -93,11 +93,7 @@ export default function VMsPage() {
               userVMs.map((vm) => (
                 <div
                   key={vm.id}
-                  className="card bg-base-100 shadow-md mb-4 w-64 h-64 flex flex-col justify-center p-4"
-                  style={{
-                    borderRadius: "0.375rem",
-                    border: "1px solid #4B5563",
-                  }}
+                  className="card bg-base-100 shadow-md mb-4 w-64 h-64 flex flex-col justify-center p-4 rounded-md border border-base-300"
                 >
                   <h2 className="text-lg font-semibold mb-2">
                     VM ID: {vm.proxmoxId}

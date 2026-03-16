@@ -1,13 +1,13 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
-import { getUserRoles } from "@/lib/user/roles";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import Logo1024 from "@/public/logo1024.png";
-import PhysicalJericho from "@/public/physical-jericho.png";
 import { LandingPage } from "@/components/home/landing-page";
 import { NavigationHub } from "@/components/home/navigation-hub";
+import { authClient } from "@/lib/auth-client";
+import { getUserRoles } from "@/lib/users/roles";
+import Logo1024 from "@/public/logo1024.png";
+import PhysicalJericho from "@/public/physical-jericho.png";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const { data, isPending } = authClient.useSession();

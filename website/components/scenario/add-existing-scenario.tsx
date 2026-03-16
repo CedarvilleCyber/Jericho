@@ -64,7 +64,9 @@ export default function AddExistingScenarioPage({
                         <div className="flex items-center gap-2">
                           {scenario.teaserImageURL ? (
                             <Image
-                              src={scenario.teaserImageURL ?? "/placeholder.png"}
+                              src={
+                                scenario.teaserImageURL ?? "/placeholder.png"
+                              }
                               alt={scenario.name}
                               width={48}
                               height={48}
@@ -109,7 +111,10 @@ export default function AddExistingScenarioPage({
               ))}
             </div>
             <div className="flex justify-end">
-              <button className="btn btn-primary" onClick={addSelectedScenarios}>
+              <button
+                className="btn btn-primary"
+                onClick={addSelectedScenarios}
+              >
                 <IconDeviceFloppy size={16} className="mr-1" />
                 Save
               </button>

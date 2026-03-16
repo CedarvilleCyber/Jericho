@@ -1,5 +1,5 @@
+import DeleteUserButton from "@/components/admin/delete-user";
 import RoleSelect from "@/components/admin/role-select";
-import ResetPasswordButton from "@/components/admin/reset-password";
 import VMsTabContent from "@/components/admin/vms-tab-content";
 import AddExistingScenarioPage from "@/components/scenario/add-existing-scenario";
 import EditUserScenario from "@/components/scenario/edit-user-scenario";
@@ -66,14 +66,14 @@ export default async function AdminUserPage({
           defaultChecked
         />
         <div role="tabpanel" className="tab-content py-4">
-          <ResetPasswordButton userId={user.id} />
-          <div className="flex flex-col gap-2 p-4 bg-neutral rounded-lg mt-4">
+          <div className="flex flex-col gap-2 p-4 bg-neutral rounded-lg">
             <label className="text-neutral-content">User Roles</label>
             <RoleSelect
               userId={user.id}
               initialRoles={user.userRoles.map((ur) => ur.role)}
             />
           </div>
+          <DeleteUserButton userId={user.id} />
         </div>
 
         <input

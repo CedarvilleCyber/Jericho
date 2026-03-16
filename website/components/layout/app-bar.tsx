@@ -1,5 +1,9 @@
 "use client";
 
+import ColorSchemeToggle from "@/components/color-scheme-toggle";
+import { authClient } from "@/lib/auth-client";
+import { getUserRoles } from "@/lib/users/roles";
+import logo from "@/public/logo256.png";
 import {
   IconDeviceDesktop,
   IconLogout,
@@ -7,13 +11,9 @@ import {
   IconShieldLock,
   IconUser,
 } from "@tabler/icons-react";
-import ColorSchemeToggle from "../color-scheme-toggle";
-import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
-import { getUserRoles } from "@/lib/user/roles";
-import { useEffect, useState } from "react";
 import Image from "next/image";
-import logo from "@/public/logo256.png";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function AppBar() {
   const { data } = authClient.useSession();
@@ -46,7 +46,10 @@ export default function AppBar() {
                 >
                   {data.user.image ? (
                     <div className="w-8 rounded-full">
-                      <img src={data.user.image} alt={data.user.name ?? "User"} />
+                      <img
+                        src={data.user.image}
+                        alt={data.user.name ?? "User"}
+                      />
                     </div>
                   ) : (
                     <div className="w-8 rounded-full bg-base-300 flex items-center justify-center">

@@ -1,5 +1,4 @@
 import EditUserButton from "@/components/admin/edit-user-button";
-import ResolvePasswordResetButton from "@/components/admin/resolve-password-reset-button";
 import ScenarioTriggers from "@/components/admin/scenario-triggers";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -30,19 +29,13 @@ export default async function AdminPage() {
     })
   ).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
-  const pendingResets = await prisma.passwordResetRequest.findMany({
-    where: { status: "PENDING" },
-    include: { user: true },
-    orderBy: { createdAt: "asc" },
-  });
-
   return (
     <div className="max-w-5xl mx-auto px-4">
       <h1 className="text-xl my-5">Admin Dashboard</h1>
 
       <div className="border border-base-300 shadow-lg rounded-md p-4 mb-4">
         <div className="overflow-auto max-h-[50vh]">
-          <table className="table" style={{ minWidth: 700 }}>
+          <table className="table min-w-175">
             <thead>
               <tr>
                 <th>Name</th>
@@ -56,9 +49,7 @@ export default async function AdminPage() {
                 <tr key={user.id}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
-                  <td>
-                    {user.userRoles.map((role) => role.role).join(", ")}
-                  </td>
+                  <td>{user.userRoles.map((role) => role.role).join(", ")}</td>
                   <td>
                     <EditUserButton userId={user.id} />
                   </td>
@@ -68,39 +59,6 @@ export default async function AdminPage() {
           </table>
         </div>
       </div>
-      {pendingResets.length > 0 && (
-        <div className="border border-base-300 shadow-lg rounded-md p-4 mb-4">
-          <h2 className="text-lg mb-3">Pending Password Reset Requests</h2>
-          <div className="overflow-auto">
-            <table className="table" style={{ minWidth: 500 }}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Requested</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingResets.map((req) => (
-                  <tr key={req.id}>
-                    <td>{req.user.name}</td>
-                    <td>{req.user.email}</td>
-                    <td>{req.createdAt.toLocaleDateString()}</td>
-                    <td>
-                      <ResolvePasswordResetButton
-                        requestId={req.id}
-                        userName={req.user.name}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
       <ScenarioTriggers />
     </div>
   );

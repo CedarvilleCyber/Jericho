@@ -1,7 +1,7 @@
 "use client";
 
-import { setUserScenarioVM } from "@/lib/scenarios/admin";
 import { VM } from "@/app/generated/prisma/browser";
+import { setUserScenarioVM } from "@/lib/scenarios/admin";
 import { useRef } from "react";
 
 export default function UserScenarioVMEditor({

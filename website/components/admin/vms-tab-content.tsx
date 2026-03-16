@@ -3,6 +3,7 @@
 import { User, VM } from "@/app/generated/prisma/client";
 import { ensureUserHasProxmoxId } from "@/lib/proxmox-api/user";
 import { addExistingVMToUser, cloneVMTemplateToUser } from "@/lib/vms/add";
+import { getFilteredVMs, ProxmoxVM } from "@/lib/vms/filter";
 import { deleteVMFromProxmox, removeVM } from "@/lib/vms/remove";
 import {
   IconDeviceFloppy,
@@ -17,7 +18,7 @@ export default function VMsTabContent({
   proxmoxVMs,
 }: {
   user: User & { vms: VM[] };
-  proxmoxVMs: Array<{ vmid: number; name: string; template: boolean }>;
+  proxmoxVMs: ProxmoxVM[];
 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [newVMName, setNewVMName] = useState("");
@@ -36,7 +37,10 @@ export default function VMsTabContent({
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(e.target as Node)
+      ) {
         setPopoverOpen(false);
       }
     }
@@ -46,34 +50,15 @@ export default function VMsTabContent({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [popoverOpen]);
 
-  const getFilteredVMs = (searchValue: string, templatesOnly: boolean) => {
-    const search = searchValue.toLowerCase().trim();
-    const parts = search.length
-      ? search.split(/\s+/).filter((p: string) => p.length > 2)
-      : [];
-
-    const filtered = proxmoxVMs.filter((vm) => {
-      if (templatesOnly && !vm.template) return false;
-      if (!search) return true;
-      const name = vm.name.toLowerCase();
-      const id = vm.vmid.toString();
-      if (parts.length > 0) {
-        return parts.some((p: string) => name.includes(p) || id.includes(p));
-      }
-      return name.includes(search) || id.includes(search);
-    });
-
-    filtered.sort((a, b) => a.vmid - b.vmid);
-    return filtered;
-  };
-
-  const filteredExisting = getFilteredVMs(vmSearchExisting, false);
-  const filteredTemplates = getFilteredVMs(vmSearchTemplate, true);
+  const filteredExisting = getFilteredVMs(proxmoxVMs, vmSearchExisting, false);
+  const filteredTemplates = getFilteredVMs(proxmoxVMs, vmSearchTemplate, true);
 
   return (
     <div className="flex flex-col">
       {user.vms.length === 0 ? (
-        <p className="text-base-content/60 mb-4">This user has no VMs assigned.</p>
+        <p className="text-base-content/60 mb-4">
+          This user has no VMs assigned.
+        </p>
       ) : (
         <table className="table mb-2">
           <thead>
@@ -90,8 +75,7 @@ export default function VMsTabContent({
                 <td>
                   {
                     proxmoxVMs.find(
-                      (pvm) =>
-                        pvm.vmid.toString() === vm.proxmoxId.toString(),
+                      (pvm) => pvm.vmid.toString() === vm.proxmoxId.toString(),
                     )?.name
                   }
                 </td>

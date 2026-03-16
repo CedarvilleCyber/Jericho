@@ -26,6 +26,7 @@ function SignInForm() {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [signUpEmail, setSignUpEmail] = useState("");
   const router = useRouter();
 
   const [showResetForm, setShowResetForm] = useState(false);
@@ -44,7 +45,7 @@ function SignInForm() {
     setResetLoading(false);
     // Always show the same message to avoid user enumeration
     setResetMessage(
-      "If an account with that email exists, a reset link has been sent."
+      "If an account with that email exists, a reset link has been sent.",
     );
     setResetEmail("");
   };
@@ -72,7 +73,7 @@ function SignInForm() {
         if (result.error) {
           setError(result.error.message || "Failed to sign up");
         } else {
-          router.push("/");
+          setSignUpEmail(email);
         }
       } else {
         const isEmail = emailOrUsername.includes("@");
@@ -99,6 +100,31 @@ function SignInForm() {
       setLoading(false);
     }
   };
+
+  if (signUpEmail) {
+    return (
+      <div className="max-w-sm mx-auto px-4 flex min-h-screen items-center justify-center py-12">
+        <div className="card bg-base-100 border border-base-300 shadow-md w-full">
+          <div className="card-body p-6 text-center flex flex-col gap-4">
+            <h2 className="text-2xl font-bold">Check your email</h2>
+            <p className="text-sm text-base-content/60">
+              We sent a verification link to{" "}
+              <span className="font-medium text-base-content">
+                {signUpEmail}
+              </span>
+              . Click it to activate your account.
+            </p>
+            <p className="text-xs text-base-content/40">
+              Didn&apos;t get it? Check your spam folder.
+            </p>
+            <a href="/sign-in" className="btn btn-ghost btn-sm">
+              Back to sign in
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-sm mx-auto px-4 flex min-h-screen items-center justify-center py-12">
@@ -140,7 +166,9 @@ function SignInForm() {
                   <label className="form-control">
                     <div className="label">
                       <span className="label-text">Username</span>
-                      <span className="label-text-alt text-base-content/30">Optional</span>
+                      <span className="label-text-alt text-base-content/30">
+                        Optional
+                      </span>
                     </div>
                     <input
                       className="input input-bordered w-full"
@@ -296,7 +324,9 @@ function SignInForm() {
 
             <div className="flex justify-center gap-2">
               <p className="text-sm text-base-content/60">
-                {isSignUp ? "Already have an account?" : "Don't have an account?"}
+                {isSignUp
+                  ? "Already have an account?"
+                  : "Don't have an account?"}
               </p>
               <button
                 className="link text-sm"

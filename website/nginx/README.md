@@ -18,16 +18,18 @@ Ensure that the following lines are in your hosts file:
 127.0.0.1 pve.jericho.local
 ```
 
-__NOTE__: You will have to visit both the sites outside of an iframe to get rid of the self-signed cert message.
+**NOTE**: You will have to visit both the sites outside of an iframe to get rid of the self-signed cert message.
 
 ### Usage
 
 1. Start your Next.js development server:
+
    ```bash
    bun dev
    ```
 
 2. Start the nginx reverse proxy:
+
    ```bash
    cd nginx
    docker compose up -d
@@ -46,6 +48,7 @@ docker compose down
 ### Logs
 
 View nginx logs:
+
 ```bash
 docker compose logs -f
 ```

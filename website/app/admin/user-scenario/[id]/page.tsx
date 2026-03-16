@@ -1,6 +1,6 @@
+import UserScenarioVMEditor from "@/components/admin/vm-editor";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import UserScenarioVMEditor from "./vm-editor";
 
 export default async function UserScenarioPage({
   params,

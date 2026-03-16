@@ -1,9 +1,9 @@
+import NuclearPlant from "@/public/nuclear-plant.png";
+import TrafficLight from "@/public/traffic-light.png";
+import WaterTreatment from "@/public/water-treatment.png";
 import { IconArrowRight } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
-import TrafficLight from "@/public/traffic-light.png";
-import WaterTreatment from "@/public/water-treatment.png";
-import NuclearPlant from "@/public/nuclear-plant.png";
 
 export function LandingPage() {
   const scenarios = [

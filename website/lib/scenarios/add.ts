@@ -1,12 +1,17 @@
 "use server";
 
+import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import prisma from "../prisma";
 
 export async function addVMToScenario(formData: FormData) {
-  const vmId = formData.get("vmId") as string;
-  const scenarioId = formData.get("scenarioId") as string;
-  const userId = formData.get("userId") as string;
+  const vmId = formData.get("vmId");
+  if (typeof vmId !== "string" || !vmId) throw new Error("Missing vmId");
+  const scenarioId = formData.get("scenarioId");
+  if (typeof scenarioId !== "string" || !scenarioId)
+    throw new Error("Missing scenarioId");
+  const userId = formData.get("userId");
+  if (typeof userId !== "string" || !userId) throw new Error("Missing userId");
+
   await prisma.userScenario.update({
     where: {
       userId_scenarioId: {
@@ -18,19 +23,23 @@ export async function addVMToScenario(formData: FormData) {
       vmId,
     },
   });
-  
+
   revalidatePath(`/me/scenarios/${scenarioId}`);
 }
 
 export async function addExistingScenarioToUser(formData: FormData) {
-  const scenarioId = formData.get("scenarioId") as string;
-  const userId = formData.get("userId") as string;
+  const scenarioId = formData.get("scenarioId");
+  if (typeof scenarioId !== "string" || !scenarioId)
+    throw new Error("Missing scenarioId");
+  const userId = formData.get("userId");
+  if (typeof userId !== "string" || !userId) throw new Error("Missing userId");
+
   await prisma.userScenario.create({
     data: {
       userId,
       scenarioId,
     },
   });
-  
+
   revalidatePath(`/admin/users`);
 }

@@ -86,7 +86,11 @@ function ResetPasswordForm() {
 
         {error && <p className="text-sm text-error">{error}</p>}
 
-        <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+        <button
+          type="submit"
+          className="btn btn-primary w-full"
+          disabled={loading}
+        >
           {loading && <span className="loading loading-spinner loading-xs" />}
           Set New Password
         </button>
@@ -107,7 +111,11 @@ export default function ResetPasswordPage() {
                 Enter your new password below.
               </p>
             </div>
-            <Suspense fallback={<span className="loading loading-spinner loading-sm mx-auto" />}>
+            <Suspense
+              fallback={
+                <span className="loading loading-spinner loading-sm mx-auto" />
+              }
+            >
               <ResetPasswordForm />
             </Suspense>
           </div>

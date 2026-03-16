@@ -1,5 +1,5 @@
-import Image from "next/image";
 import team0Poster from "@/images/team0-poster.jpg";
+import Image from "next/image";
 
 export default function AboutPage() {
   return (

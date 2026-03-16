@@ -19,12 +19,17 @@ export async function sendEmail({
   subject: string;
   html: string;
 }) {
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM,
-    to,
-    subject,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to,
+      subject,
+      html,
+    });
+  } catch (err) {
+    console.error("[email] Failed to send email to", to, err);
+    throw new Error("Failed to send email. Please try again later.");
+  }
 }
 
 export function verificationEmailHtml({
@@ -38,7 +43,6 @@ export function verificationEmailHtml({
   body: string;
   buttonLabel: string;
 }): string {
-  // const logoUrl = `${process.env.BETTER_AUTH_URL}/logo256.png`;
   const logoUrl = `https://raw.githubusercontent.com/CedarvilleCyber/Jericho/main/website/public/logo256.png`;
 
   return `<!DOCTYPE html>
