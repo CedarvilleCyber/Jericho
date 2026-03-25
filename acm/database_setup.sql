@@ -16,18 +16,14 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Step 4: Insert sample users (passwords are hashed using PHP password_hash())
--- Note: These hashes were generated with password_hash() function
--- Plain password -> Hash
--- 'dragon' -> $2y$10$dXJ2aWxs...
--- 'the-man-the-myth-the-legend' -> $2y$10$a21tdml...
--- etc.
+-- Step 4: Insert users with hashed passwords (using bcrypt)
 INSERT INTO users (id, username, password, role) VALUES
-(1, 'ewilliams', '$2y$10$dXJ2aWxscVdsZ1VRVnEwMuxLTVlsOW8DryAD.RotFV5i.A8kjiNe6', 'admin'),
-(2, 'kmitnick', '$2y$10$a21tdmlURUN0TlZDTUFYHOZvNXzZxEa1r6cxLgXc6tNt4hEuUC3IG', 'admin'),
-(3, 'john', '$2y$10$MTMyMzAwMzAwMA4PGudY0bGmB5o8NZlFkdJ6L2xfZzzUF3jZW', 'user'),
-(4, 'alice', '$2y$10$QldlcnR5V2FzSGFzaGVk0kc0o9d5RqQT9x.wKXKsZzA5rK7zC2M4.', 'user'),
-(5, 'bob', '$2y$10$bGV0bWVpbkhhc2hlZGhl0pM7rN2x8yZ0aL3v6D1F9j2sK4x.W3zUK', 'user');
+(1, 'ewilliams', '$2y$10$T2Lc9jzfnNsokbJxZxiyUe7Q9r6d1Ovrrks7x9imv0xnlmNmCOZ2C', 'admin'),
+(2, 'kmitnick', '$2y$10$rq6xz8IHVpfIyW0gutmBv.oStIpXB8YualIo6jlsusgXEQIVSdCB.', 'admin'),
+(3, 'john', '$2y$10$hzmuDH/jn1n2pRN1HLVIeuTigRX8ucyWaSgEXddiUg9JZJos5LDwi', 'user'),
+(4, 'alice', '$2y$10$C7Ly8k2sgF1T2UMMWhZJA./ObWMnfLQypJ0WaaPvDbopdZUvtXQ/y', 'user'),
+(5, 'bob', '$2y$10$mO3dZKwdk80.JW9bWs28VOkL.94K35jkTxznbbq1IOBY0/AF0sz9u', 'user'),
+(6, 'charlie', '$2y$10$SYjruV1uG7SLuLPF5b2.X.GtyhFkpqHmhfPbNGa1mWT1aYhmtmXhO', 'user');
 
 -- To run these commands:
 -- 1. Open MySQL command line:
@@ -37,7 +33,14 @@ INSERT INTO users (id, username, password, role) VALUES
 --    sudo mysql -u root < database_setup.sql
 --
 -- 3. Verify the table was created:
---    USE acm;
+--    USE traffic_db;
 --    SELECT * FROM users;
 --
--- 4. Update config.php with your actual database credentials
+-- SETTING UP THE WEBSITE USER:
+-- 4. Create a user for the website: 
+--    create user 'webuser'@'localhost' identified by 'webpassword';
+-- 
+-- 5. Grant permissions to the user:
+--    grant all privileges on traffic_db.* TO 'webuser'@'localhost';
+-- 
+-- 6. Update config.php with your actual database credentials

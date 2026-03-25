@@ -13,7 +13,11 @@ $loggedIn = !empty($_SESSION['user']);
 
   <ul class="nav nav-pills">
     <?php if ($loggedIn): ?>
-      <li class="nav-item"><a href="./admin.php" class="nav-link">Admin</a></li>
+      <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+        <li class="nav-item"><a href="./admin.php" class="nav-link">Admin</a></li>
+      <?php endif; ?>
+
+      <li class="nav-item"><a href="./about.php" class="nav-link">About</a></li>
       <li class="nav-item"><a href="./month.php" class="nav-link">Employee of the Month</a></li>
 
       <li class="nav-item dropdown">

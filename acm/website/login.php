@@ -9,28 +9,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $_POST['username'];
     $pass = $_POST['password'];
 
-    // ============================================
-    // THIS IS THE SECURE APPROACH (commented out):
-    // ============================================
-    // $stmt = $connection->prepare("SELECT id, username, password FROM users WHERE username = ? AND password = ?");
-    // $stmt->bind_param("ss", $user, $pass);
-    // $stmt->execute();
-    // $result = $stmt->get_result();
-    // VULNERABILITY PREVENTED: Prepared statements separate SQL code from data
-    // ============================================
-
-    // VULNERABLE: Direct string concatenation allows SQL injection
-    $query = "SELECT id, username, password FROM users WHERE username = '" . $user . "' AND password = '" . $pass . "'";
-    $result = $connection->query($query);
+    // Query the database for the user by username only using prepared statement
+    $stmt = $connection->prepare("SELECT id, username, password, role FROM users WHERE username = ?");
+    $stmt->bind_param("s", $user);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result && $result->num_rows === 1) {
         $row = $result->fetch_assoc();
-        // Verify the hashed password
+        // Verify the hashed password using password_verify
         if (password_verify($pass, $row['password'])) {
             // Store login flag in session
             $_SESSION['authenticated'] = true;
             $_SESSION['user'] = $row['username'];
             $_SESSION['user_id'] = $row['id'];
+            $_SESSION['role'] = $row['role'];
             $redirect = $_SESSION['intended_destination'] ?? 'index.php';
             unset($_SESSION['intended_destination']);
             header("Location: $redirect");
@@ -43,6 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     else {
         $error = "INVALID LOGIN";
     }
+    
+    $stmt->close();
 }
 ?>
 
