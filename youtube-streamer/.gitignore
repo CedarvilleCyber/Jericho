@@ -1,0 +1,6 @@
+token.json
+client_secrets.json
+stream_key.txt
+venv/
+__pycache__/
+*.pyc

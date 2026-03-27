@@ -1,4 +1,0 @@
-[submodule "ludus-configs"]
-	path = ludus-configs
-	url = git@github.com:CedarvilleCyber/ludus-configurations.git
-	branch = main
