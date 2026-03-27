@@ -1,7 +1,7 @@
 <?php
 // login.php
 session_start();
-include 'config.php';
+require_once('config.php');
 
 $error = null;
 
@@ -17,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result && $result->num_rows === 1) {
         $row = $result->fetch_assoc();
-        // Verify the hashed password using password_verify
-        if (password_verify($pass, $row['password'])) {
+        // Verify the SHA256 hashed password
+        if (hash('sha256', $pass) === $row['password']) {
             // Store login flag in session
             $_SESSION['authenticated'] = true;
             $_SESSION['user'] = $row['username'];

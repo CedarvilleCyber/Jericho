@@ -18,12 +18,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Step 4: Insert users with hashed passwords (using bcrypt)
 INSERT INTO users (id, username, password, role) VALUES
-(1, 'ewilliams', '$2y$10$T2Lc9jzfnNsokbJxZxiyUe7Q9r6d1Ovrrks7x9imv0xnlmNmCOZ2C', 'admin'),
-(2, 'kmitnick', '$2y$10$rq6xz8IHVpfIyW0gutmBv.oStIpXB8YualIo6jlsusgXEQIVSdCB.', 'admin'),
-(3, 'john', '$2y$10$hzmuDH/jn1n2pRN1HLVIeuTigRX8ucyWaSgEXddiUg9JZJos5LDwi', 'user'),
-(4, 'alice', '$2y$10$C7Ly8k2sgF1T2UMMWhZJA./ObWMnfLQypJ0WaaPvDbopdZUvtXQ/y', 'user'),
-(5, 'bob', '$2y$10$mO3dZKwdk80.JW9bWs28VOkL.94K35jkTxznbbq1IOBY0/AF0sz9u', 'user'),
-(6, 'charlie', '$2y$10$SYjruV1uG7SLuLPF5b2.X.GtyhFkpqHmhfPbNGa1mWT1aYhmtmXhO', 'user');
+(1, 'ewilliams', 'a9c43be948c5cabd56ef2bacffb77cdaa5eec49dd5eb0cc4129cf3eda5f0e74c', 'admin'),
+(2, 'kmitnick', '4361ffda554aed737a9ea5f7ceb18de1c7414bb5815e48f0dff125887082882a', 'admin'),
+(3, 'john', 'a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea', 'user'),
+(4, 'alice', '65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5', 'user'),
+(5, 'bob', '9c6e703a0da1cca451369d142fda941e5002aeba7db21f4d6d9e8e7aa3f85cc1', 'user'),
+(6, 'charlie', 'aad91bc51e670d575d2238b9fedd4d5964fe503ae3d06ffcfdfa8c8e1df6a6f5', 'user');
 
 -- To run these commands:
 -- 1. Open MySQL command line:
