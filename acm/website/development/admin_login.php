@@ -14,11 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     
-    // VULNERABLE: Building SQL query with string concatenation
-    // This is susceptible to SQL injection attacks
-    // A student might try: ' OR '1'='1
-    // Or: admin' --
-    $query = "SELECT * FROM users WHERE username='" . $username . "' AND password='" . $password . "'";
+    $query = "SELECT * FROM users WHERE username='" . $username . "' AND password=SHA2('" . $password . "', 256)";
     
     // Execute actual query on the database
     $result = $connection->query($query);
