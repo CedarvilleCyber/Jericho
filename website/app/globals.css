@@ -1,7 +1,0 @@
-@import "tailwindcss";
-@import "@daveyplate/better-auth-ui/css";
-@plugin "daisyui" {
-  themes:
-    corporate --default,
-    business --prefersdark;
-}
