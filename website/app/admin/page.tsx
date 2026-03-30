@@ -3,7 +3,9 @@ import EditUserButton from "@/components/admin/edit-user-button";
 import ScenarioTriggers from "@/components/admin/scenario-triggers";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
@@ -34,7 +36,12 @@ export default async function AdminPage() {
     <div className="max-w-5xl mx-auto px-4">
       <div className="flex items-center justify-between my-5">
         <h1 className="text-xl">Admin Dashboard</h1>
-        <BulkCreateUsers />
+        <div className="flex gap-2">
+          <BulkCreateUsers />
+          <Link href={"/admin/scenarios"} className="btn btn-primary">
+            <IconExternalLink /> Manage Scenarios
+          </Link>
+        </div>
       </div>
 
       <div className="border border-base-300 shadow-lg rounded-md p-4 mb-4">

@@ -1,7 +1,10 @@
 import AddExistingVMToScenarioPage from "@/components/scenario/add-existing-vm";
+import QuestionsPanel from "@/components/scenario/questions-panel";
+import TopologyViewer from "@/components/scenario/topology-viewer";
 import PVEViewer from "@/components/view/pve-viewer";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { parseTopology } from "@/lib/scenarios/topology-types";
 import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
 import Image from "next/image";
@@ -37,7 +40,16 @@ export default async function ScenarioLabPage({
         where: { userId: session.user.id },
         include: { vm: true },
       },
-      questions: true,
+      questions: {
+        include: {
+          userAnswers: { where: { userId: session.user.id } },
+          section: true,
+        },
+        orderBy: { order: "asc" },
+      },
+      sections: {
+        orderBy: { order: "asc" },
+      },
     },
   });
   if (!scenario) {
@@ -73,7 +85,7 @@ export default async function ScenarioLabPage({
               <div role="tabpanel" className="tab-content py-4">
                 <p>{scenario.description}</p>
               </div>
-              {scenario.topologyURL && (
+              {(scenario.topology || scenario.topologyURL) && (
                 <>
                   <input
                     type="radio"
@@ -83,12 +95,20 @@ export default async function ScenarioLabPage({
                     aria-label="Topology"
                   />
                   <div role="tabpanel" className="tab-content py-4">
-                    <Image
-                      src={scenario.topologyURL}
-                      alt={`${scenario.name} topology`}
-                      width={800}
-                      height={600}
-                    />
+                    {scenario.topology && scenario.userScenarios[0] ? (
+                      <TopologyViewer
+                        topology={parseTopology(scenario.topology)}
+                        hintsUsed={scenario.userScenarios[0].hintsUsed}
+                        userScenarioId={scenario.userScenarios[0].id}
+                      />
+                    ) : scenario.topologyURL ? (
+                      <Image
+                        src={scenario.topologyURL}
+                        alt={`${scenario.name} topology`}
+                        width={800}
+                        height={600}
+                      />
+                    ) : null}
                   </div>
                 </>
               )}
@@ -101,7 +121,22 @@ export default async function ScenarioLabPage({
                     className="tab"
                     aria-label="Questions"
                   />
-                  <div role="tabpanel" className="tab-content py-4"></div>
+                  <div role="tabpanel" className="tab-content">
+                    <QuestionsPanel
+                      questions={scenario.questions}
+                      sections={scenario.sections}
+                      userAnswers={scenario.questions.flatMap((q) => q.userAnswers)}
+                      correctQuestionIds={scenario.questions
+                        .filter((q) => {
+                          const ua = q.userAnswers[0];
+                          if (!ua) return false;
+                          if (q.type === "NUMERIC")
+                            return parseFloat(ua.answer.trim()) === parseFloat(q.answer.trim());
+                          return ua.answer.trim() === q.answer.trim();
+                        })
+                        .map((q) => q.id)}
+                    />
+                  </div>
                 </>
               )}
               <input
