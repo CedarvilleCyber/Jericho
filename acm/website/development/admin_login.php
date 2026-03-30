@@ -1,6 +1,6 @@
 <?php
 // This page is named admin_login because "admin_login" is an entry in the wordlist
-// the students covered in class, which is /usr/share/wordlists/dirb/common.txt
+// the students covered in class, which is /usr/share/seclists/Discovery/Web-Content/common.txt
 
 session_start();
 
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Development - Admin Login (VULNERABLE)</title>
+        <title>Development - Admin Login</title>
         <link rel="stylesheet" href="../css/mdb.min.css">
         <link rel="stylesheet" href="../css/login.css">
         <script src="../js/mdb.umd.min.js" defer></script>
