@@ -131,17 +131,30 @@ model Scenario {
   updatedAt DateTime @updatedAt
 
   topologyURL        String?
+  topology           Json?
   slug               String         @unique
   teaserText         String?
   teaserImageURL     String?
   youtubeChannelId   String?
   learningObjectives String?
   questions          Question[]
+  sections           Section[]
   // We will need to add something here to signify what Ludus API call
-  // this will be associated with. 
+  // this will be associated with.
   userScenarios      UserScenario[]
 
   @@map("scenario")
+}
+
+model Section {
+  id         String     @id @default(cuid())
+  title      String
+  order      Int
+  scenarioId String
+  scenario   Scenario   @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  questions  Question[]
+
+  @@map("section")
 }
 
 model UserScenario {
@@ -156,24 +169,40 @@ model UserScenario {
   vm          VM?       @relation(fields: [vmId], references: [id], onDelete: SetNull)
   startedAt   DateTime  @default(now())
   completedAt DateTime?
+  hintsUsed   Int       @default(0)
 
   @@unique([userId, scenarioId])
   @@map("user_scenario")
 }
 
+enum QuestionType {
+  TEXT
+  LONG_TEXT
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  NUMERIC
+  ORDERING
+}
+
 model Question {
-  id              String  @id @default(cuid())
+  id              String       @id @default(cuid())
   title           String
   placeholder     String
   validationRegex String?
   answer          String
-  pointValue      Int     @default(10)
+  pointValue      Int          @default(10)
+  type            QuestionType @default(TEXT)
+  options         String?
+  order           Int          @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   scenarioId String
   scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  sectionId String?
+  section   Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
 
   competencies Competency[]
   userAnswers  UserAnswer[]
