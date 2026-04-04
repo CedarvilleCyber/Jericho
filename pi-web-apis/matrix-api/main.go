@@ -3,125 +3,276 @@ Description:
 This api is meant to be run on the pi controlling the matricies onto of the data
 center. The api allows calls to be made to enact affects on the matrix
 
+Build command: env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o matrix-api main.go
 */
-
 package main
 
 import (
 	"fmt"
 	// "net/http"
-	// github.com/gin-gonic/gin
+	//"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"periph.io/x/conn/v3/gpio"
+	"periph.io/x/conn/v3/physic"
+	"periph.io/x/conn/v3/spi"
+	"periph.io/x/conn/v3/spi/spireg"
+	"periph.io/x/host/v3"
+	"periph.io/x/host/v3/rpi"
 )
 
+// map to get bytes for a letter easily
 var matrix_font = map[rune][8]byte{
 	'A': {0x18, 0x24, 0x42, 0x7E, 0x42, 0x42, 0x42, 0x00},
-	'B': {0x7C, 0x42, 0x42, 0x7C, 0x42, 0x42, 0x7C, 0x00},
-	'C': {0x3C, 0x42, 0x40, 0x40, 0x40, 0x42, 0x3C, 0x00},
-	'D': {0x78, 0x44, 0x42, 0x42, 0x42, 0x44, 0x78, 0x00},
-	'E': {0x7E, 0x40, 0x40, 0x7C, 0x40, 0x40, 0x7E, 0x00},
-	'F': {0x7E, 0x40, 0x40, 0x7C, 0x40, 0x40, 0x40, 0x00},
-	'G': {0x3C, 0x42, 0x40, 0x4E, 0x42, 0x42, 0x3C, 0x00},
+	'B': {0x3E, 0x42, 0x42, 0x3E, 0x42, 0x42, 0x3E, 0x00},
+	'C': {0x3C, 0x42, 0x02, 0x02, 0x02, 0x42, 0x3C, 0x00},
+	'D': {0x1E, 0x22, 0x42, 0x42, 0x42, 0x22, 0x1E, 0x00},
+	'E': {0x7E, 0x02, 0x02, 0x3E, 0x02, 0x02, 0x7E, 0x00},
+	'F': {0x7E, 0x02, 0x02, 0x3E, 0x02, 0x02, 0x02, 0x00},
+	'G': {0x3C, 0x42, 0x02, 0x72, 0x42, 0x42, 0x3C, 0x00},
 	'H': {0x42, 0x42, 0x42, 0x7E, 0x42, 0x42, 0x42, 0x00},
-	'I': {0x3E, 0x08, 0x08, 0x08, 0x08, 0x08, 0x3E, 0x00},
-	'J': {0x1E, 0x04, 0x04, 0x04, 0x44, 0x44, 0x38, 0x00},
-	'K': {0x42, 0x44, 0x48, 0x70, 0x48, 0x44, 0x42, 0x00},
-	'L': {0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x7E, 0x00},
+	'I': {0x7C, 0x10, 0x10, 0x10, 0x10, 0x10, 0x7C, 0x00},
+	'J': {0x78, 0x20, 0x20, 0x20, 0x22, 0x22, 0x1C, 0x00},
+	'K': {0x42, 0x22, 0x12, 0x0E, 0x12, 0x22, 0x42, 0x00},
+	'L': {0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x7E, 0x00},
 	'M': {0x42, 0x66, 0x5A, 0x5A, 0x42, 0x42, 0x42, 0x00},
-	'N': {0x42, 0x62, 0x52, 0x4A, 0x46, 0x42, 0x42, 0x00},
+	'N': {0x42, 0x46, 0x4A, 0x52, 0x62, 0x42, 0x42, 0x00},
 	'O': {0x3C, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3C, 0x00},
-	'P': {0x7C, 0x42, 0x42, 0x7C, 0x40, 0x40, 0x40, 0x00},
-	'Q': {0x3C, 0x42, 0x42, 0x42, 0x4A, 0x44, 0x3A, 0x00},
-	'R': {0x7C, 0x42, 0x42, 0x7C, 0x48, 0x44, 0x42, 0x00},
-	'S': {0x3C, 0x42, 0x40, 0x3C, 0x02, 0x42, 0x3C, 0x00},
-	'T': {0x7E, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00},
+	'P': {0x3E, 0x42, 0x42, 0x3E, 0x02, 0x02, 0x02, 0x00},
+	'Q': {0x3C, 0x42, 0x42, 0x42, 0x52, 0x22, 0x5C, 0x00},
+	'R': {0x3E, 0x42, 0x42, 0x3E, 0x12, 0x22, 0x42, 0x00},
+	'S': {0x3C, 0x42, 0x02, 0x3C, 0x40, 0x42, 0x3C, 0x00},
+	'T': {0x7E, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x00},
 	'U': {0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3C, 0x00},
 	'V': {0x42, 0x42, 0x42, 0x42, 0x42, 0x24, 0x18, 0x00},
 	'W': {0x42, 0x42, 0x42, 0x5A, 0x5A, 0x66, 0x42, 0x00},
 	'X': {0x42, 0x24, 0x18, 0x18, 0x18, 0x24, 0x42, 0x00},
-	'Y': {0x42, 0x24, 0x18, 0x18, 0x10, 0x10, 0x10, 0x00},
-	'Z': {0x7E, 0x04, 0x08, 0x10, 0x20, 0x40, 0x7E, 0x00},
+	'Y': {0x42, 0x24, 0x18, 0x18, 0x08, 0x08, 0x08, 0x00},
+	'Z': {0x7E, 0x20, 0x10, 0x08, 0x04, 0x02, 0x7E, 0x00},
 
-	'0': {0x3C, 0x42, 0x46, 0x4A, 0x52, 0x62, 0x3C, 0x00},
-	'1': {0x08, 0x18, 0x08, 0x08, 0x08, 0x08, 0x1C, 0x00},
-	'2': {0x3C, 0x42, 0x02, 0x0C, 0x30, 0x40, 0x7E, 0x00},
-	'3': {0x3C, 0x42, 0x02, 0x1C, 0x02, 0x42, 0x3C, 0x00},
-	'4': {0x04, 0x0C, 0x14, 0x24, 0x7E, 0x04, 0x04, 0x00},
-	'5': {0x7E, 0x40, 0x7C, 0x02, 0x02, 0x42, 0x3C, 0x00},
-	'6': {0x3C, 0x40, 0x7C, 0x42, 0x42, 0x42, 0x3C, 0x00},
-	'7': {0x7E, 0x02, 0x04, 0x08, 0x10, 0x10, 0x10, 0x00},
+	'0': {0x3C, 0x42, 0x62, 0x52, 0x4A, 0x46, 0x3C, 0x00},
+	'1': {0x10, 0x18, 0x10, 0x10, 0x10, 0x10, 0x38, 0x00},
+	'2': {0x3C, 0x42, 0x40, 0x30, 0x0C, 0x02, 0x7E, 0x00},
+	'3': {0x3C, 0x42, 0x40, 0x38, 0x40, 0x42, 0x3C, 0x00},
+	'4': {0x20, 0x30, 0x28, 0x24, 0x7E, 0x20, 0x20, 0x00},
+	'5': {0x7E, 0x02, 0x3E, 0x40, 0x40, 0x42, 0x3C, 0x00},
+	'6': {0x3C, 0x02, 0x3E, 0x42, 0x42, 0x42, 0x3C, 0x00},
+	'7': {0x7E, 0x40, 0x20, 0x10, 0x08, 0x08, 0x08, 0x00},
 	'8': {0x3C, 0x42, 0x42, 0x3C, 0x42, 0x42, 0x3C, 0x00},
-	'9': {0x3C, 0x42, 0x42, 0x3E, 0x02, 0x42, 0x3C, 0x00},
+	'9': {0x3C, 0x42, 0x42, 0x7C, 0x40, 0x42, 0x3C, 0x00},
 
-	'!': {0x08, 0x08, 0x08, 0x08, 0x08, 0x00, 0x08, 0x00},
-	'?': {0x3C, 0x42, 0x02, 0x0C, 0x10, 0x00, 0x10, 0x00},
+	'!': {0x10, 0x10, 0x10, 0x10, 0x10, 0x00, 0x10, 0x00},
+	'?': {0x3C, 0x42, 0x40, 0x30, 0x08, 0x00, 0x08, 0x00},
 }
+
+var CS_PINS = []gpio.PinOut{
+	rpi.P1_29, // GPIO05
+	rpi.P1_31, // GPIO6
+	rpi.P1_33, // GPIO13
+	rpi.P1_35, // GPIO19
+	rpi.P1_37, // GPIO26
+	rpi.P1_32, // GPIO12
+	rpi.P1_36, // GPIO16
+	rpi.P1_40, // GPIO21
+}
+
+var CLEAR = [8]byte{0, 0, 0, 0, 0, 0, 0, 0}
+
+var spiConn spi.Conn
+var spiMutex sync.Mutex
+
+var idleRunning bool = true
 
 func main() {
-	// router := gin.Default()
-	// router.GET("/")
+	// Initialize periph.io host (required for hardware access)
+	if _, err := host.Init(); err != nil {
+		fmt.Printf("Failed to initialize host: %v\n", err)
+		return
+	}
 
-	test := matrix_font['a']
+	var err error
 
-	fmt.Println(test)
+	p, err := spireg.Open("")
+	if err != nil {
+		fmt.Printf("Failed to register spi: %v\n", err)
+		return
+	}
+	defer p.Close()
 
-	// router.Run("localhost:8080")
+	spiConn, err = p.Connect(10*physic.MegaHertz, spi.Mode0, 8)
+	if err != nil {
+		fmt.Printf("Failed to open SPI: %v\n", err)
+		return
+	}
 
-}
+	// Initialize GPIO pins as outputs and set high (matches Python's GPIO setup)
+	for _, pin := range CS_PINS {
+		if err := pin.Out(gpio.High); err != nil {
+			fmt.Printf("Failed to set GPIO pin: %v\n", err)
+			return
+		}
+	}
 
-func centerGlyph(glyph [8]byte) [8]byte {
-	minCol := 7
-	maxCol := 0
-
-	// Find bounding box
-	for _, row := range glyph {
-		for col := 0; col < 8; col++ {
-			if (row>>col)&1 == 1 {
-				if col < minCol {
-					minCol = col
-				}
-				if col > maxCol {
-					maxCol = col
-				}
+	// Start idle loop in goroutine
+	go func() {
+		for {
+			if idleRunning {
+				idle()
+			} else {
+				time.Sleep(time.Second)
 			}
 		}
-	}
+	}()
 
-	width := maxCol - minCol + 1
-	offset := (8 - width) / 2
+	router := gin.Default()
 
-	var centered [8]byte
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
-	for i, row := range glyph {
-		trimmed := (row >> minCol) & ((1 << width) - 1)
-		centered[i] = trimmed << offset
-	}
+	router.POST("/idle/start", func(c *gin.Context) {
+		idleRunning = true
+		c.JSON(200, gin.H{"message": "idle started"})
+	})
 
-	return centered
+	router.POST("/idle/stop", func(c *gin.Context) {
+		idleRunning = false
+		clearAll()
+		c.JSON(200, gin.H{"message": "idle stopped"})
+	})
+
+	router.Run("0.0.0.0:8080")
 }
-func toHexString(glyph [8]byte) string {
-	result := ""
-	for i, row := range glyph {
-		result += fmt.Sprintf("%02x", row)
-		if i != 7 {
-			result += " "
+
+func send_data(matrix, row int, pattern byte, color string) {
+	spiMutex.Lock()
+	defer spiMutex.Unlock()
+
+	// Pull CE low
+	CS_PINS[matrix].Out(gpio.Low)
+
+	red := colorMask(pattern, strings.Contains(color, "R"))
+	blue := colorMask(pattern, strings.Contains(color, "B"))
+	green := colorMask(pattern, strings.Contains(color, "G"))
+
+	data := []byte{
+		red,
+		blue,
+		green,
+		byte(1 << row),
+	}
+
+	if err := spiConn.Tx(data, nil); err != nil {
+		fmt.Printf("SPI transmit error: %v\n", err)
+		return
+	}
+
+	CS_PINS[matrix].Out(gpio.High)
+}
+
+func colorMask(pattern byte, enabled bool) byte {
+	if enabled {
+		return ^pattern & 0xFF
+	}
+	return 0xFF
+}
+
+func clearMatrix(matrix int) {
+	for row := 0; row < 8; row++ {
+		send_data(matrix, row, CLEAR[row], "")
+	}
+}
+
+func clearAll() {
+	for matrix := 0; matrix < 8; matrix++ {
+		clearMatrix(matrix)
+	}
+}
+
+func idle() {
+	text := "JERICHO!"
+	display := make([][8]byte, len(text))
+	for i, char := range text {
+		display[i] = matrix_font[rune(char)]
+	}
+	start := time.Now()
+	for time.Since(start) < time.Second {
+		for row := 0; row < 8; row++ {
+			send_data(0, row, display[0][row], "B")
 		}
 	}
-	return result
-}
-
-func buildFontMap() map[rune]string {
-	result := make(map[rune]string)
-
-	for char, glyph := range matrix_font {
-		centered := centerGlyph(glyph)
-		result[char] = toHexString(centered)
+	start = time.Now()
+	for time.Since(start) < time.Second {
+		for row := 0; row < 8; row++ {
+			send_data(0, row, display[0][row], "B")
+			send_data(1, row, display[1][row], "B")
+		}
 	}
-
-	return result
+	start = time.Now()
+	for time.Since(start) < time.Second {
+		for row := 0; row < 8; row++ {
+			send_data(0, row, display[0][row], "B")
+			send_data(1, row, display[1][row], "B")
+			send_data(2, row, display[2][row], "B")
+		}
+	}
+	start = time.Now()
+	for time.Since(start) < time.Second {
+		for row := 0; row < 8; row++ {
+			send_data(0, row, display[0][row], "B")
+			send_data(1, row, display[1][row], "B")
+			send_data(2, row, display[2][row], "B")
+			send_data(3, row, display[3][row], "B")
+		}
+	}
+	start = time.Now()
+	for time.Since(start) < time.Second {
+		for row := 0; row < 8; row++ {
+			send_data(0, row, display[0][row], "B")
+			send_data(1, row, display[1][row], "B")
+			send_data(2, row, display[2][row], "B")
+			send_data(3, row, display[3][row], "B")
+			send_data(4, row, display[4][row], "B")
+		}
+	}
+	start = time.Now()
+	for time.Since(start) < time.Second {
+		for row := 0; row < 8; row++ {
+			send_data(0, row, display[0][row], "B")
+			send_data(1, row, display[1][row], "B")
+			send_data(2, row, display[2][row], "B")
+			send_data(3, row, display[3][row], "B")
+			send_data(4, row, display[4][row], "B")
+			send_data(5, row, display[5][row], "B")
+		}
+	}
+	start = time.Now()
+	for time.Since(start) < time.Second {
+		for row := 0; row < 8; row++ {
+			send_data(0, row, display[0][row], "B")
+			send_data(1, row, display[1][row], "B")
+			send_data(2, row, display[2][row], "B")
+			send_data(3, row, display[3][row], "B")
+			send_data(4, row, display[4][row], "B")
+			send_data(5, row, display[5][row], "B")
+			send_data(6, row, display[6][row], "B")
+		}
+	}
+	start = time.Now()
+	for time.Since(start) < time.Second {
+		for row := 0; row < 8; row++ {
+			send_data(0, row, display[0][row], "B")
+			send_data(1, row, display[1][row], "B")
+			send_data(2, row, display[2][row], "B")
+			send_data(3, row, display[3][row], "B")
+			send_data(4, row, display[4][row], "B")
+			send_data(5, row, display[5][row], "B")
+			send_data(6, row, display[6][row], "B")
+			send_data(7, row, display[7][row], "B")
+		}
+	}
+	clearAll()
 }
-
-// TODO: function for general state
-
-// TODO: function for changing the matrices
-
-// TODO: map to convert characters to matrix layout

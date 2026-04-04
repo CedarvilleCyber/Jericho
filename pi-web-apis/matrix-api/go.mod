@@ -4,6 +4,8 @@ go 1.26.1
 
 require github.com/gin-gonic/gin v1.12.0
 
+require periph.io/x/conn/v3 v3.7.2
+
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
@@ -34,4 +36,5 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
+	periph.io/x/host/v3 v3.8.5
 )
