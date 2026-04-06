@@ -118,7 +118,7 @@ func main() {
 	go func() {
 		for {
 			if idleRunning {
-				idle_test()
+				idle()
 			} else {
 				time.Sleep(time.Second)
 			}
@@ -250,7 +250,7 @@ func flash_string(text, color string) {
 	}
 }
 
-func idle_test() {
+func idle() {
 	text := "JERICHO!"
 	display := make([][8]byte, len(text))
 	for i, char := range text {
@@ -285,90 +285,6 @@ func idle_test() {
 			}
 		}
 	}
-
-}
-
-func idle() {
-	text := "JERICHO!"
-	display := make([][8]byte, len(text))
-	for i, char := range text {
-		display[i] = matrix_font[rune(char)]
-	}
-	start := time.Now()
-	for time.Since(start) < time.Second {
-		for row := 0; row < 8; row++ {
-			send_data(0, row, display[0][row], "B")
-		}
-	}
-	start = time.Now()
-	for time.Since(start) < time.Second {
-		for row := 0; row < 8; row++ {
-			send_data(0, row, display[0][row], "B")
-			send_data(1, row, display[1][row], "B")
-		}
-	}
-	start = time.Now()
-	for time.Since(start) < time.Second {
-		for row := 0; row < 8; row++ {
-			send_data(0, row, display[0][row], "B")
-			send_data(1, row, display[1][row], "B")
-			send_data(2, row, display[2][row], "B")
-		}
-	}
-	start = time.Now()
-	for time.Since(start) < time.Second {
-		for row := 0; row < 8; row++ {
-			send_data(0, row, display[0][row], "B")
-			send_data(1, row, display[1][row], "B")
-			send_data(2, row, display[2][row], "B")
-			send_data(3, row, display[3][row], "B")
-		}
-	}
-	start = time.Now()
-	for time.Since(start) < time.Second {
-		for row := 0; row < 8; row++ {
-			send_data(0, row, display[0][row], "B")
-			send_data(1, row, display[1][row], "B")
-			send_data(2, row, display[2][row], "B")
-			send_data(3, row, display[3][row], "B")
-			send_data(4, row, display[4][row], "B")
-		}
-	}
-	start = time.Now()
-	for time.Since(start) < time.Second {
-		for row := 0; row < 8; row++ {
-			send_data(0, row, display[0][row], "B")
-			send_data(1, row, display[1][row], "B")
-			send_data(2, row, display[2][row], "B")
-			send_data(3, row, display[3][row], "B")
-			send_data(4, row, display[4][row], "B")
-			send_data(5, row, display[5][row], "B")
-		}
-	}
-	start = time.Now()
-	for time.Since(start) < time.Second {
-		for row := 0; row < 8; row++ {
-			send_data(0, row, display[0][row], "B")
-			send_data(1, row, display[1][row], "B")
-			send_data(2, row, display[2][row], "B")
-			send_data(3, row, display[3][row], "B")
-			send_data(4, row, display[4][row], "B")
-			send_data(5, row, display[5][row], "B")
-			send_data(6, row, display[6][row], "B")
-		}
-	}
-	start = time.Now()
-	for time.Since(start) < time.Second {
-		for row := 0; row < 8; row++ {
-			send_data(0, row, display[0][row], "B")
-			send_data(1, row, display[1][row], "B")
-			send_data(2, row, display[2][row], "B")
-			send_data(3, row, display[3][row], "B")
-			send_data(4, row, display[4][row], "B")
-			send_data(5, row, display[5][row], "B")
-			send_data(6, row, display[6][row], "B")
-			send_data(7, row, display[7][row], "B")
-		}
-	}
 	clearAll()
+
 }
