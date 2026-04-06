@@ -5,6 +5,7 @@ center. The api allows calls to be made to enact affects on the matrix
 
 Build command: env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o matrix-api main_ai.go
 
+This version was vibe coded and really only good for seeing how to setup things
 */
 
 import (
