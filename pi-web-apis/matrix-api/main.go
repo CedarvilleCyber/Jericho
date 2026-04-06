@@ -1,6 +1,6 @@
 /*
 Description:
-This api is meant to be run on the pi controlling the matricies onto of the data
+This api is meant to be run on the pi controlling the matricies on top of the data
 center. The api allows calls to be made to enact affects on the matrix
 */
 package main
