@@ -2,8 +2,6 @@
 Description:
 This api is meant to be run on the pi controlling the matricies onto of the data
 center. The api allows calls to be made to enact affects on the matrix
-
-Build command: env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o matrix-api main.go
 */
 package main
 
@@ -120,7 +118,7 @@ func main() {
 	go func() {
 		for {
 			if idleRunning {
-				idle()
+				idle_test()
 			} else {
 				time.Sleep(time.Second)
 			}
@@ -144,7 +142,27 @@ func main() {
 		c.JSON(200, gin.H{"message": "idle stopped"})
 	})
 
-	router.Run("0.0.0.0:8080")
+	router.POST("/flash", func(c *gin.Context) {
+		text := strings.ToUpper(c.Query("text"))
+		color := strings.ToUpper(c.DefaultQuery("color", "B"))
+
+		if text == "" {
+			c.JSON(400, gin.H{"error": "must include text to display"})
+			return
+		}
+
+		if len(text) > 8 {
+			c.JSON(400, gin.H{"error": "text can't be more than 8 characters"})
+			return
+		}
+
+		go func() {
+			flash_string(text, color)
+		}()
+		c.JSON(200, gin.H{"text": text, "color": color, "duration": "10 seconds"})
+	})
+
+	router.Run("0.0.0.0:8000")
 }
 
 func send_data(matrix, row int, pattern byte, color string) {
@@ -190,6 +208,84 @@ func clearAll() {
 	for matrix := 0; matrix < 8; matrix++ {
 		clearMatrix(matrix)
 	}
+}
+
+// flash a 8 character string on matrix board for 10 seconds
+func flash_string(text, color string) {
+	display := make([][8]byte, len(text))
+	for i, char := range text {
+		display[i] = matrix_font[rune(char)]
+	}
+	start := time.Now()
+	for time.Since(start) < time.Second*10 {
+		matrixOn := time.Now()
+		for time.Since(matrixOn) < time.Second {
+			for row := 0; row < 8; row++ {
+				send_data(0, row, display[0][row], color)
+				if len(text) > 1 {
+					send_data(1, row, display[1][row], color)
+				}
+				if len(text) > 2 {
+					send_data(2, row, display[2][row], color)
+				}
+				if len(text) > 3 {
+					send_data(3, row, display[3][row], color)
+				}
+				if len(text) > 4 {
+					send_data(4, row, display[4][row], color)
+				}
+				if len(text) > 5 {
+					send_data(5, row, display[5][row], color)
+				}
+				if len(text) > 6 {
+					send_data(6, row, display[6][row], color)
+				}
+				if len(text) > 7 {
+					send_data(7, row, display[7][row], color)
+				}
+			}
+		}
+		clearAll()
+		time.Sleep(time.Second / 2)
+	}
+}
+
+func idle_test() {
+	text := "JERICHO!"
+	display := make([][8]byte, len(text))
+	for i, char := range text {
+		display[i] = matrix_font[rune(char)]
+	}
+	for i := 0; i < len(text); i++ {
+		start := time.Now()
+		for time.Since(start) < time.Second {
+			for row := 0; row < 8; row++ {
+				send_data(0, row, display[0][row], "B")
+				if i >= 1 {
+					send_data(1, row, display[1][row], "B")
+				}
+				if i >= 2 {
+					send_data(2, row, display[2][row], "B")
+				}
+				if i >= 3 {
+					send_data(3, row, display[3][row], "B")
+				}
+				if i >= 4 {
+					send_data(4, row, display[4][row], "B")
+				}
+				if i >= 5 {
+					send_data(5, row, display[5][row], "B")
+				}
+				if i >= 6 {
+					send_data(6, row, display[6][row], "B")
+				}
+				if i >= 7 {
+					send_data(7, row, display[7][row], "B")
+				}
+			}
+		}
+	}
+
 }
 
 func idle() {
