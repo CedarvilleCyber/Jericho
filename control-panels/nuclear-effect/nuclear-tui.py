@@ -3,24 +3,60 @@
 Nuclear Power Plant Control Panel TUI
 Runs on headless Debian (terminal only, no display server required)
 Dependencies: pip install rich
+
+Installation instructions:
+
+sudo apt install ca-certificates
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+[close and reopen terminal]
+
+uv venv
+source .venv/bin/activate
+
+uv pip install rich requests
+python nuclear-tui.py
 """
 
 import curses
 import time
 import random
+import requests
 import subprocess
 import threading
 import sys
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 # ─────────────────────────────────────────────
-#  CONFIGURATION — edit these to fit your setup
+#  TIMEZONE
 # ─────────────────────────────────────────────
-SMOKE_COMMAND = "echo '[SMOKE TRIGGER] Activating smoke effect via GPIO/relay'"
-# Replace with your actual trigger command, e.g.:
-#   "python3 /home/pi/trigger_smoke.py"
-#   "gpio write 7 1"
-#   "curl http://192.168.1.50/trigger"
+UTC_PLUS_3 = timezone(timedelta(hours=3))
+
+# ─────────────────────────────────────────────
+#  EFFECT TRIGGERS
+# ─────────────────────────────────────────────
+def triggerPhysicalEffect():
+    # NOTE: you'll need to change these IPs to Master Control's IP. Also figure 
+    # out how Master Control's routing works - you may need to update the URL paths.
+
+    nuclear_url = 'http://192.0.2.101:8000/smoke'
+    nuclear_payload = { "duration": 5 }
+
+    sound_url = 'http://192.0.2.104:8000/play'
+    sound_payload = { "sound": "nuclear5.wav" }
+
+    sound_response = requests.post(sound_url, json=sound_payload)
+
+    if sound_response.status_code == 429:
+        print("Error: system in use. Wait a few seconds and try again.")
+        sys.exit()
+
+    nuclear_response = requests.post(nuclear_url, json=nuclear_payload)
+
+    print(f"Sound status code: {sound_response.status_code}")
+    print(f"Sound response body: {sound_response.json()}")
+    print(f"Nuclear status code: {nuclear_response.status_code}")
+    print(f"Nuclear response body: {nuclear_response.json()}")
 
 # ─────────────────────────────────────────────
 #  PLANT STATE
@@ -47,9 +83,10 @@ class PlantState:
         self.tick           = 0
         self.meltdown_step  = 0       # 0–100
 
-    def log(self, msg):
-        ts = datetime.now().strftime("%H:%M:%S")
-        self.event_log.append(f"[{ts}] {msg}")
+    def log(self, msg, color=1):
+        # color defaults to C_NORMAL (1). Pass C_YELLOW (3) or C_RED (4) as needed.
+        ts = datetime.now(UTC_PLUS_3).strftime("%H:%M:%S")
+        self.event_log.append((f"[{ts}] {msg}", color))
         if len(self.event_log) > 100:
             self.event_log.pop(0)
 
@@ -77,45 +114,40 @@ class PlantState:
         self.containment_p  += random.uniform(0.5, 2.0)
 
         if s == 5:
-            self.log("⚠  COOLANT FLOW ANOMALY DETECTED")
+            self.log("WARNING: COOLANT FLOW ANOMALY DETECTED", color=3)
             self.coolant_alarm = True
         if s == 12:
-            self.log("⚠  PRIMARY LOOP PRESSURE RISING")
+            self.log("WARNING: PRIMARY LOOP PRESSURE RISING", color=3)
             self.pressure_alarm = True
         if s == 20:
-            self.log("🔴 SCRAM SIGNAL — AUTOMATIC ROD INSERTION")
+            self.log("SCRAM SIGNAL — AUTOMATIC ROD INSERTION", color=4)
             self.scram_active = True
             self.rod_position = max(0, self.rod_position - 60)
         if s == 28:
-            self.log("🔴 SCRAM FAILURE — RODS DID NOT FULLY INSERT")
+            self.log("SCRAM FAILURE — RODS DID NOT FULLY INSERT", color=4)
         if s == 35:
-            self.log("🔴 CORE TEMPERATURE EXCEEDS DESIGN LIMIT (350°C)")
+            self.log("CORE TEMPERATURE EXCEEDS DESIGN LIMIT (350°C)", color=4)
         if s == 45:
-            self.log("🔴 COOLANT BOILING — VOID COEFFICIENT POSITIVE")
+            self.log("COOLANT BOILING — VOID COEFFICIENT POSITIVE", color=4)
         if s == 55:
-            self.log("🔴 FUEL CLADDING BREACH — RADIATION SPIKE")
+            self.log("FUEL CLADDING BREACH — RADIATION SPIKE", color=4)
             self.emergency_mode = True
         if s == 65:
-            self.log("🔴 CONTAINMENT PRESSURE CRITICAL")
+            self.log("CONTAINMENT PRESSURE CRITICAL", color=4)
         if s == 75:
-            self.log("💥 STEAM EXPLOSION — CONTAINMENT BREACHED")
+            self.log("STEAM EXPLOSION — CONTAINMENT BREACHED", color=4)
         if s >= 80 and not self.smoke_fired:
-            self.log("☢  INITIATING EXTERNAL RELEASE SEQUENCE")
+            self.log("INITIATING EXTERNAL RELEASE SEQUENCE", color=4)
             self.fire_smoke()
 
     def fire_smoke(self):
         """Execute the physical smoke trigger."""
         self.smoke_fired = True
-        self.log("🚨 SMOKE EFFECT TRIGGERED")
+        self.log("SMOKE EFFECT TRIGGERED", color=4)
         try:
-            subprocess.Popen(
-                SMOKE_COMMAND,
-                shell=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
+            triggerPhysicalEffect()
         except Exception as e:
-            self.log(f"   Trigger error: {e}")
+            self.log(f"Trigger error: {e}", color=3)
 
 # ─────────────────────────────────────────────
 #  COLOUR PAIRS  (curses)
@@ -189,11 +221,11 @@ def box(win, y, x, h, w, title="", color=C_CYAN):
 def draw(stdscr, state: PlantState):
     stdscr.erase()
     H, W = stdscr.getmaxyx()
-    now  = datetime.now().strftime("%Y-%m-%d  %H:%M:%S")
+    now  = datetime.now(UTC_PLUS_3).strftime("%Y-%m-%d  %H:%M:%S")
     tick = state.tick
 
     # ── Header ──────────────────────────────────────────────────────────
-    header = "▓▓  NORTHFIELD NUCLEAR GENERATING STATION — UNIT 2 CONTROL ROOM  ▓▓"
+    header = "▓▓  TEVAKISTAN WESTERN NUCLEAR GENERATING STATION — UNIT 2 CONTROL ROOM  ▓▓"
     hcol = C_RED if state.emergency_mode else C_CYAN
     safe_addstr(stdscr, 0, (W - len(header))//2, header,
                 curses.color_pair(hcol) | curses.A_BOLD)
@@ -291,9 +323,7 @@ def draw(stdscr, state: PlantState):
     log_h   = H - log_top - 3
     box(stdscr, log_top, 1, log_h + 2, 77, "OPERATOR EVENT LOG", C_CYAN)
     visible = state.event_log[-(log_h):]
-    for i, entry in enumerate(visible):
-        col = C_RED if "🔴" in entry or "💥" in entry or "☢" in entry or "🚨" in entry \
-              else (C_YELLOW if "⚠" in entry else C_NORMAL)
+    for i, (entry, col) in enumerate(visible):
         safe_addstr(stdscr, log_top + 1 + i, 3, entry[:73],
                     curses.color_pair(col))
 
@@ -314,8 +344,8 @@ def main(stdscr):
     init_colors()
 
     state = PlantState()
-    state.log("Unit 2 at 100% rated thermal power — all systems nominal")
-    state.log("Operator login: trainee@nggs-unit2")
+    state.log("Unit 2 at 100% rated thermal power — all systems nominal", color=2)
+    state.log("Operator login: trainee@unit2.nuclearcontrol.tk", color=2)
 
     while True:
         state.tick += 1
@@ -331,16 +361,16 @@ def main(stdscr):
 
         elif key in (ord('m'), ord('M')) and not state.meltdown_seq:
             state.meltdown_seq = True
-            state.log("⚠  MELTDOWN SEQUENCE INITIATED BY OPERATOR")
+            state.log("MELTDOWN SEQUENCE INITIATED BY OPERATOR", color=3)
 
         elif key in (ord('s'), ord('S')) and not state.smoke_fired:
-            state.log("🚨 MANUAL SMOKE TRIGGER ACTIVATED BY OPERATOR")
+            state.log("MANUAL SMOKE TRIGGER ACTIVATED BY OPERATOR", color=3)
             state.fire_smoke()
 
         elif key in (ord('r'), ord('R')):
             state.__init__()
-            state.log("System reset by operator.")
-            state.log("Unit 2 at 100% rated thermal power — all systems nominal")
+            state.log("System reset by operator.", color=2)
+            state.log("Unit 2 at 100% rated thermal power — all systems nominal", color=2)
 
         # ── Physics tick ─────────────────────────────────────────────────
         if state.meltdown_seq:
