@@ -54,7 +54,7 @@ def triggerPhysicalEffect(state):
             nuclear_response = requests.post(nuclear_url, json=nuclear_payload, timeout=2)
             state.log(f"Sound: {sound_response.status_code} | Nuclear: {nuclear_response.status_code}", color=2)
     except requests.exceptions.RequestException as e:
-        state.log(f"Network error: {e}", color=3)
+        state.log(f"Network error: {e}", color=4)
 
 # ─────────────────────────────────────────────
 #  PLANT STATE
@@ -76,6 +76,11 @@ class PlantState:
         self.meltdown_seq   = False
         self.smoke_fired    = False
         self.emergency_mode = False
+
+        # Gamified meltdown sequence controls
+        self.coolant_disabled       = False
+        self.fuel_increased         = False
+        self.balancing_overridden     = False
 
         self.event_log      = []
         self.tick           = 0
@@ -127,15 +132,14 @@ class PlantState:
             self.log("CORE TEMPERATURE EXCEEDS DESIGN LIMIT (350°C)", color=4)
         if s == 45:
             self.log("OPERATIONALIZE AUXILIARY COOLING PROCEDURES", color=4)
-        if s == 55:
+        if s == 57:
             self.log("FUEL CLADDING BREACH — RADIATION SPIKE", color=4)
             self.emergency_mode = True
-        if s == 65:
+        if s == 68:
             self.log("CONTAINMENT PRESSURE CRITICAL - BEGIN PARTIAL RELEASE SEQUENCE", color=4)
-        if s == 75:
+        if s == 81:
             self.log("FLOODING PRIMARY AND SECONDARY REACTOR CHAMBERS", color=4)
-        if s >= 80 and not self.smoke_fired:
-            self.log("", color=4)
+        if s >= 92 and not self.smoke_fired:
             self.fire_smoke()
 
     def fire_smoke(self):
@@ -273,7 +277,7 @@ def draw(stdscr, state: PlantState):
     rod_drawn = max(0, min(10, int(state.rod_position / 10)))
     safe_addstr(stdscr, 13, 2, "  Control Rods:", curses.color_pair(C_NORMAL))
     rod_str = "▐" * rod_drawn + "░" * (10 - rod_drawn)
-    rcol = C_RED if rod_drawn > 9 else (C_YELLOW if rod_drawn > 6 else C_GREEN)
+    rcol = C_NORMAL if rod_drawn > 9 else (C_YELLOW if rod_drawn > 6 else C_RED)
     safe_addstr(stdscr, 13, 18, f"[{rod_str}] {state.rod_position}%",
                 curses.color_pair(rcol))
 
@@ -307,7 +311,8 @@ def draw(stdscr, state: PlantState):
     if state.meltdown_seq:
         box(stdscr, 17, 1, 4, 77, "CORE DAMAGE PROGRESSION", C_RED)
         pct = min(state.meltdown_step, 100)
-        b_md = "█" * int(pct * 0.73) + "░" * (73 - int(pct * 0.73))
+        BAR_WIDTH = 65
+        b_md = "█" * int(pct * (BAR_WIDTH / 100)) + "░" * (BAR_WIDTH - int(pct * (BAR_WIDTH / 100)))
         mcol = C_RED if pct > 60 else (C_YELLOW if pct > 30 else C_GREEN)
         safe_addstr(stdscr, 18, 3, f"  [{b_md}] {pct:3d}%",
                     curses.color_pair(mcol) | curses.A_BOLD)
@@ -316,17 +321,38 @@ def draw(stdscr, state: PlantState):
         safe_addstr(stdscr, 19, 3, f"  Phase: {phase}",
                     curses.color_pair(mcol) | curses.A_BOLD)
 
+    # ── Control Override Status ──────────────────────────────────────────
+    else:
+        box(stdscr, 17, 1, 4, 77, "OVERRIDE SEQUENCE PROGRESS", C_YELLOW)
+        controls_active = sum([state.coolant_disabled, state.fuel_increased, state.balancing_overridden])
+        status_line = f"  Coolant Disabled: {'✓' if state.coolant_disabled else '✗'}  |  " \
+                      f"Fuel Increased: {'✓' if state.fuel_increased else '✗'}  |  " \
+                      f"Balance Override: {'✓' if state.balancing_overridden else '✗'}"
+        col = C_GREEN if controls_active < 3 else C_RED
+        safe_addstr(stdscr, 18, 3, status_line, curses.color_pair(col) | curses.A_BOLD)
+        if controls_active == 3:
+            safe_addstr(stdscr, 19, 3, "  >>> ALL OVERRIDES ACTIVE - CRITICAL SYSTEMS COMPROMISED <<<",
+                        curses.color_pair(C_RED) | curses.A_BOLD | curses.A_BLINK)
+
     # ── Event Log ────────────────────────────────────────────────────────
     log_top = 22 if state.meltdown_seq else 18
     log_h   = H - log_top - 3
     box(stdscr, log_top, 1, log_h + 2, 77, "OPERATOR EVENT LOG", C_CYAN)
-    visible = state.event_log[-(log_h):]
+
+    # Pre-wrap all entries
+    wrapped = []
+    for entry, col in state.event_log:
+        lines = [entry[i:i+73] for i in range(0, len(entry), 73)]
+        for line in lines:
+            wrapped.append((line, col))
+    
+    visible = wrapped[-(log_h):]
     for i, (entry, col) in enumerate(visible):
         safe_addstr(stdscr, log_top + 1 + i, 3, entry[:73],
                     curses.color_pair(col))
 
     # ── Footer / Key Bindings ────────────────────────────────────────────
-    keys = "[M] Trigger Meltdown Sequence   [S] Manual Smoke Trigger   [R] Reset   [Q] Quit"
+    keys = "[C] Disable Coolant   [F] Increase Fuel   [O] Override Balance   [R] Reset   [Q] Quit"
     safe_addstr(stdscr, H-1, (W - len(keys))//2, keys,
                 curses.color_pair(C_CYAN) | curses.A_BOLD)
 
@@ -356,13 +382,31 @@ def main(stdscr):
         if key in (ord('q'), ord('Q')):
             break
 
-        elif key in (ord('m'), ord('M')) and not state.meltdown_seq:
-            state.meltdown_seq = True
-            state.log("MELTDOWN SEQUENCE INITIATED BY OPERATOR", color=3)
+        elif key in (ord('c'), ord('C')) and not state.meltdown_seq:
+            if not state.coolant_disabled:
+                state.coolant_disabled = True
+                state.log("COOLANT CIRCULATION PROCEDURES DISABLED", color=3)
+            else:
+                state.coolant_disabled = False
+                state.log("Coolant procedures re-enabled", color=2)
 
-        elif key in (ord('s'), ord('S')) and not state.smoke_fired:
-            state.log("MANUAL SMOKE TRIGGER ACTIVATED BY OPERATOR", color=3)
-            state.fire_smoke()
+        elif key in (ord('f'), ord('F')) and not state.meltdown_seq:
+            if not state.fuel_increased:
+                state.fuel_increased = True
+                state.log("ENRICHED FUEL RODS INSERTED - CORE POWER SURGE", color=3)
+                state.core_power = min(120.0, state.core_power + 15)
+            else:
+                state.fuel_increased = False
+                state.log("Fuel rods extracted to normal levels", color=2)
+                state.core_power = max(100.0, state.core_power - 15)
+
+        elif key in (ord('o'), ord('O')) and not state.meltdown_seq:
+            if not state.balancing_overridden:
+                state.balancing_overridden = True
+                state.log("AUTOMATIC FUEL BALANCING OVERRIDE ENGAGED", color=3)
+            else:
+                state.balancing_overridden = False
+                state.log("Automatic balancing systems restored", color=2)
 
         elif key in (ord('r'), ord('R')):
             state.__init__()
@@ -374,6 +418,11 @@ def main(stdscr):
             state.tick_meltdown()
         else:
             state.tick_normal()
+
+        # ── Auto-trigger meltdown when all override controls are active ──
+        if (state.coolant_disabled and state.fuel_increased and state.balancing_overridden 
+            and not state.meltdown_seq):
+            state.meltdown_seq = True
 
         # ── Draw ─────────────────────────────────────────────────────────
         draw(stdscr, state)
