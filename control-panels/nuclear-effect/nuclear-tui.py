@@ -35,7 +35,7 @@ UTC_PLUS_3 = timezone(timedelta(hours=3))
 # ─────────────────────────────────────────────
 #  EFFECT TRIGGERS
 # ─────────────────────────────────────────────
-def triggerPhysicalEffect():
+def triggerPhysicalEffect(state):
     # NOTE: you'll need to change these IPs to Master Control's IP. Also figure 
     # out how Master Control's routing works - you may need to update the URL paths.
 
@@ -45,18 +45,16 @@ def triggerPhysicalEffect():
     sound_url = 'http://192.0.2.104:8000/play'
     sound_payload = { "sound": "nuclear5.wav" }
 
-    sound_response = requests.post(sound_url, json=sound_payload)
+    try:
+        sound_response = requests.post(sound_url, json=sound_payload, timeout=2)
 
-    if sound_response.status_code == 429:
-        print("Error: system in use. Wait a few seconds and try again.")
-        sys.exit()
-
-    nuclear_response = requests.post(nuclear_url, json=nuclear_payload)
-
-    print(f"Sound status code: {sound_response.status_code}")
-    print(f"Sound response body: {sound_response.json()}")
-    print(f"Nuclear status code: {nuclear_response.status_code}")
-    print(f"Nuclear response body: {nuclear_response.json()}")
+        if sound_response.status_code == 429:
+            state.log("Error: system in use. Wait a few seconds and try again.", color=3)
+        else: 
+            nuclear_response = requests.post(nuclear_url, json=nuclear_payload, timeout=2)
+            state.log(f"Sound: {sound_response.status_code} | Nuclear: {nuclear_response.status_code}", color=2)
+    except requests.exceptions.RequestException as e:
+        state.log(f"Network error: {e}", color=3)
 
 # ─────────────────────────────────────────────
 #  PLANT STATE
@@ -128,24 +126,24 @@ class PlantState:
         if s == 35:
             self.log("CORE TEMPERATURE EXCEEDS DESIGN LIMIT (350°C)", color=4)
         if s == 45:
-            self.log("COOLANT BOILING — VOID COEFFICIENT POSITIVE", color=4)
+            self.log("OPERATIONALIZE AUXILIARY COOLING PROCEDURES", color=4)
         if s == 55:
             self.log("FUEL CLADDING BREACH — RADIATION SPIKE", color=4)
             self.emergency_mode = True
         if s == 65:
-            self.log("CONTAINMENT PRESSURE CRITICAL", color=4)
+            self.log("CONTAINMENT PRESSURE CRITICAL - BEGIN PARTIAL RELEASE SEQUENCE", color=4)
         if s == 75:
-            self.log("STEAM EXPLOSION — CONTAINMENT BREACHED", color=4)
+            self.log("FLOODING PRIMARY AND SECONDARY REACTOR CHAMBERS", color=4)
         if s >= 80 and not self.smoke_fired:
-            self.log("INITIATING EXTERNAL RELEASE SEQUENCE", color=4)
+            self.log("", color=4)
             self.fire_smoke()
 
     def fire_smoke(self):
         """Execute the physical smoke trigger."""
         self.smoke_fired = True
-        self.log("SMOKE EFFECT TRIGGERED", color=4)
+        self.log("INITIATING EXTERNAL RELEASE SEQUENCE", color=4)
         try:
-            triggerPhysicalEffect()
+            triggerPhysicalEffect(self)
         except Exception as e:
             self.log(f"Trigger error: {e}", color=3)
 
@@ -164,10 +162,10 @@ C_RED_B    = 8   # bright red (blink candidate)
 def init_colors():
     curses.start_color()
     curses.use_default_colors()
-    curses.init_pair(C_NORMAL,  curses.COLOR_WHITE,   -1)
-    curses.init_pair(C_GREEN,   curses.COLOR_GREEN,   -1)
-    curses.init_pair(C_YELLOW,  curses.COLOR_YELLOW,  -1)
-    curses.init_pair(C_RED,     curses.COLOR_RED,     -1)
+    curses.init_pair(C_NORMAL,  curses.COLOR_WHITE,   -1) # 1
+    curses.init_pair(C_GREEN,   curses.COLOR_GREEN,   -1) # 2
+    curses.init_pair(C_YELLOW,  curses.COLOR_YELLOW,  -1) # 3
+    curses.init_pair(C_RED,     curses.COLOR_RED,     -1) # 4
     curses.init_pair(C_CYAN,    curses.COLOR_CYAN,    -1)
     curses.init_pair(C_WHITE_B, curses.COLOR_WHITE,   -1)
     curses.init_pair(C_MAGENTA, curses.COLOR_MAGENTA, -1)
@@ -233,7 +231,7 @@ def draw(stdscr, state: PlantState):
 
     status_txt = "⚠ EMERGENCY" if state.emergency_mode else ("SCRAM" if state.scram_active else "NORMAL POWER")
     status_col = C_RED if state.emergency_mode else (C_YELLOW if state.scram_active else C_GREEN)
-    safe_addstr(stdscr, 1, W-25, f"PLANT STATUS: {status_txt}",
+    safe_addstr(stdscr, 1, W-27, f"PLANT STATUS: {status_txt}",
                 curses.color_pair(status_col) | curses.A_BOLD)
 
     # ── Reactor Core Panel ───────────────────────────────────────────────
@@ -339,8 +337,7 @@ def draw(stdscr, state: PlantState):
 # ─────────────────────────────────────────────
 def main(stdscr):
     curses.curs_set(0)
-    stdscr.nodelay(True)
-    stdscr.timeout(500)          # refresh every 500 ms
+    stdscr.timeout(500)          # blocking getch with 500ms timeout
     init_colors()
 
     state = PlantState()
