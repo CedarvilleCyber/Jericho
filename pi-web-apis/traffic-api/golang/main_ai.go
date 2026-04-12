@@ -44,6 +44,7 @@ type TrafficLightState struct {
 	NorthSouth LightState `json:"north_south"`
 	EastWest   LightState `json:"east_west"`
 	IdleActive bool       `json:"idle_active"`
+	BlackOut   bool       `json:"blackout"`
 	Step       int        `json:"step"`
 }
 
@@ -64,6 +65,7 @@ var (
 var (
 	stateMutex  sync.Mutex
 	idleActive  bool = true
+	blackOut    bool = false
 	currentStep int
 
 	// Track current light state for API responses
@@ -96,6 +98,9 @@ func main() {
 		for {
 			if idleActive {
 				runTrafficCycle()
+			} else if blackOut {
+				// In blackout mode, do nothing - allow manual control
+				time.Sleep(100 * time.Millisecond)
 			} else {
 				runFlashMode()
 			}
@@ -124,6 +129,7 @@ func main() {
 				GreenOn:  ewGreen,
 			},
 			IdleActive: idleActive,
+			BlackOut:   blackOut,
 			Step:       currentStep,
 		}
 		stateMutex.Unlock()
@@ -141,6 +147,7 @@ func main() {
 	router.POST("/idle/stop", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleActive = false
+		blackOut = false // Exit blackout mode too
 		stateMutex.Unlock()
 		clearAllLights()
 		c.JSON(200, gin.H{"message": "idle stopped"})
@@ -203,7 +210,25 @@ func main() {
 		c.JSON(200, gin.H{"mode": mode, "status": "activated"})
 	})
 
+	router.POST("/blackout", func(c *gin.Context) {
+		stateMutex.Lock()
+		idleActive = false
+		blackOut = true
+		stateMutex.Unlock()
+		clearAllLights()
+		c.JSON(200, gin.H{"status": "blackout", "message": "manual control enabled"})
+	})
+
+	router.POST("/blackout/exit", func(c *gin.Context) {
+		stateMutex.Lock()
+		blackOut = false
+		idleActive = true // Return to normal cycling
+		stateMutex.Unlock()
+		c.JSON(200, gin.H{"status": "blackout exited", "message": "returned to idle mode"})
+	})
+
 	router.Run("0.0.0.0:8000")
+
 }
 
 // setPin sets a GPIO pin on or off (inverted for common anode)

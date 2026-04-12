@@ -69,6 +69,7 @@ Response:
     "green": true
   },
   "idle_active": true,
+  "blackout": false,
   "step": 0
 }
 ```
@@ -87,13 +88,31 @@ curl -X POST http://localhost:8000/idle/start
 curl -X POST http://localhost:8000/idle/stop
 ```
 
+### Blackout Mode
+
+**Enter Blackout Mode** (stops all automatic functions, enables manual control)
+**POST** `/blackout`
+```bash
+curl -X POST http://localhost:8000/blackout
+```
+Starts with all lights off. Use individual light control endpoints to manually set desired lights.
+
+**Exit Blackout Mode** (returns to idle cycling)
+**POST** `/blackout/exit`
+```bash
+curl -X POST http://localhost:8000/blackout/exit
+```
+
 ### Individual Light Control
 
-**Set Individual Light**
+**Set Individual Light State** (Primary Control Method)
 **POST** `/light/:direction/:color?state=on|off`
+
+Controls a specific traffic light. This overrides any automatic cycling and gives you direct control over each light.
 
 Directions: `north-south` or `ns`, `east-west` or `ew`
 Colors: `red`, `yellow`, `green`
+States: `on` (default), `off`
 
 ```bash
 # Turn on north-south red light
@@ -101,6 +120,9 @@ curl -X POST "http://localhost:8000/light/north-south/red?state=on"
 
 # Turn off east-west green light
 curl -X POST "http://localhost:8000/light/ew/green?state=off"
+
+# Turn on east-west yellow (state=on is default)
+curl -X POST "http://localhost:8000/light/east-west/yellow"
 ```
 
 Response:
@@ -112,7 +134,7 @@ Response:
 }
 ```
 
-**Get Individual Light State**
+**Get Individual Light State** (for debugging/verification)
 **GET** `/light/:direction/:color`
 ```bash
 curl http://localhost:8000/light/north-south/red
