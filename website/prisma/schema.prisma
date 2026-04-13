@@ -123,6 +123,17 @@ model Verification {
   @@map("verification")
 }
 
+model ScenarioLivestream {
+  id         String   @id @default(cuid())
+  scenarioId String
+  label      String
+  channelId  String
+  order      Int      @default(0)
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@map("scenario_livestream")
+}
+
 model Scenario {
   id          String @id @default(cuid())
   name        String
@@ -136,8 +147,8 @@ model Scenario {
   slug               String         @unique
   teaserText         String?
   teaserImageURL     String?
-  youtubeChannelId   String?
   learningObjectives String?
+  livestreams        ScenarioLivestream[]
   questions          Question[]
   sections           Section[]
   // We will need to add something here to signify what Ludus API call
