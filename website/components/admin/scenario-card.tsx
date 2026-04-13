@@ -19,7 +19,7 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioWithQuestions }) 
           </Link>
         </div>
 
-        <p className="text-sm text-base-content/80 mt-1">{scenario.description}</p>
+        <p className="text-sm text-base-content/80 mt-1 whitespace-pre-wrap">{scenario.description}</p>
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 text-sm">
           {scenario.teaserText && (

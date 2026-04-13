@@ -351,7 +351,7 @@ export function EditScenarioModal({
   return (
     <>
     <dialog ref={dialogRef} className="modal" onCancel={handleDialogCancel}>
-      <div className="modal-box max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="modal-box max-w-2xl max-h-[90vh] overflow-y-auto overscroll-contain">
         <h3 className="font-bold text-lg mb-4">Edit Scenario</h3>
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">

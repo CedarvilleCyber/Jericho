@@ -3,6 +3,7 @@ import "./globals.css";
 import ErrorBoundary from "@/components/error-boundary";
 import AppBar from "@/components/layout/app-bar";
 import Footer from "@/components/layout/footer";
+import ImpersonationBanner from "@/components/impersonation-banner";
 import Providers from "@/components/providers";
 import type { Metadata } from "next";
 
@@ -41,9 +42,12 @@ export default function RootLayout({
       <body className="min-h-screen">
         <Providers>
           <ErrorBoundary>
-            <div className="flex flex-col min-h-screen">
+            <div className="flex flex-col h-dvh">
               <AppBar />
-              <div className="flex-1">{children}</div>
+              <div className="px-4">
+                <ImpersonationBanner />
+              </div>
+              <div className="flex-1 min-h-0 overflow-auto flex flex-col">{children}</div>
               <Footer />
             </div>
           </ErrorBoundary>

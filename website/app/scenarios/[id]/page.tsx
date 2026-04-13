@@ -67,7 +67,7 @@ export default async function ScenarioPage({
           {scenario?.name || "Scenario Not Found"}
         </h2>
       </div>
-      <p className="text-base-content/60 mb-4">
+      <p className="text-base-content/60 mb-4 whitespace-pre-wrap">
         {scenario?.description ||
           "The scenario you are looking for does not exist."}
       </p>

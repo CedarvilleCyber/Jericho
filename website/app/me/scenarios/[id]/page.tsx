@@ -1,13 +1,11 @@
 import AddExistingVMToScenarioPage from "@/components/scenario/add-existing-vm";
-import QuestionsPanel from "@/components/scenario/questions-panel";
-import TopologyViewer from "@/components/scenario/topology-viewer";
+import ScenarioTabsCard from "@/components/scenario/scenario-tabs-card";
 import PVEViewer from "@/components/view/pve-viewer";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { parseTopology } from "@/lib/scenarios/topology-types";
 import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -69,7 +67,7 @@ export default async function ScenarioLabPage({
     .map((h) => h.id);
 
   return (
-    <div className="mx-6 px-4 py-8">
+    <div className="mx-6 px-4 py-8 h-full flex flex-col">
       <div className="breadcrumbs text-sm mb-6">
         <ul>
           <li>
@@ -82,105 +80,36 @@ export default async function ScenarioLabPage({
         </ul>
       </div>
       <h1 className="text-2xl font-bold mb-4">{scenario.name}</h1>
-      <div className="grid grid-cols-2 gap-6 mb-4">
-        <div className="card bg-base-100 border border-base-300">
-          <div className="card-body p-4">
-            <div className="tabs tabs-bordered">
-              <input
-                type="radio"
-                name="scenario_tabs"
-                role="tab"
-                className="tab"
-                aria-label="Details"
-                defaultChecked
-              />
-              <div role="tabpanel" className="tab-content py-4">
-                <p>{scenario.description}</p>
-              </div>
-              {(scenario.topology || scenario.topologyURL) && (
-                <>
-                  <input
-                    type="radio"
-                    name="scenario_tabs"
-                    role="tab"
-                    className="tab"
-                    aria-label="Topology"
-                  />
-                  <div role="tabpanel" className="tab-content py-4">
-                    {scenario.topology && scenario.userScenarios[0] ? (
-                      <TopologyViewer
-                        topology={parseTopology(scenario.topology)}
-                        hintsUsed={scenario.userScenarios[0].hintsUsed}
-                        userScenarioId={scenario.userScenarios[0].id}
-                      />
-                    ) : scenario.topologyURL ? (
-                      <Image
-                        src={scenario.topologyURL}
-                        alt={`${scenario.name} topology`}
-                        width={800}
-                        height={600}
-                      />
-                    ) : null}
-                  </div>
-                </>
-              )}
-              {scenario.questions.length > 0 && (
-                <>
-                  <input
-                    type="radio"
-                    name="scenario_tabs"
-                    role="tab"
-                    className="tab"
-                    aria-label="Questions"
-                  />
-                  <div role="tabpanel" className="tab-content">
-                    <QuestionsPanel
-                      questions={scenario.questions}
-                      sections={scenario.sections}
-                      userAnswers={scenario.questions.flatMap((q) => q.userAnswers)}
-                      revealedHintIds={revealedHintIds}
-                      correctQuestionIds={scenario.questions
-                        .filter((q) => {
-                          const ua = q.userAnswers[0];
-                          if (!ua) return false;
-                          if (q.type === "NUMERIC")
-                            return parseFloat(ua.answer.trim()) === parseFloat(q.answer.trim());
-                          if (q.answerIsRegex) {
-                            try { return new RegExp(q.answer).test(ua.answer.trim()); } catch { return false; }
-                          }
-                          return ua.answer.trim() === q.answer.trim();
-                        })
-                        .map((q) => q.id)}
-                    />
-                  </div>
-                </>
-              )}
-              <input
-                type="radio"
-                name="scenario_tabs"
-                role="tab"
-                className="tab"
-                aria-label="Livestream"
-              />
-              <div role="tabpanel" className="tab-content py-4">
-                <div className="flex flex-col gap-3">
-                  <p>Livestream coming soon!</p>
-                  <div className="flex justify-end">
-                    <button className="btn" disabled>
-                      <IconExternalLink className="mr-2" />
-                      Pop out
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="card bg-base-100 border border-base-300">
-          <div className="card-body p-4">
+      <div className="grid grid-cols-2 gap-6 mb-4 flex-1 min-h-0">
+        <ScenarioTabsCard
+          description={scenario.description}
+          topology={scenario.topology ? parseTopology(scenario.topology) : undefined}
+          topologyURL={scenario.topologyURL ?? undefined}
+          scenarioName={scenario.name}
+          hintsUsed={scenario.userScenarios[0]?.hintsUsed}
+          userScenarioId={scenario.userScenarios[0]?.id}
+          questions={scenario.questions}
+          sections={scenario.sections}
+          userAnswers={scenario.questions.flatMap((q) => q.userAnswers)}
+          revealedHintIds={revealedHintIds}
+          correctQuestionIds={scenario.questions
+            .filter((q) => {
+              const ua = q.userAnswers[0];
+              if (!ua) return false;
+              if (q.type === "NUMERIC")
+                return parseFloat(ua.answer.trim()) === parseFloat(q.answer.trim());
+              if (q.answerIsRegex) {
+                try { return new RegExp(q.answer).test(ua.answer.trim()); } catch { return false; }
+              }
+              return ua.answer.trim() === q.answer.trim();
+            })
+            .map((q) => q.id)}
+        />
+        <div className="card bg-base-100 border border-base-300 min-h-0">
+          <div className="card-body p-4 flex flex-col overflow-y-auto">
             {scenario.userScenarios[0]?.vmId ? (
               <>
-                <p className="mb-2 text-base-content/60">
+                <p className="mb-2 text-base-content/60 basis-0">
                   Click on the preview below to launch the VM console.
                 </p>
                 {scenario.userScenarios[0].vm ? (

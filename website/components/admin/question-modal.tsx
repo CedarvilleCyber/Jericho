@@ -439,8 +439,9 @@ function QuestionFields({
         <input
           type="number"
           className="input input-bordered w-full"
-          value={form.order}
-          onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
+          value={form.order + 1}
+          min={1}
+          onChange={(e) => setForm({ ...form, order: Math.max(0, Number(e.target.value) - 1) })}
         />
       </label>
 
@@ -510,7 +511,7 @@ export function EditQuestionModal({
   return (
     <>
       <dialog ref={dialogRef} className="modal" onCancel={handleDialogCancel}>
-        <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto overscroll-contain">
           <h3 className="font-bold text-lg mb-4">Edit Question</h3>
           <QuestionFields form={form} setForm={setForm} sections={sections} />
           <div className="modal-action">
@@ -579,7 +580,7 @@ export function AddQuestionModal({
   return (
     <>
       <dialog ref={dialogRef} className="modal" onCancel={handleDialogCancel}>
-        <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto overscroll-contain">
           <h3 className="font-bold text-lg mb-4">Add Question</h3>
           <QuestionFields form={form} setForm={setForm} sections={sections} />
           <div className="modal-action">
