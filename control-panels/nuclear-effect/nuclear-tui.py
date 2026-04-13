@@ -39,10 +39,10 @@ def triggerPhysicalEffect(state):
     # NOTE: you'll need to change these IPs to Master Control's IP. Also figure 
     # out how Master Control's routing works - you may need to update the URL paths.
 
-    nuclear_url = 'http://192.0.2.101:8000/smoke'
+    nuclear_url = 'http://nuclear.jericho.local:80/smoke'
     nuclear_payload = { "duration": 5 }
 
-    sound_url = 'http://192.0.2.104:8000/play'
+    sound_url = 'http://sound.jericho.local:80/play'
     sound_payload = { "sound": "nuclear5.wav" }
 
     try:
@@ -52,7 +52,7 @@ def triggerPhysicalEffect(state):
             state.log("Error: system in use. Wait a few seconds and try again.", color=3)
         else: 
             nuclear_response = requests.post(nuclear_url, json=nuclear_payload, timeout=2)
-            state.log(f"Sound: {sound_response.status_code} | Nuclear: {nuclear_response.status_code}", color=2)
+            state.log(f"Sound: {sound_response.status_code} | Nuclear: {nuclear_response.status_code}", color=4)
     except requests.exceptions.RequestException as e:
         state.log(f"Network error: {e}", color=4)
 
