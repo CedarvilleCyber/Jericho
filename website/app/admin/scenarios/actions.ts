@@ -14,7 +14,6 @@ export async function updateScenario(
     topology: object | null;
     teaserText: string;
     teaserImageURL: string;
-    youtubeChannelId: string;
     learningObjectives: string;
   },
 ) {
@@ -28,7 +27,6 @@ export async function updateScenario(
       topology: data.topology ?? undefined,
       teaserText: data.teaserText || null,
       teaserImageURL: data.teaserImageURL || null,
-      youtubeChannelId: data.youtubeChannelId || null,
       learningObjectives: data.learningObjectives || null,
     },
   });
@@ -127,7 +125,6 @@ export async function createScenario(data: {
   topology: object | null;
   teaserText: string;
   teaserImageURL: string;
-  youtubeChannelId: string;
   learningObjectives: string;
 }) {
   await prisma.scenario.create({
@@ -139,7 +136,6 @@ export async function createScenario(data: {
       topology: data.topology ?? undefined,
       teaserText: data.teaserText || null,
       teaserImageURL: data.teaserImageURL || null,
-      youtubeChannelId: data.youtubeChannelId || null,
       learningObjectives: data.learningObjectives || null,
     },
   });

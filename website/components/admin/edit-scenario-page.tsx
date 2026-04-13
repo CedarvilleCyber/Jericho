@@ -326,7 +326,6 @@ export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions
     topologyURL: scenario.topologyURL ?? "",
     teaserText: scenario.teaserText ?? "",
     teaserImageURL: scenario.teaserImageURL ?? "",
-    youtubeChannelId: scenario.youtubeChannelId ?? "",
     learningObjectives: scenario.learningObjectives ?? "",
   });
   const [topology, setTopology] = useState<Topology>(parseTopology(scenario.topology));
@@ -390,12 +389,6 @@ export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions
                     onChange={(e) => setForm({ ...form, topologyURL: e.target.value })} />
                 </label>
               </div>
-              <label className="form-control">
-                <div className="label"><span className="label-text">YouTube Channel ID</span></div>
-                <input className="input input-bordered w-full" value={form.youtubeChannelId}
-                  placeholder="Optional"
-                  onChange={(e) => setForm({ ...form, youtubeChannelId: e.target.value })} />
-              </label>
               <label className="form-control">
                 <div className="label"><span className="label-text">Learning Objectives</span></div>
                 <textarea className="textarea textarea-bordered w-full" rows={3}

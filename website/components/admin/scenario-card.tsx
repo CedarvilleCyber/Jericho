@@ -40,12 +40,6 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioWithQuestions }) 
               <span className="text-base-content/70 font-mono text-xs">{scenario.topologyURL}</span>
             </div>
           )}
-          {scenario.youtubeChannelId && (
-            <div>
-              <span className="font-semibold">YouTube: </span>
-              <span className="text-base-content/70">{scenario.youtubeChannelId}</span>
-            </div>
-          )}
         </div>
 
         {scenario.learningObjectives && (
