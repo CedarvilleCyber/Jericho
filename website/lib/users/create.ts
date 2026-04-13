@@ -40,6 +40,7 @@ export async function bulkCreateUsers(
           name: user.name,
           email: user.email,
           emailVerified: true,
+          role: "user",
           userRoles: { create: { role: "STUDENT" } },
         },
       });

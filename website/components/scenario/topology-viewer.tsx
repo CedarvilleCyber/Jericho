@@ -2,7 +2,7 @@
 
 import { useHint } from "@/lib/scenarios/hint";
 import { Topology, TopologyNode } from "@/lib/scenarios/topology-types";
-import { ReactFlow, useReactFlow, type Node, type Edge } from "@xyflow/react";
+import { ReactFlow, useReactFlow, useNodesInitialized, useStore, type Node, type Edge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { TopologyMachineNode } from "./topology-node";
 import { useEffect, useTransition } from "react";
@@ -36,9 +36,11 @@ function buildPositions(
 
 function FitViewEffect({ hintsUsed }: { hintsUsed: number }) {
   const { fitView } = useReactFlow();
+  const nodesInitialized = useNodesInitialized();
+  const width = useStore((s) => s.width);
   useEffect(() => {
-    fitView({ duration: 400 });
-  }, [hintsUsed, fitView]);
+    if (nodesInitialized && width > 0) fitView({ duration: 400 });
+  }, [hintsUsed, nodesInitialized, width, fitView]);
   return null;
 }
 
@@ -92,7 +94,6 @@ export default function TopologyViewer({
           nodes={rfNodes}
           edges={rfEdges}
           nodeTypes={NODE_TYPES}
-          fitView
           colorMode={theme === "business" ? "dark" : "light"}
         >
           <FitViewEffect hintsUsed={hintsUsed} />

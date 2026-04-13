@@ -21,7 +21,8 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useSaveGuard } from "./save-guard";
 
 const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
@@ -312,13 +313,12 @@ function QuestionsList({
   );
 }
 
-export function EditScenarioModal({
-  scenario,
-  onClose,
-}: {
-  scenario: ScenarioWithQuestions;
-  onClose: () => void;
-}) {
+export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions }) {
+  const router = useRouter();
+  const { handleCancelAttempt, confirmDialog } = useSaveGuard(() =>
+    router.push("/admin/scenarios"),
+  );
+
   const [form, setForm] = useState({
     name: scenario.name,
     description: scenario.description,
@@ -329,9 +329,7 @@ export function EditScenarioModal({
     youtubeChannelId: scenario.youtubeChannelId ?? "",
     learningObjectives: scenario.learningObjectives ?? "",
   });
-  const [topology, setTopology] = useState<Topology>(
-    parseTopology(scenario.topology),
-  );
+  const [topology, setTopology] = useState<Topology>(parseTopology(scenario.topology));
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -341,87 +339,89 @@ export function EditScenarioModal({
       topology: topology.nodes.length > 0 ? topology : null,
     });
     setSaving(false);
-    onClose();
+    router.push("/admin/scenarios");
   }
-
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const { handleCancelAttempt, handleDialogCancel, confirmDialog } = useSaveGuard(onClose);
-  useEffect(() => { dialogRef.current?.showModal(); }, []);
 
   return (
     <>
-    <dialog ref={dialogRef} className="modal" onCancel={handleDialogCancel}>
-      <div className="modal-box max-w-2xl max-h-[90vh] overflow-y-auto overscroll-contain">
-        <h3 className="font-bold text-lg mb-4">Edit Scenario</h3>
-        <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-3">
-            <label className="form-control">
-              <div className="label"><span className="label-text">Name</span></div>
-              <input className="input input-bordered w-full" value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            </label>
-            <label className="form-control">
-              <div className="label"><span className="label-text">Slug</span></div>
-              <input className="input input-bordered w-full" value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: e.target.value })} />
-            </label>
+      <div className="flex flex-col mt-3">
+        <div className="mx-auto w-3xl">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Edit Scenario</h2>
           </div>
-          <label className="form-control">
-            <div className="label"><span className="label-text">Description</span></div>
-            <textarea className="textarea textarea-bordered w-full" rows={3}
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })} />
-          </label>
-          <label className="form-control">
-            <div className="label"><span className="label-text">Teaser Text</span></div>
-            <textarea className="textarea textarea-bordered w-full" rows={2}
-              value={form.teaserText} placeholder="Optional"
-              onChange={(e) => setForm({ ...form, teaserText: e.target.value })} />
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="form-control">
-              <div className="label"><span className="label-text">Teaser Image URL</span></div>
-              <input className="input input-bordered w-full" value={form.teaserImageURL}
-                placeholder="Optional"
-                onChange={(e) => setForm({ ...form, teaserImageURL: e.target.value })} />
-            </label>
-            <label className="form-control">
-              <div className="label"><span className="label-text">Topology URL</span></div>
-              <input className="input input-bordered w-full" value={form.topologyURL}
-                placeholder="Optional"
-                onChange={(e) => setForm({ ...form, topologyURL: e.target.value })} />
-            </label>
+
+          <div className="card bg-base-100 border border-base-300 shadow-md">
+            <div className="card-body flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-3">
+                <label className="form-control">
+                  <div className="label"><span className="label-text">Name</span></div>
+                  <input className="input input-bordered w-full" value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                </label>
+                <label className="form-control">
+                  <div className="label"><span className="label-text">Slug</span></div>
+                  <input className="input input-bordered w-full" value={form.slug}
+                    onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+                </label>
+              </div>
+              <label className="form-control">
+                <div className="label"><span className="label-text">Description</span></div>
+                <textarea className="textarea textarea-bordered w-full" rows={3}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              </label>
+              <label className="form-control">
+                <div className="label"><span className="label-text">Teaser Text</span></div>
+                <textarea className="textarea textarea-bordered w-full" rows={2}
+                  value={form.teaserText} placeholder="Optional"
+                  onChange={(e) => setForm({ ...form, teaserText: e.target.value })} />
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="form-control">
+                  <div className="label"><span className="label-text">Teaser Image URL</span></div>
+                  <input className="input input-bordered w-full" value={form.teaserImageURL}
+                    placeholder="Optional"
+                    onChange={(e) => setForm({ ...form, teaserImageURL: e.target.value })} />
+                </label>
+                <label className="form-control">
+                  <div className="label"><span className="label-text">Topology URL</span></div>
+                  <input className="input input-bordered w-full" value={form.topologyURL}
+                    placeholder="Optional"
+                    onChange={(e) => setForm({ ...form, topologyURL: e.target.value })} />
+                </label>
+              </div>
+              <label className="form-control">
+                <div className="label"><span className="label-text">YouTube Channel ID</span></div>
+                <input className="input input-bordered w-full" value={form.youtubeChannelId}
+                  placeholder="Optional"
+                  onChange={(e) => setForm({ ...form, youtubeChannelId: e.target.value })} />
+              </label>
+              <label className="form-control">
+                <div className="label"><span className="label-text">Learning Objectives</span></div>
+                <textarea className="textarea textarea-bordered w-full" rows={3}
+                  value={form.learningObjectives} placeholder="Optional"
+                  onChange={(e) => setForm({ ...form, learningObjectives: e.target.value })} />
+              </label>
+              <TopologyEditor value={topology} onChange={setTopology} />
+              <SectionsList sections={scenario.sections} scenarioId={scenario.id} />
+              <QuestionsList
+                questions={scenario.questions}
+                sections={scenario.sections}
+                scenarioId={scenario.id}
+              />
+
+              <div className="flex justify-end gap-2 mt-2">
+                <button className="btn btn-ghost" onClick={handleCancelAttempt}>Cancel</button>
+                <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                  {saving ? <span className="loading loading-spinner loading-sm" /> : "Save"}
+                </button>
+              </div>
+            </div>
           </div>
-          <label className="form-control">
-            <div className="label"><span className="label-text">YouTube Channel ID</span></div>
-            <input className="input input-bordered w-full" value={form.youtubeChannelId}
-              placeholder="Optional"
-              onChange={(e) => setForm({ ...form, youtubeChannelId: e.target.value })} />
-          </label>
-          <label className="form-control">
-            <div className="label"><span className="label-text">Learning Objectives</span></div>
-            <textarea className="textarea textarea-bordered w-full" rows={3}
-              value={form.learningObjectives} placeholder="Optional"
-              onChange={(e) => setForm({ ...form, learningObjectives: e.target.value })} />
-          </label>
-          <TopologyEditor value={topology} onChange={setTopology} />
-          <SectionsList sections={scenario.sections} scenarioId={scenario.id} />
-          <QuestionsList
-            questions={scenario.questions}
-            sections={scenario.sections}
-            scenarioId={scenario.id}
-          />
-        </div>
-        <div className="modal-action">
-          <button className="btn btn-ghost" onClick={handleCancelAttempt}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? <span className="loading loading-spinner loading-sm" /> : "Save"}
-          </button>
         </div>
       </div>
-      <div className="modal-backdrop" onClick={handleCancelAttempt} />
-    </dialog>
-    {confirmDialog}
+
+      {confirmDialog}
     </>
   );
 }

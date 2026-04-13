@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
+import { IconBrandWindows } from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -26,6 +27,7 @@ function SignInForm() {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [microsoftLoading, setMicrosoftLoading] = useState(false);
   const [signUpEmail, setSignUpEmail] = useState("");
   const router = useRouter();
 
@@ -101,6 +103,24 @@ function SignInForm() {
     }
   };
 
+  const handleMicrosoftSignIn = async () => {
+    setError("");
+    setMicrosoftLoading(true);
+
+    try {
+      await authClient.signIn.social({
+        provider: "microsoft",
+        callbackURL: "/",
+        errorCallbackURL: "/sign-in",
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to sign in with Microsoft",
+      );
+      setMicrosoftLoading(false);
+    }
+  };
+
   if (signUpEmail) {
     return (
       <div className="max-w-sm mx-auto px-4 flex min-h-screen items-center justify-center py-12">
@@ -142,6 +162,23 @@ function SignInForm() {
               </p>
             </div>
 
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                className="btn btn-outline w-full"
+                onClick={handleMicrosoftSignIn}
+                disabled={loading || microsoftLoading}
+              >
+                {microsoftLoading ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  <IconBrandWindows size={18} />
+                )}
+                Continue with Microsoft
+              </button>
+              <div className="divider my-0 text-xs text-base-content/40">or</div>
+            </div>
+
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-4">
                 {isSignUp && (
@@ -157,7 +194,7 @@ function SignInForm() {
                       required
                       value={name}
                       onChange={(e) => setName(e.currentTarget.value)}
-                      disabled={loading}
+                      disabled={loading || microsoftLoading}
                     />
                   </label>
                 )}
@@ -175,7 +212,7 @@ function SignInForm() {
                       placeholder="Your username"
                       value={username}
                       onChange={(e) => setUsername(e.currentTarget.value)}
-                      disabled={loading}
+                      disabled={loading || microsoftLoading}
                     />
                   </label>
                 )}
@@ -200,7 +237,7 @@ function SignInForm() {
                         ? setEmail(e.currentTarget.value)
                         : setEmailOrUsername(e.currentTarget.value)
                     }
-                    disabled={loading}
+                    disabled={loading || microsoftLoading}
                   />
                 </label>
 
@@ -218,7 +255,7 @@ function SignInForm() {
                     minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.currentTarget.value)}
-                    disabled={loading}
+                    disabled={loading || microsoftLoading}
                   />
                 </label>
 
@@ -239,7 +276,7 @@ function SignInForm() {
                       onChange={(e) =>
                         setConfirmPassword(e.currentTarget.value)
                       }
-                      disabled={loading}
+                      disabled={loading || microsoftLoading}
                     />
                   </label>
                 )}
@@ -249,7 +286,7 @@ function SignInForm() {
                 <button
                   type="submit"
                   className="btn btn-primary w-full"
-                  disabled={loading}
+                  disabled={loading || microsoftLoading}
                 >
                   {loading && (
                     <span className="loading loading-spinner loading-xs" />
@@ -294,21 +331,21 @@ function SignInForm() {
                         value={resetEmail}
                         onChange={(e) => setResetEmail(e.currentTarget.value)}
                         required
-                        disabled={resetLoading}
+                        disabled={resetLoading || microsoftLoading}
                       />
                       <div className="flex gap-2">
                         <button
                           type="button"
                           className="btn btn-ghost btn-sm flex-1"
                           onClick={() => setShowResetForm(false)}
-                          disabled={resetLoading}
+                          disabled={resetLoading || microsoftLoading}
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
                           className="btn btn-primary btn-sm flex-1"
-                          disabled={resetLoading}
+                          disabled={resetLoading || microsoftLoading}
                         >
                           {resetLoading && (
                             <span className="loading loading-spinner loading-xs" />
@@ -336,6 +373,7 @@ function SignInForm() {
                   setError("");
                   setConfirmPassword("");
                 }}
+                disabled={loading || microsoftLoading}
               >
                 {isSignUp ? "Sign In" : "Sign Up"}
               </button>

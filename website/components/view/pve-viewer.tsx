@@ -40,6 +40,7 @@ export default function PVEViewer({ vmId }: { vmId: number }) {
       href={noVncConsoleURL || "#"}
       target="_blank"
       rel="noopener noreferrer"
+      className="basis-full"
     >
       <iframe
         src={noVncConsoleURL || ""}

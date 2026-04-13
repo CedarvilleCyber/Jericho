@@ -1,13 +1,8 @@
 import { ScenarioWithQuestions } from "@/components/admin/scenario-types";
 import { IconPencil } from "@tabler/icons-react";
+import Link from "next/link";
 
-export function ScenarioCard({
-  scenario,
-  onEdit,
-}: {
-  scenario: ScenarioWithQuestions;
-  onEdit: () => void;
-}) {
+export function ScenarioCard({ scenario }: { scenario: ScenarioWithQuestions }) {
   return (
     <div className="card card-border bg-base-100 shadow-md mb-4">
       <div className="card-body p-5">
@@ -16,12 +11,15 @@ export function ScenarioCard({
             <h3 className="card-title text-lg">{scenario.name}</h3>
             <p className="text-xs text-base-content/50 font-mono">/{scenario.slug}</p>
           </div>
-          <button className="btn btn-sm btn-ghost shrink-0" onClick={onEdit}>
+          <Link
+            href={`/admin/scenarios/${scenario.id}/edit`}
+            className="btn btn-sm btn-ghost shrink-0"
+          >
             <IconPencil size={16} /> Edit
-          </button>
+          </Link>
         </div>
 
-        <p className="text-sm text-base-content/80 mt-1">{scenario.description}</p>
+        <p className="text-sm text-base-content/80 mt-1 whitespace-pre-wrap">{scenario.description}</p>
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 text-sm">
           {scenario.teaserText && (

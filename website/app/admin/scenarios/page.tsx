@@ -1,12 +1,12 @@
 import CreateScenarioButton from "@/components/admin/create-scenario-button";
-import ScenarioEditor from "@/components/admin/scenario-editor";
+import { ScenarioCard } from "@/components/admin/scenario-card";
 import prisma from "@/lib/prisma";
 
 export default async function ScenariosPage() {
   const scenarios = await prisma.scenario.findMany({
     include: {
       questions: {
-        include: { section: true },
+        include: { section: true, hints: { orderBy: { order: "asc" } } },
         orderBy: { order: "asc" },
       },
       sections: { orderBy: { order: "asc" } },
@@ -22,7 +22,7 @@ export default async function ScenariosPage() {
           <CreateScenarioButton />
         </div>
         {scenarios.map((scenario) => (
-          <ScenarioEditor key={scenario.id} scenario={scenario} />
+          <ScenarioCard key={scenario.id} scenario={scenario} />
         ))}
       </div>
     </div>

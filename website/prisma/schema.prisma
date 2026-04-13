@@ -27,6 +27,7 @@ model User {
   vms           VM[]
   userRoles     UserRole[]
   userAnswers   UserAnswer[]
+  userHints     UserHint[]
 
   username        String?
   displayUsername String?
@@ -190,6 +191,7 @@ model Question {
   placeholder     String
   validationRegex String?
   answer          String
+  answerIsRegex   Boolean      @default(false)
   pointValue      Int          @default(10)
   type            QuestionType @default(TEXT)
   options         String?
@@ -206,8 +208,34 @@ model Question {
 
   competencies Competency[]
   userAnswers  UserAnswer[]
+  hints        Hint[]
 
   @@map("question")
+}
+
+model Hint {
+  id         String   @id @default(cuid())
+  text       String
+  order      Int      @default(0)
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userHints  UserHint[]
+
+  @@map("hint")
+}
+
+model UserHint {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hintId    String
+  hint      Hint     @relation(fields: [hintId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, hintId])
+  @@map("user_hint")
 }
 
 model UserAnswer {

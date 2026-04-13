@@ -9,6 +9,7 @@ import {
   IconLogout,
   IconSettings,
   IconShieldLock,
+  IconTrophy,
   IconUser,
 } from "@tabler/icons-react";
 import Image from "next/image";
@@ -74,6 +75,12 @@ export default function AppBar() {
                     <Link href="/me">
                       <IconSettings size={16} />
                       Account
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/leaderboard">
+                      <IconTrophy size={16} />
+                      Leaderboard
                     </Link>
                   </li>
                   {isAdmin && (

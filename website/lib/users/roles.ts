@@ -26,5 +26,11 @@ export async function updateUserRoles(
     });
   }
 
+  const authRole = roles.includes(Role.ADMIN) ? "admin" : "user";
+  await prisma.user.update({
+    where: { id: userId },
+    data: { role: authRole },
+  });
+
   return {};
 }

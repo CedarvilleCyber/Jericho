@@ -1,4 +1,5 @@
 import DeleteUserButton from "@/components/admin/delete-user";
+import ImpersonateUserButton from "@/components/admin/impersonate-user-button";
 import RoleSelect from "@/components/admin/role-select";
 import VMsTabContent from "@/components/admin/vms-tab-content";
 import AddExistingScenarioPage from "@/components/scenario/add-existing-scenario";
@@ -72,6 +73,9 @@ export default async function AdminUserPage({
               userId={user.id}
               initialRoles={user.userRoles.map((ur) => ur.role)}
             />
+          </div>
+          <div className="mt-4">
+            <ImpersonateUserButton userId={user.id} userName={user.name || user.email} />
           </div>
           <DeleteUserButton userId={user.id} />
         </div>
