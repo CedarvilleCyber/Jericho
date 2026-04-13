@@ -42,11 +42,13 @@ export async function updateQuestion(
     placeholder: string;
     validationRegex: string;
     answer: string;
+    answerIsRegex: boolean;
     pointValue: number;
     type: QuestionType;
     options: string | null;
     sectionId: string | null;
     order: number;
+    hints: { text: string; order: number }[];
   },
 ) {
   await prisma.question.update({
@@ -56,6 +58,7 @@ export async function updateQuestion(
       placeholder: data.placeholder,
       validationRegex: data.validationRegex || null,
       answer: data.answer,
+      answerIsRegex: data.answerIsRegex,
       pointValue: data.pointValue,
       type: data.type,
       options: data.options || null,
@@ -63,6 +66,12 @@ export async function updateQuestion(
       order: data.order,
     },
   });
+  await prisma.hint.deleteMany({ where: { questionId: id } });
+  if (data.hints.length > 0) {
+    await prisma.hint.createMany({
+      data: data.hints.map((h) => ({ questionId: id, text: h.text, order: h.order })),
+    });
+  }
   revalidatePath("/admin/scenarios");
 }
 
@@ -73,20 +82,23 @@ export async function addQuestion(
     placeholder: string;
     validationRegex: string;
     answer: string;
+    answerIsRegex: boolean;
     pointValue: number;
     type: QuestionType;
     options: string | null;
     sectionId: string | null;
     order: number;
+    hints: { text: string; order: number }[];
   },
 ) {
-  await prisma.question.create({
+  const question = await prisma.question.create({
     data: {
       scenarioId,
       title: data.title,
       placeholder: data.placeholder,
       validationRegex: data.validationRegex || null,
       answer: data.answer,
+      answerIsRegex: data.answerIsRegex,
       pointValue: data.pointValue,
       type: data.type,
       options: data.options || null,
@@ -94,6 +106,11 @@ export async function addQuestion(
       order: data.order,
     },
   });
+  if (data.hints.length > 0) {
+    await prisma.hint.createMany({
+      data: data.hints.map((h) => ({ questionId: question.id, text: h.text, order: h.order })),
+    });
+  }
   revalidatePath("/admin/scenarios");
 }
 

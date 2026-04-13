@@ -3,7 +3,8 @@
 import { addQuestion, updateQuestion } from "@/app/admin/scenarios/actions";
 import { QuestionWithSection, QuestionType } from "./scenario-types";
 import { Section } from "@/app/generated/prisma/client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSaveGuard } from "./save-guard";
 import { IconPlus, IconTrash, IconArrowUp, IconArrowDown } from "@tabler/icons-react";
 
 const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
@@ -21,10 +22,12 @@ type FormState = {
   placeholder: string;
   validationRegex: string;
   answer: string;
+  answerIsRegex: boolean;
   pointValue: number;
   options: string[];
   sectionId: string;
   order: number;
+  hints: { text: string; order: number }[];
 };
 
 function OptionsEditor({
@@ -87,6 +90,86 @@ function OptionsEditor({
       ))}
       <button type="button" className="btn btn-ghost btn-sm self-start gap-1" onClick={addOption}>
         <IconPlus size={14} /> Add option
+      </button>
+    </div>
+  );
+}
+
+function HintsEditor({
+  hints,
+  onChange,
+}: {
+  hints: { text: string; order: number }[];
+  onChange: (hints: { text: string; order: number }[]) => void;
+}) {
+  function addHint() {
+    onChange([...hints, { text: "", order: hints.length }]);
+  }
+
+  function removeHint(i: number) {
+    onChange(hints.filter((_, idx) => idx !== i).map((h, idx) => ({ ...h, order: idx })));
+  }
+
+  function updateHint(i: number, text: string) {
+    onChange(hints.map((h, idx) => (idx === i ? { ...h, text } : h)));
+  }
+
+  function moveUp(i: number) {
+    if (i === 0) return;
+    const next = [...hints];
+    [next[i - 1], next[i]] = [next[i], next[i - 1]];
+    onChange(next.map((h, idx) => ({ ...h, order: idx })));
+  }
+
+  function moveDown(i: number) {
+    if (i === hints.length - 1) return;
+    const next = [...hints];
+    [next[i], next[i + 1]] = [next[i + 1], next[i]];
+    onChange(next.map((h, idx) => ({ ...h, order: idx })));
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="label">
+        <span className="label-text">Hints</span>
+        <span className="label-text-alt text-base-content/60">Revealed one at a time</span>
+      </div>
+      {hints.map((hint, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="text-base-content/40 text-sm w-4 shrink-0">{i + 1}.</span>
+          <input
+            className="input input-bordered input-sm flex-1"
+            value={hint.text}
+            placeholder={`Hint ${i + 1}`}
+            onChange={(e) => updateHint(i, e.target.value)}
+          />
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-square"
+            onClick={() => moveUp(i)}
+            disabled={i === 0}
+          >
+            <IconArrowUp size={14} />
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-square"
+            onClick={() => moveDown(i)}
+            disabled={i === hints.length - 1}
+          >
+            <IconArrowDown size={14} />
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-square"
+            onClick={() => removeHint(i)}
+          >
+            <IconTrash size={14} />
+          </button>
+        </div>
+      ))}
+      <button type="button" className="btn btn-ghost btn-sm self-start gap-1" onClick={addHint}>
+        <IconPlus size={14} /> Add hint
       </button>
     </div>
   );
@@ -251,22 +334,33 @@ function QuestionFields({
       )}
 
       {(form.type === "TEXT" || form.type === "LONG_TEXT") && (
-        <label className="form-control">
-          <div className="label"><span className="label-text">Answer</span></div>
-          {form.type === "LONG_TEXT" ? (
-            <textarea
-              className="textarea textarea-bordered w-full"
-              value={form.answer}
-              onChange={(e) => setForm({ ...form, answer: e.target.value })}
-            />
-          ) : (
+        <>
+          <label className="form-control">
+            <div className="label"><span className="label-text">Answer</span></div>
+            {form.type === "LONG_TEXT" ? (
+              <textarea
+                className="textarea textarea-bordered w-full"
+                value={form.answer}
+                onChange={(e) => setForm({ ...form, answer: e.target.value })}
+              />
+            ) : (
+              <input
+                className="input input-bordered w-full"
+                value={form.answer}
+                onChange={(e) => setForm({ ...form, answer: e.target.value })}
+              />
+            )}
+          </label>
+          <label className="label cursor-pointer gap-2 justify-start">
             <input
-              className="input input-bordered w-full"
-              value={form.answer}
-              onChange={(e) => setForm({ ...form, answer: e.target.value })}
+              type="checkbox"
+              className="checkbox checkbox-sm"
+              checked={form.answerIsRegex}
+              onChange={(e) => setForm({ ...form, answerIsRegex: e.target.checked })}
             />
-          )}
-        </label>
+            <span className="label-text">Answer is a regex pattern</span>
+          </label>
+        </>
       )}
 
       {form.type === "NUMERIC" && (
@@ -349,6 +443,11 @@ function QuestionFields({
           onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
         />
       </label>
+
+      <HintsEditor
+        hints={form.hints}
+        onChange={(hints) => setForm({ ...form, hints })}
+      />
     </div>
   );
 }
@@ -378,10 +477,12 @@ export function EditQuestionModal({
     placeholder: question.placeholder,
     validationRegex: question.validationRegex ?? "",
     answer: question.answer,
+    answerIsRegex: question.answerIsRegex,
     pointValue: question.pointValue,
     options: optionsFromQuestion(question),
     sectionId: question.sectionId ?? "",
     order: question.order,
+    hints: [...question.hints].sort((a, b) => a.order - b.order).map((h) => ({ text: h.text, order: h.order })),
   });
   const [saving, setSaving] = useState(false);
 
@@ -402,20 +503,27 @@ export function EditQuestionModal({
     onClose();
   }
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const { handleCancelAttempt, handleDialogCancel, confirmDialog } = useSaveGuard(onClose);
+  useEffect(() => { dialogRef.current?.showModal(); }, []);
+
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto">
-        <h3 className="font-bold text-lg mb-4">Edit Question</h3>
-        <QuestionFields form={form} setForm={setForm} sections={sections} />
-        <div className="modal-action">
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? <span className="loading loading-spinner loading-sm" /> : "Save"}
-          </button>
+    <>
+      <dialog ref={dialogRef} className="modal" onCancel={handleDialogCancel}>
+        <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto">
+          <h3 className="font-bold text-lg mb-4">Edit Question</h3>
+          <QuestionFields form={form} setForm={setForm} sections={sections} />
+          <div className="modal-action">
+            <button className="btn btn-ghost" onClick={handleCancelAttempt}>Cancel</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? <span className="loading loading-spinner loading-sm" /> : "Save"}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="modal-backdrop" onClick={onClose} />
-    </div>
+        <div className="modal-backdrop" onClick={handleCancelAttempt} />
+      </dialog>
+      {confirmDialog}
+    </>
   );
 }
 
@@ -436,10 +544,12 @@ export function AddQuestionModal({
     placeholder: "",
     validationRegex: "",
     answer: "",
+    answerIsRegex: false,
     pointValue: 10,
     options: [],
     sectionId: "",
     order: nextOrder,
+    hints: [],
   });
   const [saving, setSaving] = useState(false);
 
@@ -460,19 +570,28 @@ export function AddQuestionModal({
     onClose();
   }
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const { handleCancelAttempt, handleDialogCancel, confirmDialog } = useSaveGuard(onClose, {
+    title: "Discard question?",
+  });
+  useEffect(() => { dialogRef.current?.showModal(); }, []);
+
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto">
-        <h3 className="font-bold text-lg mb-4">Add Question</h3>
-        <QuestionFields form={form} setForm={setForm} sections={sections} />
-        <div className="modal-action">
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? <span className="loading loading-spinner loading-sm" /> : "Add"}
-          </button>
+    <>
+      <dialog ref={dialogRef} className="modal" onCancel={handleDialogCancel}>
+        <div className="modal-box max-w-lg max-h-[90vh] overflow-y-auto">
+          <h3 className="font-bold text-lg mb-4">Add Question</h3>
+          <QuestionFields form={form} setForm={setForm} sections={sections} />
+          <div className="modal-action">
+            <button className="btn btn-ghost" onClick={handleCancelAttempt}>Cancel</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? <span className="loading loading-spinner loading-sm" /> : "Add"}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="modal-backdrop" onClick={onClose} />
-    </div>
+        <div className="modal-backdrop" onClick={handleCancelAttempt} />
+      </dialog>
+      {confirmDialog}
+    </>
   );
 }

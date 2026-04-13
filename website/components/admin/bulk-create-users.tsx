@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { useSaveGuard } from "./save-guard";
 
 type UserRow = {
   id: string;
@@ -61,6 +62,9 @@ export default function BulkCreateUsers() {
   const [results, setResults] = useState<ResultWithPassword[] | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { handleCancelAttempt: showConfirmation, confirmDialog } = useSaveGuard(close, {
+    title: "Discard users?",
+  });
 
   function updateRow(id: string, patch: Partial<UserRow>) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
@@ -76,6 +80,14 @@ export default function BulkCreateUsers() {
     dialogRef.current?.close();
     if (results?.some((r) => r.success)) {
       router.refresh();
+    }
+  }
+
+  function handleCancelClick() {
+    if (results) {
+      close();
+    } else {
+      showConfirmation();
     }
   }
 
@@ -113,7 +125,11 @@ export default function BulkCreateUsers() {
         Create Users
       </button>
 
-      <dialog ref={dialogRef} className="modal">
+      <dialog
+        ref={dialogRef}
+        className="modal"
+        onCancel={(e) => { e.preventDefault(); handleCancelClick(); }}
+      >
         <div className="modal-box max-w-3xl w-full">
           <h3 className="font-bold text-lg mb-4">Create Users</h3>
 
@@ -293,7 +309,7 @@ export default function BulkCreateUsers() {
               <div className="modal-action">
                 <button
                   className="btn"
-                  onClick={close}
+                  onClick={handleCancelClick}
                   disabled={loading}
                 >
                   Cancel
@@ -310,10 +326,9 @@ export default function BulkCreateUsers() {
             </div>
           )}
         </div>
-        <form method="dialog" className="modal-backdrop">
-          <button onClick={close}>close</button>
-        </form>
+        <div className="modal-backdrop" onClick={handleCancelClick} />
       </dialog>
+      {confirmDialog}
     </>
   );
 }

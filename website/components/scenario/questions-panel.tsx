@@ -1,9 +1,9 @@
 "use client";
 
-import { submitAnswer } from "@/lib/scenarios/answer";
+import { submitAnswer, revealHint } from "@/lib/scenarios/answer";
 import { Section, UserAnswer } from "@/app/generated/prisma/client";
 import { QuestionWithSection } from "@/components/admin/scenario-types";
-import { IconCheck, IconLock, IconX } from "@tabler/icons-react";
+import { IconCheck, IconLock, IconX, IconBulb } from "@tabler/icons-react";
 import { useState } from "react";
 
 type AnswerState = {
@@ -12,6 +12,7 @@ type AnswerState = {
   submitting: boolean;
   correct: boolean | null;
   validationError: string | null;
+  hintsRevealed: number;
 };
 
 function parseOptions(options: string | null): string[] {
@@ -28,9 +29,11 @@ function parseOptions(options: string | null): string[] {
 function QuestionBox({
   question,
   existingAnswer,
+  revealedHintIds,
 }: {
   question: QuestionWithSection;
   existingAnswer: UserAnswer | undefined;
+  revealedHintIds: Set<string>;
 }) {
   const options = parseOptions(question.options);
 
@@ -40,12 +43,17 @@ function QuestionBox({
     return options;
   }
 
+  const initialHintsRevealed = question.hints.filter((h) =>
+    revealedHintIds.has(h.id)
+  ).length;
+
   const [state, setState] = useState<AnswerState>({
     value: existingAnswer?.answer ?? "",
     orderedItems: initOrderedItems(),
     submitting: false,
     correct: null,
     validationError: null,
+    hintsRevealed: initialHintsRevealed,
   });
 
   function validate(value: string): string | null {
@@ -257,6 +265,33 @@ function QuestionBox({
             Incorrect — try again.
           </div>
         )}
+
+        {question.hints.length > 0 && state.correct !== true && (
+          <div className="flex flex-col gap-2 pt-1 border-t border-base-300">
+            {question.hints.slice(0, state.hintsRevealed).map((hint, i) => (
+              <div key={hint.id} className="alert alert-info py-2 text-sm gap-2">
+                <IconBulb size={16} className="shrink-0" />
+                <span><span className="font-medium">Hint {i + 1}:</span> {hint.text}</span>
+              </div>
+            ))}
+            {state.hintsRevealed < question.hints.length && (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm self-start gap-1.5"
+                onClick={() => {
+                  const nextHint = question.hints[state.hintsRevealed];
+                  if (nextHint) revealHint(nextHint.id);
+                  setState((s) => ({ ...s, hintsRevealed: s.hintsRevealed + 1 }));
+                }}
+              >
+                <IconBulb size={14} />
+                {state.hintsRevealed === 0
+                  ? `Show hint (${question.hints.length} available)`
+                  : `Show hint ${state.hintsRevealed + 1} of ${question.hints.length}`}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -283,11 +318,13 @@ export default function QuestionsPanel({
   sections,
   userAnswers,
   correctQuestionIds,
+  revealedHintIds = [],
 }: {
   questions: QuestionWithSection[];
   sections: Section[];
   userAnswers: UserAnswer[];
   correctQuestionIds: string[];
+  revealedHintIds?: string[];
 }) {
   const sortedSections = [...sections].sort((a, b) => a.order - b.order);
   const unsectioned = questions
@@ -296,6 +333,7 @@ export default function QuestionsPanel({
 
   const answerMap = Object.fromEntries(userAnswers.map((a) => [a.questionId, a]));
   const correctSet = new Set(correctQuestionIds);
+  const revealedHintSet = new Set(revealedHintIds);
 
   // Build a flat ordered list: unsectioned first, then sections in order
   const flatOrder: QuestionWithSection[] = [
@@ -316,7 +354,7 @@ export default function QuestionsPanel({
     <div className="flex flex-col gap-3 py-4">
       {unsectioned.map((q) =>
         visibleIds.has(q.id) ? (
-          <QuestionBox key={q.id} question={q} existingAnswer={answerMap[q.id]} />
+          <QuestionBox key={q.id} question={q} existingAnswer={answerMap[q.id]} revealedHintIds={revealedHintSet} />
         ) : null,
       )}
 
@@ -342,7 +380,7 @@ export default function QuestionsPanel({
             ) : (
               sectionQuestions.map((q) =>
                 visibleIds.has(q.id) ? (
-                  <QuestionBox key={q.id} question={q} existingAnswer={answerMap[q.id]} />
+                  <QuestionBox key={q.id} question={q} existingAnswer={answerMap[q.id]} revealedHintIds={revealedHintSet} />
                 ) : null,
               )
             )}

@@ -44,6 +44,10 @@ export default async function ScenarioLabPage({
         include: {
           userAnswers: { where: { userId: session.user.id } },
           section: true,
+          hints: {
+            orderBy: { order: "asc" },
+            include: { userHints: { where: { userId: session.user.id } } },
+          },
         },
         orderBy: { order: "asc" },
       },
@@ -56,8 +60,16 @@ export default async function ScenarioLabPage({
     redirect("/me/scenarios");
   }
 
+  const revealedHintIds = scenario.questions
+    .flatMap((q) => q.hints)
+    .filter(
+      (h) =>
+        ((h as typeof h & { userHints?: unknown[] }).userHints?.length ?? 0) > 0
+    )
+    .map((h) => h.id);
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="mx-6 px-4 py-8">
       <div className="breadcrumbs text-sm mb-6">
         <ul>
           <li>
@@ -126,12 +138,16 @@ export default async function ScenarioLabPage({
                       questions={scenario.questions}
                       sections={scenario.sections}
                       userAnswers={scenario.questions.flatMap((q) => q.userAnswers)}
+                      revealedHintIds={revealedHintIds}
                       correctQuestionIds={scenario.questions
                         .filter((q) => {
                           const ua = q.userAnswers[0];
                           if (!ua) return false;
                           if (q.type === "NUMERIC")
                             return parseFloat(ua.answer.trim()) === parseFloat(q.answer.trim());
+                          if (q.answerIsRegex) {
+                            try { return new RegExp(q.answer).test(ua.answer.trim()); } catch { return false; }
+                          }
                           return ua.answer.trim() === q.answer.trim();
                         })
                         .map((q) => q.id)}
