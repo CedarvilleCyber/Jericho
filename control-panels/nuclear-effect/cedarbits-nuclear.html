@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jericho Nuclear</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --green: #00ff41;
+    --green-dim: #007a1f;
+    --green-glow: #00ff4188;
+    --amber: #ffb300;
+    --red: #ff2020;
+    --red-dim: #7a0000;
+    --panel: #0d0d0d;
+    --panel-mid: #141414;
+    --panel-light: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #00cc33;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #050505;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--green);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* SCANLINE flicker */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.85; }
+    94% { opacity: 1; }
+    97% { opacity: 0.9; }
+  }
+  body { animation: flicker 8s infinite; }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    border: 1px solid var(--green-dim);
+    padding: 10px 40px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 1100px;
+    background: var(--panel);
+    position: relative;
+  }
+  .header::before, .header::after {
+    content: '◄◄◄';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--green-dim);
+    font-size: 12px;
+  }
+  .header::before { left: 10px; }
+  .header::after { right: 10px; content: '►►►'; }
+
+  .facility-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 6px;
+    color: var(--green-dim);
+    margin-bottom: 4px;
+  }
+  .unit-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px var(--green-glow);
+  }
+  .clock {
+    font-size: 11px;
+    color: var(--green-dim);
+    margin-top: 4px;
+    letter-spacing: 3px;
+  }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    width: 100%;
+    max-width: 1100px;
+    background: var(--red-dim);
+    border: 1px solid var(--red);
+    padding: 6px 16px;
+    margin-bottom: 16px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    animation: alert-pulse 0.6s infinite;
+  }
+  .alert-banner.active { display: flex; }
+  @keyframes alert-pulse {
+    0%, 100% { border-color: var(--red); background: var(--red-dim); }
+    50% { border-color: #ff6060; background: #3a0000; }
+  }
+  .alert-icon { font-size: 18px; }
+  .alert-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 3px;
+    flex: 1;
+  }
+
+  /* MAIN GRID */
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr 260px;
+    gap: 12px;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  /* PANELS */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px;
+  }
+  .panel-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  /* GAUGE METERS */
+  .gauge-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gauge {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .gauge-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--green-dim);
+    display: flex;
+    justify-content: space-between;
+  }
+  .gauge-label span { color: var(--green); }
+  .gauge-track {
+    height: 14px;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .gauge-fill {
+    height: 100%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green-glow);
+    transition: width 1.5s ease, background 0.3s;
+    position: relative;
+  }
+  .gauge-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: #fff;
+    opacity: 0.6;
+  }
+  .gauge-fill.warn { background: var(--amber); box-shadow: 0 0 8px rgba(255,179,0,0.5); }
+  .gauge-fill.crit { background: var(--red); box-shadow: 0 0 8px rgba(255,32,32,0.5); }
+
+  /* CENTER PANEL */
+  .center-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* REACTOR CORE VIZ */
+  .core-display {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .core-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    align-self: flex-start;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    padding-bottom: 8px;
+  }
+
+  .core-svg-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+  svg.core {
+    width: 200px;
+    height: 200px;
+  }
+  .core-status-label {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green-glow);
+    white-space: nowrap;
+  }
+
+  @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes spin-rev  { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+  @keyframes core-pulse {
+    0%, 100% { opacity: 0.7; r: 30; }
+    50% { opacity: 1; r: 36; }
+  }
+  @keyframes rod-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .ring1 { transform-origin: 100px 100px; animation: spin-slow 12s linear infinite; }
+  .ring2 { transform-origin: 100px 100px; animation: spin-rev 8s linear infinite; }
+  .core-circle { transform-origin: 100px 100px; }
+
+  /* CONTROL RODS */
+  .rods-panel {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .rod-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .rod-label { font-size: 8px; letter-spacing: 1px; color: var(--green-dim); }
+  .rod-track {
+    width: 22px;
+    height: 80px;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .rod-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, #b0ffcc, var(--green));
+    box-shadow: 0 0 10px var(--green-glow);
+    transition: height 0.8s ease;
+  }
+  .rod-pct { font-size: 9px; color: var(--green-dim); }
+
+  /* LOG TERMINAL */
+  .log-terminal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px;
+    flex: 1;
+  }
+  .log-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .log-body {
+    height: 140px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #007a1f;
+  }
+  .log-body::-webkit-scrollbar { width: 4px; }
+  .log-body::-webkit-scrollbar-track { background: #000; }
+  .log-body::-webkit-scrollbar-thumb { background: var(--green-dim); }
+  .log-line { animation: fadeIn 0.3s ease; }
+  .log-line.warn { color: var(--amber); }
+  .log-line.crit { color: var(--red); }
+  .log-line.hack { color: #ff00ff; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* CONTROL BUTTONS */
+  .controls-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 9px 16px;
+    border: 1px solid;
+    background: var(--panel-light);
+    cursor: pointer;
+    transition: all 0.15s;
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+  }
+  .btn-green  { color: var(--green); border-color: var(--green-dim); }
+  .btn-green:hover  { background: var(--green); color: #000; box-shadow: 0 0 12px var(--green-glow); }
+  .btn-amber  { color: var(--amber); border-color: #7a5500; }
+  .btn-amber:hover  { background: var(--amber); color: #000; box-shadow: 0 0 12px rgba(255,179,0,0.5); }
+  .btn-red    { color: var(--red); border-color: var(--red-dim); }
+  .btn-red:hover    { background: var(--red); color: #000; box-shadow: 0 0 12px rgba(255,32,32,0.5); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* RIGHT: STATUS INDICATORS */
+  .indicator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .indicator {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--green-dim);
+  }
+  .led {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #003300;
+    border: 1px solid #004400;
+    flex-shrink: 0;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .led.on-green { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+  .led.on-amber { background: var(--amber); box-shadow: 0 0 6px rgba(255,179,0,0.6); }
+  .led.on-red   { background: var(--red);   box-shadow: 0 0 6px rgba(255,32,32,0.6); }
+  @keyframes blink-red {
+    0%, 100% { background: var(--red); box-shadow: 0 0 6px rgba(255,32,32,0.6); }
+    50% { background: #500000; box-shadow: none; }
+  }
+  .led.blink-red { animation: blink-red 0.5s infinite; }
+
+  /* PUMP / VALVE STATUS */
+  .system-items { display: flex; flex-direction: column; gap: 8px; }
+  .system-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 6px 8px;
+    background: var(--panel-light);
+    border: 1px solid var(--border);
+  }
+  .sys-label { color: var(--green-dim); }
+  .sys-val { color: var(--green); font-weight: bold; }
+  .sys-val.warn { color: var(--amber); }
+  .sys-val.crit { color: var(--red); }
+
+  /* SCRAM BUTTON */
+  .scram-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .scram-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 4px;
+    width: 100%;
+    padding: 14px;
+    background: #1a0000;
+    border: 2px solid var(--red);
+    color: var(--red);
+    cursor: pointer;
+    text-shadow: 0 0 10px rgba(255,32,32,0.7);
+    box-shadow: inset 0 0 20px rgba(255,0,0,0.1);
+    transition: all 0.15s;
+  }
+  .scram-btn:hover {
+    background: var(--red);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(255,32,32,0.8);
+  }
+  .scram-label { font-size: 9px; color: var(--red-dim); letter-spacing: 2px; }
+
+  /* FOOTER */
+  .footer {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+    padding-top: 10px;
+    font-size: 9px;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+  }
+
+  /* Simulated "hack" text effect */
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20%  { transform: translate(-2px, 1px); }
+    40%  { transform: translate(2px, -1px); }
+    60%  { transform: translate(-1px, 2px); }
+    80%  { transform: translate(1px, -2px); }
+  }
+  .glitching { animation: glitch 0.15s infinite; }
+
+  /* ============================
+     LOGIN SCREEN
+  ============================== */
+  #loginScreen {
+    position: fixed;
+    inset: 0;
+    background: #020202;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* Animated grid background */
+  #loginScreen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,65,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,65,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridScroll 20s linear infinite;
+  }
+  @keyframes gridScroll {
+    from { background-position: 0 0; }
+    to   { background-position: 40px 40px; }
+  }
+
+  .login-box {
+    position: relative;
+    width: 440px;
+    background: var(--panel);
+    border: 1px solid var(--green-dim);
+    padding: 40px 40px 32px;
+    box-shadow: 0 0 60px rgba(0,255,65,0.08), inset 0 0 40px rgba(0,0,0,0.6);
+  }
+  .login-box::before, .login-box::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: var(--green);
+    border-style: solid;
+  }
+  .login-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .login-box::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-logo .facility {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 5px;
+    color: var(--green-dim);
+    margin-bottom: 8px;
+  }
+  .login-logo .system {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-shadow: 0 0 20px var(--green-glow);
+    line-height: 1.3;
+  }
+  .login-logo .unit {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    margin-top: 4px;
+  }
+
+  .login-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 24px;
+  }
+
+  .login-field {
+    margin-bottom: 16px;
+  }
+  .login-field label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+    margin-bottom: 6px;
+  }
+  .login-field input {
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    letter-spacing: 2px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .login-field input:focus {
+    border-color: var(--green-dim);
+    box-shadow: 0 0 10px rgba(0,255,65,0.15);
+  }
+  .login-field input::placeholder { color: #003300; letter-spacing: 1px; }
+  .login-field input[type="password"] { letter-spacing: 5px; }
+
+  .login-btn {
+    width: 100%;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    padding: 12px;
+    background: #001a00;
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+    text-shadow: 0 0 8px var(--green-glow);
+  }
+  .login-btn:hover {
+    background: var(--green);
+    color: #000;
+    box-shadow: 0 0 20px var(--green-glow);
+  }
+  .login-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .login-error {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--red);
+    text-align: center;
+    margin-top: 12px;
+    height: 16px;
+    transition: opacity 0.3s;
+  }
+
+  .login-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: #003300;
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Typewriter boot sequence */
+  .boot-log {
+    position: relative;
+    width: 440px;
+    margin-top: 16px;
+    font-size: 10px;
+    line-height: 1.9;
+    color: #004d14;
+    letter-spacing: 1px;
+    min-height: 90px;
+  }
+  .boot-line { opacity: 0; animation: bootFadeIn 0.1s forwards; }
+  @keyframes bootFadeIn { to { opacity: 1; } }
+
+  /* Auth attempt shake */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+  .shake { animation: shake 0.4s ease; }
+
+  /* Login → Panel transition */
+  @keyframes panelReveal {
+    from { opacity: 0; transform: scale(0.98); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  #mainPanel { animation: none; }
+  #mainPanel.revealed { animation: panelReveal 0.6s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box" id="loginBox">
+    <div class="login-logo">
+      <div class="facility">JERICHO NUCLEAR FACILITY // SECTOR 7</div>
+      <div class="system">REACTOR CONTROL<br>SYSTEM</div>
+      <div class="unit">UNIT 4 — CLASSIFIED ACCESS</div>
+    </div>
+    <hr class="login-divider">
+
+    <div class="login-field">
+      <label>OPERATOR</label>
+      <input type="text" id="loginUser" placeholder="Enter username" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="login-field">
+      <label>ACCESS CODE</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="off" onkeydown="if(event.key==='Enter')attemptLogin()">
+    </div>
+
+    <button class="login-btn" id="loginBtn" onclick="attemptLogin()">AUTHENTICATE →</button>
+    <div class="login-hint" style="margin-top:8px; text-align:center;">
+      <span id="hintTrigger" onclick="showHint()" style="color:var(--green-dim); font-size:11px; user-select:none;">Need a hint?</span>
+    </div>
+    <div class="login-error" id="loginError"></div>
+
+    <div class="login-footer">
+      <span>NRC COMPLIANCE: CFR-50.55</span>
+      <span id="loginClock">--:--:-- UTC</span>
+      <span>ATTEMPTS: <span id="attemptCount">0</span>/5</span>
+    </div>
+  </div>
+  <div class="boot-log" id="bootLog"></div>
+</div>
+
+<!-- NOTE:
+  Modern browsers restrict Web Crypto (crypto.subtle) to secure contexts (HTTPS or localhost).
+  If you serve this file over plain HTTP from Apache on another machine, the WebCrypto API may be unavailable
+  and the script will load a JS fallback. For best security and compatibility, enable HTTPS or test via localhost.
+-->
+
+<!-- MAIN CONTROL PANEL -->
+<div id="mainPanel" style="display:none; width:100%; flex-direction:column; align-items:center; padding:20px;">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="facility-name">JERICHO NUCLEAR FACILITY — SECTOR 7 — CLASSIFIED</div>
+  <div class="unit-name">REACTOR CONTROL SYSTEM — UNIT 4</div>
+  <div class="clock" id="clock">SYSTEM TIME: LOADING...</div>
+</div>
+
+<!-- ALERT BANNER -->
+<div class="alert-banner" id="alertBanner">
+  <span class="alert-icon">⚠</span>
+  <span class="alert-text" id="alertText">ANOMALOUS INPUT DETECTED — UNAUTHORIZED WRITE TO PLC REGISTER 0x4A</span>
+  <span class="alert-icon">⚠</span>
+</div>
+
+<!-- MAIN PANEL -->
+<div class="panel-grid">
+
+  <!-- LEFT: GAUGES -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">// REACTOR TELEMETRY</div>
+      <div class="gauge-row" id="gaugeRow">
+
+        <div class="gauge">
+          <div class="gauge-label">CORE TEMP (°C) <span id="tempVal">312</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="tempGauge" style="width:31%"></div></div>
+        </div>
+
+        <div class="gauge">
+          <div class="gauge-label">NEUTRON FLUX <span id="fluxVal">0.44</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="fluxGauge" style="width:44%"></div></div>
+        </div>
+
+        <div class="gauge">
+          <div class="gauge-label">COOLANT FLOW <span id="coolVal">87%</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="coolGauge" style="width:87%"></div></div>
+        </div>
+
+        <div class="gauge">
+          <div class="gauge-label">STEAM PRESSURE <span id="steamVal">142</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="steamGauge" style="width:57%"></div></div>
+        </div>
+
+        <div class="gauge">
+          <div class="gauge-label">RADIATION LVL <span id="radVal">0.12</span></div>
+          <div class="gauge-track"><div class="gauge-fill" id="radGauge" style="width:12%"></div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:12px;">
+      <div class="panel-title">// ATTACK INTERFACE</div>
+      <div class="controls-row">
+        <button class="btn btn-amber" onclick="injectAnomaly()">INJECT ANOMALY</button>
+        <button class="btn btn-red" onclick="replayAttack()">REPLAY ATTACK</button>
+      </div>
+      <div style="margin-top:8px;">
+        <button class="btn btn-green" style="width:100%" onclick="resetSystems()">RESTORE BASELINE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center-panel">
+
+    <!-- CORE VISUALIZATION -->
+    <div class="core-display">
+      <div class="core-title">// REACTOR CORE — SCHEMATIC VIEW</div>
+      <div class="core-svg-wrap">
+        <svg class="core" viewBox="0 0 200 200">
+          <!-- Outer ring -->
+          <g class="ring1">
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#005500" stroke-width="1" stroke-dasharray="6 4"/>
+            <circle cx="100" cy="20"  r="4" fill="#007a1f"/>
+            <circle cx="100" cy="180" r="4" fill="#007a1f"/>
+            <circle cx="20"  cy="100" r="4" fill="#007a1f"/>
+            <circle cx="180" cy="100" r="4" fill="#007a1f"/>
+          </g>
+          <!-- Inner ring -->
+          <g class="ring2">
+            <circle cx="100" cy="100" r="55" fill="none" stroke="#007a1f" stroke-width="1.5" stroke-dasharray="3 6"/>
+            <circle cx="100" cy="45"  r="5" fill="#00aa28"/>
+            <circle cx="100" cy="155" r="5" fill="#00aa28"/>
+            <circle cx="45"  cy="100" r="5" fill="#00aa28"/>
+            <circle cx="155" cy="100" r="5" fill="#00aa28"/>
+          </g>
+          <!-- Core glow -->
+          <radialGradient id="coreGrad">
+            <stop offset="0%"   stop-color="#00ff41" stop-opacity="0.6"/>
+            <stop offset="60%"  stop-color="#003300" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+          </radialGradient>
+          <circle cx="100" cy="100" r="35" fill="url(#coreGrad)"/>
+          <circle cx="100" cy="100" r="20" fill="#001a00" stroke="#00ff41" stroke-width="1.5"/>
+          <text x="100" y="105" text-anchor="middle" fill="#00ff41" font-family="Share Tech Mono" font-size="10" id="corePctText">NOMINAL</text>
+        </svg>
+        <div class="core-status-label" id="coreStatusLabel">● OPERATING NORMAL</div>
+      </div>
+
+      <!-- CONTROL RODS -->
+      <div class="rods-panel" id="rodsPanel">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- LOG TERMINAL -->
+    <div class="log-terminal">
+      <div class="log-title">// SYSTEM EVENT LOG — LIVE FEED</div>
+      <div class="log-body" id="logBody"></div>
+    </div>
+
+    <!-- CONTROL BUTTONS -->
+    <div class="panel">
+      <div class="panel-title">// OPERATOR CONTROLS</div>
+      <div class="controls-row">
+        <button class="btn btn-green" onclick="insertRods()">INSERT RODS</button>
+        <button class="btn btn-green" onclick="withdrawRods()">WITHDRAW RODS</button>
+        <button class="btn btn-amber" onclick="toggleCoolant()">TOGGLE COOLANT</button>
+        <button class="btn btn-amber" onclick="togglePump()">TOGGLE PUMP A</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: STATUS + SCRAM -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">// SYSTEM STATUS</div>
+      <div class="indicator-grid">
+        <div class="indicator"><div class="led on-green" id="led-scram"></div>SCRAM</div>
+        <div class="indicator"><div class="led on-green" id="led-cool"></div>COOLANT</div>
+        <div class="indicator"><div class="led on-green" id="led-pumpA"></div>PUMP A</div>
+        <div class="indicator"><div class="led on-green" id="led-pumpB"></div>PUMP B</div>
+        <div class="indicator"><div class="led on-green" id="led-emerg"></div>EMERG PWR</div>
+        <div class="indicator"><div class="led on-green" id="led-comm"></div>COMMS</div>
+        <div class="indicator"><div class="led on-amber" id="led-maint"></div>MAINT</div>
+        <div class="indicator"><div class="led" id="led-breach"></div>BREACH</div>
+      </div>
+
+      <div class="panel-title" style="margin-top:8px;">// SUBSYSTEMS</div>
+      <div class="system-items">
+        <div class="system-item">
+          <span class="sys-label">COOLANT TEMP</span>
+          <span class="sys-val" id="sub-cool-temp">85°C</span>
+        </div>
+        <div class="system-item">
+          <span class="sys-label">PUMP A FLOW</span>
+          <span class="sys-val" id="sub-pumpA">1340 L/m</span>
+        </div>
+        <div class="system-item">
+          <span class="sys-label">PUMP B FLOW</span>
+          <span class="sys-val" id="sub-pumpB">1290 L/m</span>
+        </div>
+        <div class="system-item">
+          <span class="sys-label">CONTAINMENT P</span>
+          <span class="sys-val" id="sub-cont">1.01 atm</span>
+        </div>
+        <div class="system-item">
+          <span class="sys-label">NET OUTPUT</span>
+          <span class="sys-val" id="sub-output">982 MW</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:12px;">
+      <div class="panel-title">// EMERGENCY</div>
+      <div class="scram-wrap">
+        <button class="scram-btn" onclick="scramClicked()">⚑ SCRAM</button>
+        <div class="scram-label">EMERGENCY SHUTDOWN</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>JERICHO NF // SYS BUILD 3.7.1-SECURE</span>
+  <span id="footerStatus">STATUS: NOMINAL</span>
+  <span>PLCS ONLINE: 4/4</span>
+</div>
+
+</div><!-- /mainPanel -->
+
+<script>
+// ============================
+// AUTH
+// SHA-256 of "SCRAM2024"
+// ============================
+const PASSWORD_HASH = '2ff52fa2aa4b6d15c22080ef549da8b80e7343a91b57ca2033b8cbe3cdcf67ad';
+let loginAttempts = 0;
+const MAX_ATTEMPTS = 5;
+const USER_HASH = 'fe51ac3783a2d4fee5e2a06ef45a0d779e751d8a479596107b7faca1651d72f7';
+
+// Editable hint message shown when operator clicks the hint text.
+// You can change this string to whatever hint text you'd like displayed.
+const HINT_MESSAGE = 'How about a file found within a folder';
+const HINT_DURATION = 3000; // milliseconds
+
+function showHint() {
+  const trigger = document.getElementById('hintTrigger') || document.getElementById('loginHintText');
+  if (!trigger) return alert(HINT_MESSAGE);
+
+  // store original label so we can restore it
+  if (!trigger.dataset.orig) trigger.dataset.orig = trigger.textContent || '';
+
+  // reset any existing timer
+  if (trigger._hintTimer) { clearTimeout(trigger._hintTimer); trigger._hintTimer = null; }
+
+  // display the hint for a short duration
+  trigger.textContent = HINT_MESSAGE;
+  trigger.style.color = 'var(--green)';
+  trigger.classList.add('glitching');
+
+  trigger._hintTimer = setTimeout(() => {
+    trigger.textContent = trigger.dataset.orig || '';
+    trigger.style.color = 'var(--green-dim)';
+    trigger.classList.remove('glitching');
+    trigger._hintTimer = null;
+  }, HINT_DURATION);
+}
+
+async function sha256(str) {
+  // Use Web Crypto API when available (requires secure context: https or localhost)
+  if (window.crypto && window.crypto.subtle && typeof window.crypto.subtle.digest === 'function') {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Fallback: attempt to use js-sha256 (loaded from CDN) if WebCrypto isn't available
+  if (window.sha256 && typeof window.sha256 === 'function') {
+    return window.sha256(str);
+  }
+
+  // Dynamically load a small sha256 library as a fallback for non-secure contexts
+  await new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/build/sha256.min.js';
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load SHA-256 fallback script'));
+    document.head.appendChild(script);
+  });
+
+  if (window.sha256 && typeof window.sha256 === 'function') {
+    return window.sha256(str);
+  }
+
+  throw new Error('No SHA-256 implementation available');
+}
+
+// Boot log typewriter
+const BOOT_LINES = [
+  { text: '> BIOS POST... OK', delay: 200 },
+  { text: '> LOADING KERNEL 4.19.0-SCADA...', delay: 600 },
+  { text: '> MOUNTING /dev/plc0 /dev/plc1 /dev/plc2 /dev/plc3... OK', delay: 1100 },
+  { text: '> SCADA INTERFACE v3.7.1 STARTING...', delay: 1700 },
+  { text: '> PLC HEARTBEAT CHECK: 4/4 ONLINE', delay: 2300 },
+  { text: '> CRYPTO MODULE LOADED — AES-256-GCM ACTIVE', delay: 2800 },
+  { text: '> AWAITING OPERATOR AUTHENTICATION', delay: 3300 },
+];
+
+function runBootSequence() {
+  const log = document.getElementById('bootLog');
+  BOOT_LINES.forEach(({ text, delay }) => {
+    setTimeout(() => {
+      const line = document.createElement('div');
+      line.className = 'boot-line';
+      line.textContent = text;
+      log.appendChild(line);
+    }, delay);
+  });
+}
+
+// Login clock
+setInterval(() => {
+  const el = document.getElementById('loginClock');
+  if (el) el.textContent = new Date().toISOString().slice(11, 19) + ' UTC';
+}, 1000);
+
+async function attemptLogin() {
+  if (loginAttempts >= MAX_ATTEMPTS) return;
+
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn  = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  const box  = document.getElementById('loginBox');
+
+  if (!user || !pass) {
+    errEl.textContent = 'ALL FIELDS REQUIRED';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'VERIFYING...';
+  errEl.textContent = '';
+
+  // Artificial delay to simulate server round-trip
+  await new Promise(r => setTimeout(r, 700 + Math.random() * 400));
+
+  let passHash;
+  try {
+    passHash = await sha256(pass);
+  } catch (err) {
+    console.error('SHA-256 error:', err);
+    errEl.textContent = 'ERROR: Cryptography unavailable — cannot verify credentials';
+    btn.disabled = false;
+    btn.textContent = 'AUTHENTICATE →';
+    return;
+  }
+
+  let userHash;
+  try {
+    userHash = await sha256(user);
+  } catch (err) {
+    console.error('SHA-256 error:', err);
+    errEl.textContent = 'ERROR: Cryptography unavailable — cannot verify credentials';
+    btn.disabled = false;
+    btn.textContent = 'AUTHENTICATE →';
+    return;
+  }
+
+  loginAttempts++;
+  document.getElementById('attemptCount').textContent = loginAttempts;
+
+  if (passHash === PASSWORD_HASH && userHash === USER_HASH) {
+    // SUCCESS
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = '✓ ACCESS GRANTED — LOADING SYSTEMS...';
+    btn.textContent   = 'ACCESS GRANTED';
+
+    setTimeout(() => {
+      document.getElementById('loginScreen').style.transition = 'opacity 0.5s';
+      document.getElementById('loginScreen').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('loginScreen').style.display = 'none';
+        const panel = document.getElementById('mainPanel');
+        panel.style.display = 'flex';
+        panel.classList.add('revealed');
+      }, 500);
+    }, 800);
+
+  } else {
+    // FAILURE
+    box.classList.remove('shake');
+    void box.offsetWidth; // reflow to restart animation
+    box.classList.add('shake');
+    errEl.style.color = 'var(--red)';
+
+    if (loginAttempts >= MAX_ATTEMPTS) {
+      errEl.textContent = '⚑ ACCOUNT LOCKED — CONTACT SECURITY';
+      document.getElementById('loginPass').disabled = true;
+      document.getElementById('loginUser').disabled = true;
+      btn.textContent = 'LOCKED';
+    } else {
+      errEl.textContent = `✗ INVALID CREDENTIALS — ${MAX_ATTEMPTS - loginAttempts} ATTEMPT(S) REMAINING`;
+      btn.disabled = false;
+      btn.textContent = 'AUTHENTICATE →';
+    }
+  }
+}
+
+runBootSequence();
+
+// ============================
+// STATE
+// ============================
+const state = {
+  temp:     312,
+  flux:     0.44,
+  coolant:  87,
+  steam:    142,
+  rad:      0.12,
+  rods:     [60, 65, 70, 62, 68],  // % inserted
+  attacking: false,
+  scrammed:  false,
+  coolantOn: true,
+  pumpAOn:   true,
+  alertActive: false,
+};
+
+// ============================
+// CLOCK
+// ============================
+function updateClock() {
+  const now = new Date();
+  const str = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+  document.getElementById('clock').textContent = 'SYSTEM TIME: ' + str;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================
+// CONTROL RODS
+// ============================
+function buildRods() {
+  const panel = document.getElementById('rodsPanel');
+  panel.innerHTML = '';
+  state.rods.forEach((pct, i) => {
+    panel.innerHTML += `
+      <div class="rod-slot">
+        <div class="rod-label">CR-${i+1}</div>
+        <div class="rod-track" title="Click to toggle rod ${i+1}" onclick="toggleRod(${i})">
+          <div class="rod-fill" id="rod-fill-${i}" style="height:${pct}%"></div>
+        </div>
+        <div class="rod-pct" id="rod-pct-${i}">${pct}%</div>
+      </div>`;
+  });
+  // ensure initial LED state reflects current rod positions / preconditions
+  try { checkScramPreconditions(); } catch (e) { /* ignore */ }
+}
+
+function toggleRod(i) {
+  if (state.scrammed) return;
+  state.rods[i] = state.rods[i] > 30 ? 20 : 70;
+  updateRodDisplay();
+  log(`CR-${i+1} POSITION ADJUSTED TO ${state.rods[i]}%`, 'normal');
+  try { checkScramPreconditions(); } catch (e) { /* ignore */ }
+}
+
+function updateRodDisplay() {
+  state.rods.forEach((pct, i) => {
+    const fill = document.getElementById('rod-fill-' + i);
+    const lbl  = document.getElementById('rod-pct-'  + i);
+    if (fill) fill.style.height = pct + '%';
+    if (lbl)  lbl.textContent   = pct + '%';
+  });
+}
+
+// ============================
+// GAUGE UPDATE
+// ============================
+function setGauge(id, valId, val, maxVal, unit, warnPct, critPct) {
+  const pct = Math.min(100, (val / maxVal) * 100);
+  const fill = document.getElementById(id);
+  const label = document.getElementById(valId);
+  fill.style.width = pct + '%';
+  label.textContent = (unit === '%') ? val.toFixed(0) + '%' : val.toFixed(unit === 'float' ? 2 : 0);
+  fill.className = 'gauge-fill' + (pct >= critPct ? ' crit' : pct >= warnPct ? ' warn' : '');
+}
+
+function updateGauges() {
+  setGauge('tempGauge',  'tempVal',  state.temp,    1000, 'C',     55, 80);
+  setGauge('fluxGauge',  'fluxVal',  state.flux,    1.0,  'float', 60, 80);
+  setGauge('coolGauge',  'coolVal',  state.coolant, 100,  '%',     30, 20); // inverted logic handled by crit
+  setGauge('steamGauge', 'steamVal', state.steam,   250,  'C',     65, 85);
+  setGauge('radGauge',   'radVal',   state.rad,     5.0,  'float', 40, 75);
+
+  // Subsystem labels
+  document.getElementById('sub-cool-temp').textContent = (state.temp * 0.28).toFixed(0) + '°C';
+  document.getElementById('sub-pumpA').textContent     = state.pumpAOn ? (1300 + Math.floor(state.coolant * 4.5)).toLocaleString() + ' L/m' : '0 L/m';
+  document.getElementById('sub-pumpB').textContent     = (1250 + Math.floor(Math.random() * 40)).toLocaleString() + ' L/m';
+  document.getElementById('sub-cont').textContent      = (1.0 + state.rad * 0.03).toFixed(2) + ' atm';
+    document.getElementById('sub-output').textContent    = (state.coolantOn ? 900 + Math.floor(state.flux * 120) : 0) + ' MW'; // Updated output calculation
+
+  // Re-evaluate SCRAM preconditions whenever gauges are updated so
+  // the breach LED reflects current operator actions immediately.
+  try { checkScramPreconditions(); } catch (e) { /* ignore */ }
+}
+
+// ============================
+// LOG
+// ============================
+let logCount = 0;
+function log(msg, level = 'normal') {
+  const body = document.getElementById('logBody');
+  const ts = new Date().toISOString().slice(11, 19);
+  const cls = level === 'warn' ? 'log-line warn' : level === 'crit' ? 'log-line crit' : level === 'hack' ? 'log-line hack' : 'log-line';
+  const line = document.createElement('div');
+  line.className = cls;
+  line.textContent = `[${ts}] ${msg}`;
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+  logCount++;
+  if (logCount > 80) body.removeChild(body.firstChild);
+}
+
+// ============================
+// BASELINE NOISE
+// ============================
+function naturalDrift() {
+  if (state.scrammed) return;
+  state.temp    += (Math.random() - 0.48) * 3;
+  state.flux    += (Math.random() - 0.48) * 0.008;
+  state.coolant += state.coolantOn ? (Math.random() - 0.5) * 0.5 : -0.4;
+  state.steam   += (Math.random() - 0.48) * 2;
+  state.rad     += (Math.random() - 0.5) * 0.005;
+
+  // Clamp
+  state.temp    = Math.max(200, Math.min(900, state.temp));
+  state.flux    = Math.max(0, Math.min(0.99, state.flux));
+  state.coolant = Math.max(0, Math.min(100, state.coolant));
+  state.steam   = Math.max(80, Math.min(250, state.steam));
+  state.rad     = Math.max(0.05, Math.min(4.9, state.rad));
+
+  checkThresholds();
+  updateGauges();
+}
+
+// ============================
+// THRESHOLDS & ALERTS
+// ============================
+let prevAlerts = {};
+function checkThresholds() {
+  const warnTemp  = state.temp > 650;
+  const critTemp  = state.temp > 800;
+  const warnFlux  = state.flux > 0.75;
+  const critFlux  = state.flux > 0.88;
+  const lowCool   = state.coolant < 25;
+  const critCool  = state.coolant < 10;
+  const warnRad   = state.rad > 1.5;
+  const critRad   = state.rad > 3.5;
+
+  if (critTemp   && !prevAlerts.critTemp)  { log('CRITICAL: CORE TEMP EXCEEDS 800°C — MELTDOWN RISK', 'crit'); showAlert('CRITICAL: CORE TEMPERATURE THRESHOLD EXCEEDED'); }
+  else if (warnTemp && !prevAlerts.warnTemp) { log('WARNING: CORE TEMP ELEVATED — MONITOR CLOSELY', 'warn'); }
+  if (critFlux   && !prevAlerts.critFlux)  { log('CRITICAL: NEUTRON FLUX RUNAWAY — SCRAM RECOMMENDED', 'crit'); showAlert('CRITICAL: NEUTRON FLUX RUNAWAY DETECTED'); }
+  if (critCool   && !prevAlerts.critCool)  { log('CRITICAL: COOLANT LOSS — CORE UNCOVERED', 'crit'); showAlert('CRITICAL: COOLANT LEVEL CRITICALLY LOW'); }
+  else if (lowCool && !prevAlerts.lowCool) { log('WARNING: COOLANT LEVEL BELOW 25%', 'warn'); }
+  if (critRad    && !prevAlerts.critRad)   { log('CRITICAL: RADIATION BEYOND SAFE LIMIT — EVACUATE', 'crit'); showAlert('CRITICAL: RADIATION LEVEL EXCEEDS EVACUATION THRESHOLD'); }
+  else if (warnRad && !prevAlerts.warnRad) { log('WARNING: ELEVATED RADIATION DETECTED', 'warn'); }
+
+  prevAlerts = { critTemp, warnTemp, critFlux, warnFlux, lowCool, critCool, warnRad, critRad };
+
+  // LED breach
+  const breach = critTemp || critFlux || critCool || critRad;
+  setLED('led-breach', breach ? 'blink-red' : '');
+  document.getElementById('footerStatus').textContent = breach ? 'STATUS: ⚠ CRITICAL FAULT' : (state.attacking ? 'STATUS: ⚠ UNDER ATTACK' : 'STATUS: NOMINAL');
+}
+
+function showAlert(msg) {
+  document.getElementById('alertText').textContent = msg;
+  const banner = document.getElementById('alertBanner');
+  banner.classList.add('active');
+  // If a persistent alert is active (e.g. SCRAM), don't auto-clear the banner.
+  if (state.alertActive) return;
+  setTimeout(() => {
+    // only remove if no persistent alert has been set in the meantime
+    if (!state.alertActive) banner.classList.remove('active');
+  }, 6000);
+}
+
+function showPersistentAlert(msg) {
+  document.getElementById('alertText').textContent = msg;
+  document.getElementById('alertBanner').classList.add('active');
+  state.alertActive = true;
+}
+
+// ============================
+// LEDS
+// ============================
+function setLED(id, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // Manage known LED state classes without overwriting other classes.
+  const known = ['on-green', 'on-amber', 'on-red', 'blink-red'];
+  known.forEach(c => el.classList.remove(c));
+  if (cls) el.classList.add(cls);
+}
+
+// ============================
+// OPERATOR CONTROLS
+// ============================
+function insertRods() {
+  if (state.scrammed) return;
+  state.rods = state.rods.map(r => Math.min(100, r + 20));
+  updateRodDisplay();
+  state.flux -= 0.08;
+  state.temp -= 30;
+  log('OPERATOR: Control rods inserted — flux suppressed', 'normal');
+  // Refresh gauges and evaluate scram preconditions
+  try { updateGauges(); } catch (e) { /* ignore */ }
+  try { checkScramPreconditions(); } catch (e) { /* ignore */ }
+}
+
+function withdrawRods() {
+  if (state.scrammed) return;
+  state.rods = state.rods.map(r => Math.max(0, r - 20));
+  updateRodDisplay();
+  state.flux += 0.1;
+  state.temp += 40;
+  log('OPERATOR: Control rods withdrawn — power increasing', 'warn');
+  // Refresh gauges and evaluate scram preconditions
+  try { updateGauges(); } catch (e) { /* ignore */ }
+  try { checkScramPreconditions(); } catch (e) { /* ignore */ }
+}
+
+function toggleCoolant() {
+  if (state.scrammed) return;
+  state.coolantOn = !state.coolantOn;
+  setLED('led-cool', state.coolantOn ? 'on-green' : 'on-red');
+  log(`OPERATOR: Coolant loop ${state.coolantOn ? 'ENABLED' : 'DISABLED'}`, state.coolantOn ? 'normal' : 'warn');
+  // update gauges/subsystem display and re-evaluate preconditions
+  try { updateGauges(); } catch (e) { /* ignore */ }
+  try { checkScramPreconditions(); } catch (e) { /* ignore */ }
+}
+
+function togglePump() {
+  if (state.scrammed) return;
+  state.pumpAOn = !state.pumpAOn;
+  setLED('led-pumpA', state.pumpAOn ? 'on-green' : 'on-amber');
+  log(`OPERATOR: Pump A ${state.pumpAOn ? 'STARTED' : 'STOPPED'}`, state.pumpAOn ? 'normal' : 'warn');
+  // update gauges/subsystem display and re-evaluate preconditions
+  try { updateGauges(); } catch (e) { /* ignore */ }
+  try { checkScramPreconditions(); } catch (e) { /* ignore */ }
+}
+
+function scram() {
+  if (state.scrammed) return;
+  state.scrammed = true;
+  state.rods = state.rods.map(() => 100);
+  updateRodDisplay();
+  setLED('led-scram', 'on-red');
+  document.getElementById('coreStatusLabel').textContent = '● SHUTDOWN — SCRAM ACTIVE';
+  document.getElementById('corePctText').textContent = 'SCRAM';
+  log('SCRAM INITIATED — ALL RODS INSERTED — REACTOR SHUTDOWN', 'crit');
+  showPersistentAlert('SCRAM ACTIVATED — REACTOR EMERGENCY SHUTDOWN');
+  // ensure any breach indicator is cleared once scram completes
+  setLED('led-breach', '');
+  document.getElementById('footerStatus').textContent = 'STATUS: SHUTDOWN';
+
+  // Gradual cool-down
+  const coolDown = setInterval(() => {
+    state.temp    = Math.max(50,   state.temp    - 25);
+    state.flux    = Math.max(0,    state.flux    - 0.04);
+    state.coolant = Math.min(100,  state.coolant + 1);
+    state.steam   = Math.max(100,  state.steam   - 5);
+    state.rad     = Math.max(0.05, state.rad     - 0.05);
+    updateGauges();
+    if (state.temp <= 80 && state.flux <= 0.01) clearInterval(coolDown);
+  }, 400);
+}
+
+// ============================
+// SCRAM PRECONDITION CHECK + API WRAPPER
+// ============================
+function checkScramPreconditions() {
+  const conditions = {
+    coolantDisabled: !state.coolantOn,
+    pumpAStopped:    !state.pumpAOn,
+    cr1At20:         state.rods[0] === 20,
+    cr4At70:         state.rods[3] === 70,
+  };
+  const metCount = Object.values(conditions).filter(Boolean).length;
+  const allMet = metCount === 4;
+
+  // If all SCRAM preconditions are met, indicate breach by blinking the
+  // breach LED; otherwise clear the breach indicator.
+  try {
+    setLED('led-breach', allMet ? 'blink-red' : '');
+  } catch (e) {
+    // ignore if LED element not available yet
+  }
+
+  return { conditions, metCount, allMet };
+}
+
+async function callPayloadApi() {
+  // Mirror the behavior of the provided Python script: POST to a sound endpoint
+  // and then POST to the nuclear/effects endpoint. If the sound service
+  // responds with HTTP 429, abort and surface an api_busy error (matching
+  // the Python script's early exit behavior).
+  const soundUrl = "http://sound.jericho.local:80/play";
+  const soundPayload = { sound: 'nuclear5.wav' };
+
+  try {
+    const soundResp = await fetch(soundUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(soundPayload),
+      cache: 'no-store'
+    });
+
+    if (soundResp.status === 429) {
+      let bodyText = '';
+      try { bodyText = await soundResp.text(); } catch (e) { /* ignore */ }
+      log('Error: system in use. Wait a few seconds and try again.', 'warn');
+      if (bodyText) bodyText.split(/\r?\n/).filter(Boolean).forEach(l => log('Sound: ' + l, 'warn'));
+      // Mirror Python behavior: abort if sound service reports busy
+      throw new Error('api_busy');
+    }
+
+    try {
+      const sct = soundResp.headers.get('content-type') || '';
+      if (sct.includes('application/json')) {
+        const data = await soundResp.json();
+        log('Sound status code: ' + soundResp.status, 'normal');
+        log('Sound response body: ' + JSON.stringify(data), 'normal');
+      } else {
+        const txt = await soundResp.text();
+        log('Sound status code: ' + soundResp.status, 'normal');
+        txt.split(/\r?\n/).filter(Boolean).forEach(l => log('Sound: ' + l, 'normal'));
+      }
+    } catch (e) {
+      log('Sound: failed to parse response - ' + String(e), 'warn');
+    }
+  } catch (err) {
+    // Non-429 errors contacting sound service are logged but do not abort
+    if (err && err.message === 'api_busy') throw err;
+    log('Error contacting sound service: ' + String(err), 'warn');
+  }
+
+  // Now call the nuclear/effects endpoint (mirrors Python script)
+  const nuclearUrl = "http://nuclear.jericho.local:80/smoke";
+  const nuclearPayload = { duration: 5 };
+
+  try {
+    const nucResp = await fetch(nuclearUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nuclearPayload),
+      cache: 'no-store'
+    });
+
+    try {
+      const nct = nucResp.headers.get('content-type') || '';
+      if (nct.includes('application/json')) {
+        const nd = await nucResp.json();
+        log('Nuclear status code: ' + nucResp.status, 'normal');
+        log('Nuclear response body: ' + JSON.stringify(nd), 'normal');
+      } else {
+        const nt = await nucResp.text();
+        log('Nuclear status code: ' + nucResp.status, 'normal');
+        nt.split(/\r?\n/).filter(Boolean).forEach(l => log('Nuclear: ' + l, 'normal'));
+      }
+    } catch (e) {
+      log('Nuclear: failed to parse response - ' + String(e), 'warn');
+    }
+  } catch (err) {
+    log('Error contacting nuclear/effects service: ' + String(err), 'warn');
+  }
+
+  log('Payload API sequence completed', 'normal');
+  return true;
+}
+
+async function scramClicked() {
+  // Called when operator presses SCRAM button. If preconditions met, call API then local scram.
+  if (state.scrammed) return;
+  const { conditions, metCount, allMet } = checkScramPreconditions();
+  if (!allMet) {
+    log(`SCRAM ATTEMPT: ${metCount}/4 preconditions met — API call aborted`, 'warn');
+    showAlert(`SCRAM ABORTED — ${metCount}/4 PRECONDITIONS MET`);
+    return;
+  }
+
+  log('SCRAM PRECONDITIONS VERIFIED — initiating API SCRAM', 'normal');
+  try {
+    await callPayloadApi();
+  } catch (e) {
+    // If API is busy, prompt operator to retry and do NOT perform local scram
+    if (e && e.message === 'api_busy') {
+      log('SCRAM ABORTED: API busy — please try again in a few seconds', 'warn');
+      return;
+    }
+    // For other failures, proceed with local scram fallback
+    log('API SCRAM failed, proceeding with local scram fallback', 'warn');
+  }
+
+  // perform local scram after successful API (or fallback)
+  scram();
+}
+
+// ============================
+// ATTACK SCENARIOS
+// ============================
+let attackInterval = null;
+
+function injectAnomaly() {
+  log('[ATTACKER] Sending malformed Modbus packet to PLC 0x4A...', 'hack');
+  setTimeout(() => log('[ATTACKER] PLC accepted rogue write: COOLANT_VALVE_OVERRIDE = 0x00', 'hack'), 700);
+  setTimeout(() => {
+    state.coolantOn = false;
+    state.coolant   -= 15;
+    setLED('led-cool', 'on-red');
+    setLED('led-comm', 'on-amber');
+    showAlert('ANOMALOUS INPUT DETECTED — UNAUTHORIZED WRITE TO PLC REGISTER 0x4A');
+    log('[SYSTEM] ALERT: Coolant valve override detected — operator action required', 'crit');
+  }, 1200);
+  state.attacking = true;
+}
+
+function replayAttack() {
+  log('[ATTACKER] Initiating replay of captured control signal...', 'hack');
+  setTimeout(() => log('[ATTACKER] Replaying: ROD_WITHDRAW signal x5 to all control rod PLCs', 'hack'), 500);
+  setTimeout(() => {
+    state.rods = state.rods.map(() => 5);
+    updateRodDisplay();
+    state.flux += 0.25;
+    state.temp += 90;
+    state.rad  += 0.5;
+    setLED('led-comm', 'on-red');
+    showAlert('REPLAY ATTACK DETECTED — UNAUTHORIZED ROD WITHDRAWAL COMMAND');
+    log('[SYSTEM] ALERT: All control rods withdrawn by unauthorized command — manual intervention required', 'crit');
+  }, 1200);
+  state.attacking = true;
+}
+
+function resetSystems() {
+  state.temp     = 312;
+  state.flux     = 0.44;
+  state.coolant  = 87;
+  state.steam    = 142;
+  state.rad      = 0.12;
+  state.rods     = [60, 65, 70, 62, 68];
+  state.attacking = false;
+  state.scrammed  = false;
+  state.coolantOn = true;
+  state.pumpAOn   = true;
+
+  updateRodDisplay();
+  updateGauges();
+  setLED('led-scram', 'on-green');
+  setLED('led-cool',  'on-green');
+  setLED('led-pumpA', 'on-green');
+  setLED('led-comm',  'on-green');
+  setLED('led-breach', '');
+
+  document.getElementById('coreStatusLabel').textContent  = '● OPERATING NORMAL';
+  document.getElementById('corePctText').textContent      = 'NOMINAL';
+  document.getElementById('footerStatus').textContent     = 'STATUS: NOMINAL';
+  // clear persistent alert flag and hide any alert banner
+  state.alertActive = false;
+  document.getElementById('alertBanner').classList.remove('active');
+  prevAlerts = {};
+
+  // re-evaluate preconditions after reset to ensure LED state is correct
+  try { checkScramPreconditions(); } catch (e) { /* ignore */ }
+
+  log('BASELINE RESTORED — All systems nominal', 'normal');
+}
+
+// ============================
+// INIT
+// ============================
+buildRods();
+updateGauges();
+
+log('SYSTEM BOOT — REACTOR CONTROL SYSTEM v3.7.1 INITIALIZED', 'normal');
+log('PLC SCAN COMPLETE — 4/4 CONTROLLERS ONLINE', 'normal');
+log('SCADA LINK ESTABLISHED — POLLING INTERVAL 250ms', 'normal');
+log('WARNING: Maintenance flag active on secondary heat exchanger', 'warn');
+log('MONITORING ACTIVE — Awaiting operator input', 'normal');
+
+setInterval(naturalDrift, 1200);
+setInterval(() => {
+  if (!state.scrammed && Math.random() < 0.04) {
+    log(`AUTO-SCAN: PLC ${Math.floor(Math.random()*4)+1} heartbeat nominal`, 'normal');
+  }
+}, 4000);
+</script>
+</body>
+</html>
