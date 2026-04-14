@@ -3,6 +3,7 @@ import ScenarioTabsCard from "@/components/scenario/scenario-tabs-card";
 import PVEViewer from "@/components/view/pve-viewer";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { INFORMATIONAL_COMPLETED_SENTINEL } from "@/lib/scenarios/constants";
 import { parseTopology } from "@/lib/scenarios/topology-types";
 import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
@@ -99,6 +100,8 @@ export default async function ScenarioLabPage({
             .filter((q) => {
               const ua = q.userAnswers[0];
               if (!ua) return false;
+              if (q.type === "INFORMATIONAL")
+                return ua.answer === INFORMATIONAL_COMPLETED_SENTINEL;
               if (q.type === "NUMERIC")
                 return parseFloat(ua.answer.trim()) === parseFloat(q.answer.trim());
               if (q.answerIsRegex) {

@@ -37,7 +37,7 @@ export async function submitAnswer(
     update: { answer },
   });
 
-  revalidatePath(`/me/scenarios`);
+  revalidatePath(`/me/scenarios`, "layout");
   return { correct };
 }
 

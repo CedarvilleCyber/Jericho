@@ -92,7 +92,7 @@ function QuestionBox({
     value: existingAnswer?.answer ?? "",
     orderedItems: initOrderedItems(),
     submitting: false,
-    correct: isInformational ? null : isInitiallyCorrect,
+    correct: isInformational || !existingAnswer ? null : isInitiallyCorrect,
     validationError: null,
     hintsRevealed: initialHintsRevealed,
     informationalCompleted: existingAnswer?.answer === INFORMATIONAL_COMPLETED_SENTINEL,
