@@ -15,6 +15,9 @@ function isAnswerCorrect(
   type: string,
   answerIsRegex: boolean
 ): boolean {
+  if (type === "INFORMATIONAL") {
+    return false;
+  }
   const ua = userAnswer.trim();
   const ca = correctAnswer.trim();
   if (type === "NUMERIC") {

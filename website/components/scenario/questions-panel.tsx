@@ -1,10 +1,19 @@
 "use client";
 
 import { submitAnswer, revealHint } from "@/lib/scenarios/answer";
+import { INFORMATIONAL_COMPLETED_SENTINEL } from "@/lib/scenarios/constants";
 import { Section, UserAnswer } from "@/app/generated/prisma/client";
 import { QuestionWithSection } from "@/components/admin/scenario-types";
-import { IconCheck, IconLock, IconX, IconBulb } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconLock,
+  IconX,
+  IconBulb,
+  IconInfoCircle,
+  IconRosetteDiscountCheck,
+} from "@tabler/icons-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type AnswerState = {
   value: string;
@@ -13,6 +22,7 @@ type AnswerState = {
   correct: boolean | null;
   validationError: string | null;
   hintsRevealed: number;
+  informationalCompleted: boolean;
 };
 
 function parseOptions(options: string | null): string[] {
@@ -26,6 +36,31 @@ function parseOptions(options: string | null): string[] {
   return options.split("|").filter(Boolean);
 }
 
+function isQuestionAnsweredCorrectly(
+  question: QuestionWithSection,
+  answer: string | undefined,
+): boolean {
+  if (!answer) return false;
+
+  if (question.type === "INFORMATIONAL") {
+    return answer === INFORMATIONAL_COMPLETED_SENTINEL;
+  }
+
+  if (question.type === "NUMERIC") {
+    return parseFloat(answer.trim()) === parseFloat(question.answer.trim());
+  }
+
+  if (question.answerIsRegex) {
+    try {
+      return new RegExp(question.answer).test(answer.trim());
+    } catch {
+      return false;
+    }
+  }
+
+  return answer.trim() === question.answer.trim();
+}
+
 function QuestionBox({
   question,
   existingAnswer,
@@ -35,7 +70,13 @@ function QuestionBox({
   existingAnswer: UserAnswer | undefined;
   revealedHintIds: Set<string>;
 }) {
+  const router = useRouter();
+  const isInformational = question.type === "INFORMATIONAL";
   const options = parseOptions(question.options);
+  const isInitiallyCorrect = isQuestionAnsweredCorrectly(
+    question,
+    existingAnswer?.answer,
+  );
 
   function initOrderedItems(): string[] {
     if (question.type !== "ORDERING") return [];
@@ -51,10 +92,15 @@ function QuestionBox({
     value: existingAnswer?.answer ?? "",
     orderedItems: initOrderedItems(),
     submitting: false,
-    correct: null,
+    correct: isInformational ? null : isInitiallyCorrect,
     validationError: null,
     hintsRevealed: initialHintsRevealed,
+    informationalCompleted: existingAnswer?.answer === INFORMATIONAL_COMPLETED_SENTINEL,
   });
+
+  const isQuestionComplete = isInformational
+    ? state.informationalCompleted
+    : state.correct === true;
 
   function validate(value: string): string | null {
     if (question.type !== "TEXT" && question.type !== "LONG_TEXT") return null;
@@ -70,6 +116,9 @@ function QuestionBox({
 
   async function handleSubmit() {
     let submitValue = state.value;
+    if (isInformational) {
+      submitValue = INFORMATIONAL_COMPLETED_SENTINEL;
+    }
     if (question.type === "ORDERING") {
       submitValue = state.orderedItems.filter(Boolean).join("|");
     }
@@ -80,7 +129,15 @@ function QuestionBox({
     }
     setState((s) => ({ ...s, submitting: true, validationError: null }));
     const { correct } = await submitAnswer(question.id, submitValue);
-    setState((s) => ({ ...s, submitting: false, correct, value: submitValue }));
+    setState((s) => ({
+      ...s,
+      submitting: false,
+      correct: isInformational ? null : correct,
+      value: submitValue,
+      informationalCompleted:
+        isInformational && submitValue === INFORMATIONAL_COMPLETED_SENTINEL,
+    }));
+    router.refresh();
   }
 
   function moveUp(i: number) {
@@ -101,7 +158,7 @@ function QuestionBox({
 
   const isSubmitDisabled =
     state.submitting ||
-    (question.type !== "ORDERING" && !state.value.trim());
+    (!isInformational && question.type !== "ORDERING" && !state.value.trim());
 
   const inputBorderClass =
     state.validationError
@@ -112,15 +169,50 @@ function QuestionBox({
           ? "input-error"
           : "";
 
+  const cardClassName = isQuestionComplete
+    ? "card bg-base-100 border-2 border-success shadow-sm shadow-success/20"
+    : "card bg-base-100 border border-base-300";
+
   return (
-    <div className="card bg-base-100 border border-base-300">
+    <div className={cardClassName}>
       <div className="card-body p-4 gap-3">
         <div className="flex items-start justify-between gap-2">
           <p className="font-medium">{question.title}</p>
           <span className="badge badge-ghost badge-sm shrink-0">
-            {question.pointValue} pts
+            {isInformational ? 0 : question.pointValue} pts
           </span>
         </div>
+
+        {isQuestionComplete && (
+          <div className="rounded-box border border-success/30 bg-success/10 px-3 py-2 text-sm text-success">
+            <span className="inline-flex items-center gap-1.5 font-medium">
+              <IconRosetteDiscountCheck size={16} />
+              {isInformational ? "Completed" : "Correct"}
+            </span>
+          </div>
+        )}
+
+        {isInformational && (
+          <div className="flex flex-col gap-3">
+            <div className="alert py-2 text-sm gap-2">
+              <IconInfoCircle size={16} className="shrink-0" />
+              <span className="whitespace-pre-wrap">{question.answer}</span>
+            </div>
+            <button
+              className="btn btn-primary shrink-0 self-start"
+              onClick={handleSubmit}
+              disabled={state.submitting || state.informationalCompleted}
+            >
+              {state.submitting ? (
+                <span className="loading loading-spinner loading-sm" />
+              ) : state.informationalCompleted ? (
+                "Continued"
+              ) : (
+                "Continue"
+              )}
+            </button>
+          </div>
+        )}
 
         {(question.type === "TEXT") && (
           <div className="flex gap-2">
@@ -253,13 +345,13 @@ function QuestionBox({
           </div>
         )}
 
-        {state.correct === true && (
+        {!isInformational && state.correct === true && (
           <div className="flex items-center gap-1.5 text-success text-sm">
             <IconCheck size={16} />
             Correct!
           </div>
         )}
-        {state.correct === false && (
+        {!isInformational && state.correct === false && (
           <div className="flex items-center gap-1.5 text-error text-sm">
             <IconX size={16} />
             Incorrect — try again.
@@ -334,6 +426,9 @@ export default function QuestionsPanel({
   const answerMap = Object.fromEntries(userAnswers.map((a) => [a.questionId, a]));
   const correctSet = new Set(correctQuestionIds);
   const revealedHintSet = new Set(revealedHintIds);
+  const completedCount = questions.filter((q) => correctSet.has(q.id)).length;
+  const totalCount = questions.length;
+  const allQuestionsComplete = totalCount > 0 && completedCount === totalCount;
 
   // Build a flat ordered list: unsectioned first, then sections in order
   const flatOrder: QuestionWithSection[] = [
@@ -352,6 +447,35 @@ export default function QuestionsPanel({
 
   return (
     <div className="flex flex-col gap-3 py-4">
+      {totalCount > 0 && (
+        <div
+          className={`rounded-box border px-4 py-3 ${
+            allQuestionsComplete
+              ? "border-success bg-success/10 text-success"
+              : "border-base-300 bg-base-200/60 text-base-content"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <IconRosetteDiscountCheck size={18} className={allQuestionsComplete ? "" : "text-base-content/50"} />
+              <div>
+                <p className="font-medium">
+                  {allQuestionsComplete ? "All questions complete" : "Question progress"}
+                </p>
+                <p className={`text-sm ${allQuestionsComplete ? "text-success/80" : "text-base-content/70"}`}>
+                  {allQuestionsComplete
+                    ? "Every question in this scenario has been completed."
+                    : `${completedCount} of ${totalCount} questions completed.`}
+                </p>
+              </div>
+            </div>
+            <span className={`badge badge-lg ${allQuestionsComplete ? "badge-success" : "badge-ghost"}`}>
+              {completedCount}/{totalCount}
+            </span>
+          </div>
+        </div>
+      )}
+
       {unsectioned.map((q) =>
         visibleIds.has(q.id) ? (
           <QuestionBox key={q.id} question={q} existingAnswer={answerMap[q.id]} revealedHintIds={revealedHintSet} />

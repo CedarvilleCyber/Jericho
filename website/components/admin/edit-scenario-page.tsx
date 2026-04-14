@@ -4,6 +4,7 @@ import {
   addSection,
   deleteQuestion,
   deleteSection,
+  updateQuestion,
   updateScenario,
   updateSection,
 } from "@/app/admin/scenarios/actions";
@@ -32,6 +33,7 @@ const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   TRUE_FALSE: "True / False",
   NUMERIC: "Numeric",
   ORDERING: "Ordering",
+  INFORMATIONAL: "Informational",
 };
 
 function SectionsList({
@@ -239,6 +241,78 @@ function QuestionsList({
     setDeletingId(null);
   }
 
+  async function handleMoveUp(question: QuestionWithSection) {
+    const idx = sorted.findIndex((q) => q.id === question.id);
+    if (idx <= 0) return;
+    const prev = sorted[idx - 1];
+    const questionHints = question.hints.map((h) => ({ text: h.text, order: h.order }));
+    const prevHints = prev.hints.map((h) => ({ text: h.text, order: h.order }));
+    await Promise.all([
+      updateQuestion(question.id, {
+        title: question.title,
+        placeholder: question.placeholder,
+        validationRegex: question.validationRegex ?? "",
+        answer: question.answer,
+        answerIsRegex: question.answerIsRegex,
+        pointValue: question.pointValue,
+        type: question.type,
+        options: question.options,
+        sectionId: question.sectionId,
+        order: prev.order,
+        hints: questionHints,
+      }),
+      updateQuestion(prev.id, {
+        title: prev.title,
+        placeholder: prev.placeholder,
+        validationRegex: prev.validationRegex ?? "",
+        answer: prev.answer,
+        answerIsRegex: prev.answerIsRegex,
+        pointValue: prev.pointValue,
+        type: prev.type,
+        options: prev.options,
+        sectionId: prev.sectionId,
+        order: question.order,
+        hints: prevHints,
+      }),
+    ]);
+  }
+
+  async function handleMoveDown(question: QuestionWithSection) {
+    const idx = sorted.findIndex((q) => q.id === question.id);
+    if (idx >= sorted.length - 1) return;
+    const next = sorted[idx + 1];
+    const questionHints = question.hints.map((h) => ({ text: h.text, order: h.order }));
+    const nextHints = next.hints.map((h) => ({ text: h.text, order: h.order }));
+    await Promise.all([
+      updateQuestion(question.id, {
+        title: question.title,
+        placeholder: question.placeholder,
+        validationRegex: question.validationRegex ?? "",
+        answer: question.answer,
+        answerIsRegex: question.answerIsRegex,
+        pointValue: question.pointValue,
+        type: question.type,
+        options: question.options,
+        sectionId: question.sectionId,
+        order: next.order,
+        hints: questionHints,
+      }),
+      updateQuestion(next.id, {
+        title: next.title,
+        placeholder: next.placeholder,
+        validationRegex: next.validationRegex ?? "",
+        answer: next.answer,
+        answerIsRegex: next.answerIsRegex,
+        pointValue: next.pointValue,
+        type: next.type,
+        options: next.options,
+        sectionId: next.sectionId,
+        order: question.order,
+        hints: nextHints,
+      }),
+    ]);
+  }
+
   const sectionMap = Object.fromEntries(sections.map((s) => [s.id, s.title]));
 
   return (
@@ -258,7 +332,7 @@ function QuestionsList({
           {sorted.length === 0 && (
             <p className="text-sm text-base-content/50">No questions yet.</p>
           )}
-          {sorted.map((q) => (
+          {sorted.map((q, idx) => (
             <div key={q.id} className="flex items-center gap-2 bg-base-200 rounded-lg px-3 py-2">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{q.title}</p>
@@ -276,6 +350,22 @@ function QuestionsList({
                 onClick={() => setEditingQuestion(q)}
               >
                 <IconPencil size={16} />
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm btn-square"
+                onClick={() => handleMoveUp(q)}
+                disabled={idx === 0}
+              >
+                <IconArrowUp size={16} />
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm btn-square"
+                onClick={() => handleMoveDown(q)}
+                disabled={idx === sorted.length - 1}
+              >
+                <IconArrowDown size={16} />
               </button>
               <button
                 type="button"
