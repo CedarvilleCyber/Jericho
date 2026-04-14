@@ -127,7 +127,8 @@ model ScenarioLivestream {
   id         String   @id @default(cuid())
   scenarioId String
   label      String
-  channelId  String
+  channelId String
+  videoId  String?
   order      Int      @default(0)
   scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 

@@ -1,10 +1,8 @@
 import AddExistingVMToScenarioPage from "@/components/scenario/add-existing-vm";
-import CompletionConfetti from "@/components/scenario/completion-confetti";
 import ScenarioTabsCard from "@/components/scenario/scenario-tabs-card";
 import PVEViewer from "@/components/view/pve-viewer";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { INFORMATIONAL_COMPLETED_SENTINEL } from "@/lib/scenarios/constants";
 import { parseTopology } from "@/lib/scenarios/topology-types";
 import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
@@ -54,6 +52,7 @@ export default async function ScenarioLabPage({
       sections: {
         orderBy: { order: "asc" },
       },
+      livestreams: { orderBy: { order: "asc" } },
     },
   });
   if (!scenario) {
@@ -68,34 +67,8 @@ export default async function ScenarioLabPage({
     )
     .map((h) => h.id);
 
-  const correctQuestionIds = scenario.questions
-    .filter((q) => {
-      const ua = q.userAnswers[0];
-      if (q.type === "INFORMATIONAL") {
-        return ua?.answer === INFORMATIONAL_COMPLETED_SENTINEL;
-      }
-      if (!ua) return false;
-      if (q.type === "NUMERIC") {
-        return parseFloat(ua.answer.trim()) === parseFloat(q.answer.trim());
-      }
-      if (q.answerIsRegex) {
-        try {
-          return new RegExp(q.answer).test(ua.answer.trim());
-        } catch {
-          return false;
-        }
-      }
-      return ua.answer.trim() === q.answer.trim();
-    })
-    .map((q) => q.id);
-
-  const allQuestionsComplete =
-    scenario.questions.length > 0 &&
-    correctQuestionIds.length === scenario.questions.length;
-
   return (
     <div className="mx-6 px-4 py-8 h-full flex flex-col">
-      <CompletionConfetti active={allQuestionsComplete} />
       <div className="breadcrumbs text-sm mb-6">
         <ul>
           <li>
@@ -111,6 +84,7 @@ export default async function ScenarioLabPage({
       <div className="grid grid-cols-2 gap-6 mb-4 flex-1 min-h-0">
         <ScenarioTabsCard
           description={scenario.description}
+          livestreams={scenario.livestreams}
           topology={scenario.topology ? parseTopology(scenario.topology) : undefined}
           topologyURL={scenario.topologyURL ?? undefined}
           scenarioName={scenario.name}
@@ -120,7 +94,19 @@ export default async function ScenarioLabPage({
           sections={scenario.sections}
           userAnswers={scenario.questions.flatMap((q) => q.userAnswers)}
           revealedHintIds={revealedHintIds}
-          correctQuestionIds={correctQuestionIds}
+          
+          correctQuestionIds={scenario.questions
+            .filter((q) => {
+              const ua = q.userAnswers[0];
+              if (!ua) return false;
+              if (q.type === "NUMERIC")
+                return parseFloat(ua.answer.trim()) === parseFloat(q.answer.trim());
+              if (q.answerIsRegex) {
+                try { return new RegExp(q.answer).test(ua.answer.trim()); } catch { return false; }
+              }
+              return ua.answer.trim() === q.answer.trim();
+            })
+            .map((q) => q.id)}
         />
         <div className="card bg-base-100 border border-base-300 min-h-0">
           <div className="card-body p-4 flex flex-col overflow-y-auto">
