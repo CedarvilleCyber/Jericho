@@ -100,7 +100,7 @@ $light_states = ['red', 'yellow', 'green', 'off'];
     </div><!-- /intersection-grid -->
 
     <!-- ── System Log ── -->
-    <div class="panel-card">
+    <div class="panel-card" style="margin-top:1.25rem;">
         <div class="panel-card-title">System Activity Log</div>
         <div class="log-panel" id="system-log">
             <div class="log-line-info">[SYSTEM] Traffic control session started. User: <?= htmlspecialchars($_SESSION['user']) ?></div>
