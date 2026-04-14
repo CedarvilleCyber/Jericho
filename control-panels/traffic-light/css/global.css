@@ -1,0 +1,93 @@
+/* ── Jericho Traffic Management System — Global Styles ── */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    color: #212529;
+}
+
+/* ── Site Header ── */
+.site-header {
+    background-color: #003865;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.site-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.site-header .brand-logo {
+    width: 36px;
+    height: 36px;
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.site-header .brand-logo svg {
+    fill: #003865;
+}
+
+.site-header .brand-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.site-header .brand-sub {
+    font-size: 0.75rem;
+    color: #a8c4e0;
+    font-weight: 400;
+}
+
+.site-header nav a {
+    color: #cde0f5;
+    text-decoration: none;
+    font-size: 0.875rem;
+    margin-left: 1.25rem;
+    font-weight: 500;
+    transition: color 0.15s;
+}
+
+.site-header nav a:hover {
+    color: #ffffff;
+}
+
+/* ── Cards ── */
+.panel-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.panel-card-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6c757d;
+    margin-bottom: 0.875rem;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+/* ── Footer ── */
+.site-footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #adb5bd;
+    padding: 1.5rem 0 1rem;
+}

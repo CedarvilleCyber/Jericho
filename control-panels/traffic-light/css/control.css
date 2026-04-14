@@ -1,0 +1,191 @@
+/* ── Traffic Light Control Panel — Specific Styles ── */
+
+/* ── Mode bar ── */
+.mode-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.mode-btn {
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.6rem 1.4rem;
+    border-radius: 6px;
+    letter-spacing: 0.01em;
+}
+
+.mode-status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+.mode-status .mode-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.mode-status .last-updated {
+    font-size: 0.75rem;
+    color: #868e96;
+}
+
+/* ── Intersection grid ── */
+.intersection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+/* ── Intersection card ── */
+.intersection-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.intersection-header {
+    background: #003865;
+    color: #fff;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.intersection-header .int-id {
+    font-size: 0.95rem;
+}
+
+.intersection-header .int-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #28c840;
+    box-shadow: 0 0 5px #28c840;
+}
+
+.intersection-body {
+    padding: 0.875rem;
+}
+
+/* ── Direction row ── */
+.direction-row {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 0.5rem;
+}
+
+.direction-row:last-of-type {
+    margin-bottom: 0;
+}
+
+.direction-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6c757d;
+    width: 2.5rem;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+/* ── Light circles ── */
+.light-circles {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.light-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: box-shadow 0.15s, opacity 0.15s;
+    flex-shrink: 0;
+}
+
+/* Inactive (unselected) state */
+.light-circle.inactive {
+    background-color: #d0d0d0;
+    border-color: #b0b0b0;
+}
+
+/* Active states */
+.light-circle.active-red {
+    background-color: #dc3545;
+    border-color: #b02a37;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.55);
+}
+
+.light-circle.active-yellow {
+    background-color: #ffc107;
+    border-color: #d39e00;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.55);
+}
+
+.light-circle.active-green {
+    background-color: #198754;
+    border-color: #146c43;
+    box-shadow: 0 0 8px rgba(25, 135, 84, 0.55);
+}
+
+.light-circle.active-off {
+    background-color: #495057;
+    border-color: #343a40;
+}
+
+/* Clickable light circles */
+.light-circle[data-state] {
+    cursor: pointer;
+}
+
+.light-circle[data-state]:hover {
+    opacity: 0.82;
+}
+
+/* ── Per-intersection apply button ── */
+.btn-apply {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* ── System log panel ── */
+.log-panel {
+    background: #1e2329;
+    color: #adb5bd;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.78rem;
+    max-height: 160px;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+.log-panel .log-line-ok {
+    color: #57c787;
+}
+
+.log-panel .log-line-err {
+    color: #f87171;
+}
+
+.log-panel .log-line-info {
+    color: #7cb9f4;
+}
