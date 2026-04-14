@@ -91,3 +91,106 @@ body {
     color: #adb5bd;
     padding: 1.5rem 0 1rem;
 }
+
+/* ── Brand heading (adapts in dark mode) ── */
+.brand-heading {
+    color: #003865;
+}
+
+/* ── Brand submit button ── */
+.btn-brand {
+    background: #003865;
+    color: #fff;
+    font-weight: 600;
+    border: 1px solid #003865;
+}
+
+.btn-brand:hover {
+    background: #004f8c;
+    border-color: #004f8c;
+    color: #fff;
+}
+
+/* ── Notice / warning card ── */
+.notice-card {
+    background: #fffbe6;
+    border-color: #ffe58f !important;
+}
+
+.notice-card .notice-card-title {
+    color: #7c6400;
+}
+
+.notice-card p {
+    color: #5c4a00;
+}
+
+.form-label {
+  color: #212529;
+}
+
+/* ── Traffic light SVG icon ── */
+.tl-icon circle {
+    fill: #e9ecef;
+}
+
+/* Nav brand-logo has a white bg always — circles stay white in both modes */
+.brand-logo .tl-icon circle {
+    fill: #ffffff;
+}
+
+/* ── Dark mode overrides ── */
+[data-bs-theme="dark"] body {
+    background-color: #111418;
+}
+
+[data-bs-theme="dark"] .panel-card {
+    background: #1a1f27;
+    border-color: #2d3748;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+[data-bs-theme="dark"] .panel-card-title {
+    color: #8899aa;
+    border-bottom-color: #2d3748;
+}
+
+[data-bs-theme="dark"] .brand-heading {
+    color: #7cb9f4;
+}
+
+[data-bs-theme="dark"] .btn-brand {
+    background: #1a5a9e;
+    border-color: #1a5a9e;
+}
+
+[data-bs-theme="dark"] .btn-brand:hover {
+    background: #2068b5;
+    border-color: #2068b5;
+}
+
+[data-bs-theme="dark"] .notice-card {
+    background: #1e1a00;
+    border-color: #5c4a00 !important;
+}
+
+[data-bs-theme="dark"] .notice-card .notice-card-title {
+    color: #ffc107;
+}
+
+[data-bs-theme="dark"] .notice-card p {
+    color: #d4aa30;
+}
+
+[data-bs-theme="dark"] .form-label {
+    color: #e9ecef;
+}
+
+
+[data-bs-theme="dark"] .tl-icon circle {
+    fill: #1a1f27;
+}
+
+[data-bs-theme="dark"] .brand-logo .tl-icon circle {
+    fill: #ffffff;
+}

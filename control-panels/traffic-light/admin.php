@@ -51,7 +51,7 @@ $uploaded_files = array_values(array_filter(
 
 <div class="container py-4" style="max-width: 760px;">
 
-    <h5 class="fw-bold mb-1" style="color:#003865;">Traffic Advisory Management</h5>
+    <h5 class="fw-bold mb-1 brand-heading">Traffic Advisory Management</h5>
     <p class="text-muted mb-4" style="font-size:0.875rem;">
         Upload traffic advisory documents for public distribution. Supported formats: PDF, DOCX, images, and plain-text notices.
     </p>
@@ -87,7 +87,7 @@ $uploaded_files = array_values(array_filter(
                 <input type="file" class="form-control" id="file" name="file" required>
                 <div class="form-text">Accepted: PDF, DOCX, JPG, PNG, TXT. PHP files are not allowed.</div>
             </div>
-            <button type="submit" class="btn" style="background:#003865;color:#fff;font-weight:600;">
+            <button type="submit" class="btn btn-brand">
                 Upload Advisory
             </button>
         </form>
@@ -133,9 +133,9 @@ $uploaded_files = array_values(array_filter(
     </div>
 
     <!-- ── Admin Info ── -->
-    <div class="panel-card" style="background:#fffbe6;border-color:#ffe58f;">
-        <div class="panel-card-title" style="color:#7c6400;">System Notice</div>
-        <p style="font-size:0.8rem;color:#5c4a00;margin:0;">
+    <div class="panel-card notice-card">
+        <div class="panel-card-title notice-card-title">System Notice</div>
+        <p style="font-size:0.8rem;margin:0;">
             Uploaded documents are stored in <code>uploads/</code> and immediately accessible to the public portal.
             Ensure all files comply with the Jericho DOT document standards before uploading.
             Contact <strong>jericho+traffic@cedarville.edu</strong> for access issues.

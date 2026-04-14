@@ -43,13 +43,13 @@ if (isset($_SESSION['user'])) {
     <div class="panel-card">
         <div class="text-center mb-4">
             <!-- Traffic light icon (larger) -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" style="fill:#003865;" class="mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" style="fill:#003865;" class="tl-icon mb-2">
                 <rect x="7" y="1" width="10" height="22" rx="3" ry="3"/>
-                <circle cx="12" cy="6"  r="2.2" fill="#f0f2f5"/>
-                <circle cx="12" cy="12" r="2.2" fill="#f0f2f5"/>
-                <circle cx="12" cy="18" r="2.2" fill="#f0f2f5"/>
+                <circle cx="12" cy="6"  r="2.2"/>
+                <circle cx="12" cy="12" r="2.2"/>
+                <circle cx="12" cy="18" r="2.2"/>
             </svg>
-            <h4 class="fw-bold mt-1" style="color:#003865;">Jericho Traffic Management System</h4>
+            <h4 class="fw-bold mt-1 brand-heading">Jericho Traffic Management System</h4>
             <p class="text-muted" style="font-size:0.85rem;">Authorized personnel only. All access is logged.</p>
         </div>
 
@@ -69,7 +69,7 @@ if (isset($_SESSION['user'])) {
                 <input type="password" class="form-control" id="password" name="password"
                        autocomplete="current-password" required>
             </div>
-            <button type="submit" class="btn w-100" style="background:#003865;color:#fff;font-weight:600;">
+            <button type="submit" class="btn btn-brand w-100">
                 Sign In
             </button>
         </form>

@@ -189,3 +189,30 @@
 .log-panel .log-line-info {
     color: #7cb9f4;
 }
+
+/* ── Dark mode overrides ── */
+[data-bs-theme="dark"] .intersection-card {
+    background: #1a1f27;
+    border-color: #2d3748;
+}
+
+[data-bs-theme="dark"] .mode-status {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .direction-label {
+    color: #8899aa;
+}
+
+[data-bs-theme="dark"] .light-circle.inactive {
+    background-color: #3a3f4a;
+    border-color: #4a5060;
+}
+
+[data-bs-theme="dark"] .mode-status {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .mode-status .last-updated {
+    color: #6c757d;
+}

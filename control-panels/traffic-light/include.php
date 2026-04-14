@@ -1,3 +1,11 @@
+<!-- Set theme before CSS loads to avoid flash -->
+<script>
+(function(){
+    var t = localStorage.getItem('jtms-theme');
+    if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-bs-theme', t);
+})();
+</script>
 <!-- Bootstrap 5 + Inter font CDN includes -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
