@@ -194,6 +194,7 @@ enum QuestionType {
   TRUE_FALSE
   NUMERIC
   ORDERING
+  INFORMATIONAL
 }
 
 model Question {

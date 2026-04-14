@@ -14,6 +14,7 @@ const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   TRUE_FALSE: "True / False",
   NUMERIC: "Numeric",
   ORDERING: "Ordering",
+  INFORMATIONAL: "Informational",
 };
 
 type FormState = {
@@ -267,7 +268,14 @@ function QuestionFields({
   const showValidationRegex = form.type === "TEXT" || form.type === "LONG_TEXT";
 
   function handleTypeChange(type: QuestionType) {
-    setForm({ ...form, type, answer: "", options: [] });
+    setForm({
+      ...form,
+      type,
+      answer: "",
+      options: [],
+      answerIsRegex: false,
+      pointValue: type === "INFORMATIONAL" ? 0 : form.pointValue,
+    });
   }
 
   function handleOptionsChange(opts: string[]) {
@@ -375,6 +383,18 @@ function QuestionFields({
         </label>
       )}
 
+      {form.type === "INFORMATIONAL" && (
+        <label className="form-control">
+          <div className="label"><span className="label-text">Informational content</span></div>
+          <textarea
+            className="textarea textarea-bordered w-full"
+            value={form.answer}
+            rows={4}
+            onChange={(e) => setForm({ ...form, answer: e.target.value })}
+          />
+        </label>
+      )}
+
       {form.type === "TRUE_FALSE" && (
         <div className="form-control">
           <div className="label"><span className="label-text">Correct Answer</span></div>
@@ -413,8 +433,9 @@ function QuestionFields({
         <input
           type="number"
           className="input input-bordered w-full"
-          value={form.pointValue}
+          value={form.type === "INFORMATIONAL" ? 0 : form.pointValue}
           onChange={(e) => setForm({ ...form, pointValue: Number(e.target.value) })}
+          disabled={form.type === "INFORMATIONAL"}
         />
       </label>
 
@@ -433,17 +454,6 @@ function QuestionFields({
           </select>
         </label>
       )}
-
-      <label className="form-control">
-        <div className="label"><span className="label-text">Order</span></div>
-        <input
-          type="number"
-          className="input input-bordered w-full"
-          value={form.order + 1}
-          min={1}
-          onChange={(e) => setForm({ ...form, order: Math.max(0, Number(e.target.value) - 1) })}
-        />
-      </label>
 
       <HintsEditor
         hints={form.hints}
@@ -497,6 +507,7 @@ export function EditQuestionModal({
           : null;
     await updateQuestion(question.id, {
       ...form,
+      pointValue: form.type === "INFORMATIONAL" ? 0 : form.pointValue,
       options,
       sectionId: form.sectionId || null,
     });
@@ -564,6 +575,7 @@ export function AddQuestionModal({
           : null;
     await addQuestion(scenarioId, {
       ...form,
+      pointValue: form.type === "INFORMATIONAL" ? 0 : form.pointValue,
       options,
       sectionId: form.sectionId || null,
     });

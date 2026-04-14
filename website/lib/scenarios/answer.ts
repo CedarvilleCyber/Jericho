@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { INFORMATIONAL_COMPLETED_SENTINEL } from "@/lib/scenarios/constants";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -16,7 +17,9 @@ export async function submitAnswer(
   if (!question) throw new Error("Question not found");
 
   let correct: boolean;
-  if (question.type === "NUMERIC") {
+  if (question.type === "INFORMATIONAL") {
+    correct = answer === INFORMATIONAL_COMPLETED_SENTINEL;
+  } else if (question.type === "NUMERIC") {
     correct = parseFloat(answer.trim()) === parseFloat(question.answer.trim());
   } else if (question.answerIsRegex) {
     try {
