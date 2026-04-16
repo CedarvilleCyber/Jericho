@@ -1,14 +1,17 @@
 "use client";
 
 import {
+  addLivestream,
   addSection,
   deleteQuestion,
+  deleteLivestream,
   deleteSection,
+  updateLivestream,
   updateQuestion,
   updateScenario,
   updateSection,
 } from "@/app/admin/scenarios/actions";
-import { Section } from "@/app/generated/prisma/client";
+import { ScenarioLivestream, Section } from "@/app/generated/prisma/client";
 import { AddQuestionModal, EditQuestionModal } from "@/components/admin/question-modal";
 import { QuestionWithSection, ScenarioWithQuestions, QuestionType } from "@/components/admin/scenario-types";
 import { TopologyEditor } from "@/components/admin/topology-editor";
@@ -403,6 +406,173 @@ function QuestionsList({
   );
 }
 
+function LivestreamsList({
+  livestreams,
+  scenarioId,
+}: {
+  livestreams: ScenarioLivestream[];
+  scenarioId: string;
+}) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [editStreamKey, setEditStreamKey] = useState("");
+  const [addingLabel, setAddingLabel] = useState("");
+  const [addingStreamKey, setAddingStreamKey] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [addingSaving, setAddingSaving] = useState(false);
+
+  const sorted = [...livestreams].sort((a, b) => a.order - b.order);
+
+  async function handleSaveEdit(ls: ScenarioLivestream) {
+    if (!editLabel.trim() || !editStreamKey.trim()) return;
+    setSavingId(ls.id);
+    await updateLivestream(ls.id, { label: editLabel.trim(), streamKey: editStreamKey.trim(), order: ls.order });
+    setSavingId(null);
+    setEditingId(null);
+  }
+
+  async function handleDelete(id: string) {
+    setDeletingId(id);
+    await deleteLivestream(id);
+    setDeletingId(null);
+  }
+
+  async function handleAdd() {
+    if (!addingLabel.trim() || !addingStreamKey.trim()) return;
+    setAddingSaving(true);
+    const maxOrder = sorted.length > 0 ? Math.max(...sorted.map((s) => s.order)) + 1 : 0;
+    await addLivestream(scenarioId, { label: addingLabel.trim(), streamKey: addingStreamKey.trim(), order: maxOrder });
+    setAddingSaving(false);
+    setAddingLabel("");
+    setAddingStreamKey("");
+    setShowAdd(false);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="label-text font-semibold">Livestreams</span>
+        <button type="button" className="btn btn-sm btn-ghost" onClick={() => setShowAdd(true)}>
+          <IconPlus size={16} /> Add
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {sorted.length === 0 && (
+          <p className="text-sm text-base-content/50">No livestreams configured.</p>
+        )}
+        {sorted.map((ls) => (
+          <div key={ls.id} className="flex items-center gap-2 bg-base-200 rounded-lg px-3 py-2">
+            {editingId === ls.id ? (
+              <>
+                <input
+                  className="input input-bordered input-sm w-32"
+                  value={editLabel}
+                  onChange={(e) => setEditLabel(e.target.value)}
+                  placeholder="Label"
+                />
+                <input
+                  className="input input-bordered input-sm flex-1"
+                  value={editStreamKey}
+                  onChange={(e) => setEditStreamKey(e.target.value)}
+                  placeholder="Stream key"
+                />
+              </>
+            ) : (
+              <>
+                <span className="text-sm font-medium w-32 truncate">{ls.label}</span>
+                <span className="text-sm text-base-content/60 flex-1 truncate font-mono">{ls.streamKey}</span>
+              </>
+            )}
+
+            {editingId === ls.id ? (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm btn-square text-success"
+                  onClick={() => handleSaveEdit(ls)}
+                  disabled={savingId === ls.id}
+                >
+                  {savingId === ls.id ? (
+                    <span className="loading loading-spinner loading-xs" />
+                  ) : (
+                    <IconCheck size={14} />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm btn-square"
+                  onClick={() => setEditingId(null)}
+                >
+                  <IconX size={14} />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm btn-square"
+                  onClick={() => { setEditingId(ls.id); setEditLabel(ls.label); setEditStreamKey(ls.streamKey); }}
+                >
+                  <IconPencil size={14} />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm btn-square text-error"
+                  onClick={() => handleDelete(ls.id)}
+                  disabled={deletingId === ls.id}
+                >
+                  {deletingId === ls.id ? (
+                    <span className="loading loading-spinner loading-xs" />
+                  ) : (
+                    <IconTrash size={14} />
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+        ))}
+
+        {showAdd && (
+          <div className="flex items-center gap-2">
+            <input
+              className="input input-bordered input-sm w-32"
+              value={addingLabel}
+              onChange={(e) => setAddingLabel(e.target.value)}
+              placeholder="Label"
+              autoFocus
+            />
+            <input
+              className="input input-bordered input-sm flex-1"
+              value={addingStreamKey}
+              onChange={(e) => setAddingStreamKey(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              placeholder="Stream key (e.g. scenario1_cam1)"
+            />
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={handleAdd}
+              disabled={addingSaving || !addingLabel.trim() || !addingStreamKey.trim()}
+            >
+              {addingSaving ? <span className="loading loading-spinner loading-xs" /> : "Add"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => { setShowAdd(false); setAddingLabel(""); setAddingStreamKey(""); }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions }) {
   const router = useRouter();
   const { handleCancelAttempt, confirmDialog } = useSaveGuard(() =>
@@ -492,6 +662,7 @@ export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions
                 sections={scenario.sections}
                 scenarioId={scenario.id}
               />
+              <LivestreamsList livestreams={scenario.livestreams} scenarioId={scenario.id} />
 
               <div className="flex justify-end gap-2 mt-2">
                 <button className="btn btn-ghost" onClick={handleCancelAttempt}>Cancel</button>

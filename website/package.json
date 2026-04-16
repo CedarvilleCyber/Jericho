@@ -16,6 +16,7 @@
     "@types/node-ssh": "^11.0.0",
     "@xyflow/react": "^12.10.2",
     "daisyui": "^5.5.19",
+    "flv.js": "^1.6.2",
     "nanoid": "^5.1.6",
     "next": "16.1.6",
     "node-ssh": "^13.2.1",

@@ -7,6 +7,7 @@ import logo from "@/public/logo256.png";
 import {
   IconDeviceDesktop,
   IconLogout,
+  IconPlayerPlay,
   IconSettings,
   IconShieldLock,
   IconTrophy,
@@ -75,6 +76,12 @@ export default function AppBar() {
                     <Link href="/me">
                       <IconSettings size={16} />
                       Account
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/livestream">
+                      <IconPlayerPlay size={16} />
+                      Livestream
                     </Link>
                   </li>
                   <li>

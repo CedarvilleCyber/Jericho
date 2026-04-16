@@ -17,6 +17,7 @@ export default async function EditScenarioRoute({
         orderBy: { order: "asc" },
       },
       sections: { orderBy: { order: "asc" } },
+      livestreams: { orderBy: { order: "asc" } },
     },
   });
 

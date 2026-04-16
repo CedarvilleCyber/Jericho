@@ -167,3 +167,29 @@ export async function deleteSection(id: string) {
   await prisma.section.delete({ where: { id } });
   revalidatePath("/admin/scenarios");
 }
+
+export async function addLivestream(
+  scenarioId: string,
+  data: { label: string; streamKey: string; order: number },
+) {
+  await prisma.scenarioLivestream.create({
+    data: { scenarioId, label: data.label, streamKey: data.streamKey, order: data.order },
+  });
+  revalidatePath("/admin/scenarios");
+}
+
+export async function updateLivestream(
+  id: string,
+  data: { label: string; streamKey: string; order: number },
+) {
+  await prisma.scenarioLivestream.update({
+    where: { id },
+    data: { label: data.label, streamKey: data.streamKey, order: data.order },
+  });
+  revalidatePath("/admin/scenarios");
+}
+
+export async function deleteLivestream(id: string) {
+  await prisma.scenarioLivestream.delete({ where: { id } });
+  revalidatePath("/admin/scenarios");
+}

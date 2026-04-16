@@ -10,6 +10,7 @@ export default async function ScenariosPage() {
         orderBy: { order: "asc" },
       },
       sections: { orderBy: { order: "asc" } },
+      livestreams: true,
     },
     orderBy: { name: "asc" },
   });
