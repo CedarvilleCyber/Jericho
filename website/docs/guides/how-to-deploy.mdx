@@ -1,0 +1,86 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Deployment
+
+### Build
+
+```bash
+bun run build
+bun run start
+```
+
+The production server listens on port 3000 by default.
+
+### Environment Variables
+
+Set all required environment variables in your production environment. Do **not** commit `.env` files. See the [Environment Variables reference](../reference/environment-variables).
+
+Key production differences from development:
+
+- `BETTER_AUTH_URL` must be your public domain (e.g., `https://jericho.example.com`)
+- `DATABASE_URL` must point to your production PostgreSQL instance
+- `NODE_TLS_REJECT_UNAUTHORIZED` should only be `0` if Proxmox uses a self-signed cert
+
+### Database Migrations
+
+Run migrations before starting the app:
+
+```bash
+bunx prisma migrate deploy
+```
+
+This applies any pending migrations without prompting for confirmation — safe for CI/CD pipelines.
+
+### Nginx Reverse Proxy
+
+A `nginx/` directory is included in the repo. A typical config to proxy port 80/443 to the Next.js server:
+
+```nginx
+server {
+    listen 80;
+    server_name jericho.example.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name jericho.example.com;
+
+    ssl_certificate     /etc/ssl/certs/jericho.crt;
+    ssl_certificate_key /etc/ssl/private/jericho.key;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### Process Management
+
+Use a process manager to keep the app running:
+
+```bash
+# PM2 example
+pm2 start "bun run start" --name jericho
+pm2 save
+pm2 startup
+```
+
+### First-Run Checklist
+
+- [ ] `DATABASE_URL` set and database reachable
+- [ ] `bunx prisma migrate deploy` succeeded
+- [ ] `BETTER_AUTH_SECRET` is a strong random value (not the placeholder)
+- [ ] `BETTER_AUTH_URL` matches your public domain
+- [ ] Email (SMTP) configured for verification and password reset
+- [ ] Proxmox env vars set and API token has required permissions
+- [ ] Nginx configured and SSL certificate in place
+- [ ] First admin user created (see [Getting Started](../getting-started#first-admin-user))

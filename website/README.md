@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jericho Website
 
-## Getting Started
+The web frontend for the Jericho cyber-physical training platform. Built with Next.js 16, Tailwind v4, DaisyUI v5, better-auth, and Prisma (PostgreSQL).
 
-First, run the development server:
+Full documentation lives in [`docs/`](./docs/) and is served at `/docs` on a running instance.
+
+---
+
+## Prerequisites
+
+- [Bun](https://bun.sh)
+- PostgreSQL 14+
+- Proxmox VE instance (for VM management features)
+- Optional: Microsoft Entra ID app registration (for OAuth sign-in)
+
+---
+
+## Development Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+cp .env.example .env   # then fill in your values
+bunx prisma migrate deploy
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Minimum required environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+BETTER_AUTH_SECRET="<random-secret>"
+BETTER_AUTH_URL="http://localhost:3000"
+DATABASE_URL="postgresql://user:password@localhost:5432/jericho"
+```
 
-## Learn More
+See [`docs/reference/environment-variables.mdx`](./docs/reference/environment-variables.mdx) for the full list.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Available Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Description |
+|---|---|
+| `bun run dev` | Start development server |
+| `bun run build` | Build for production |
+| `bun run start` | Start production server (port 3000) |
+| `bun run lint` | Run ESLint |
+| `bunx prisma studio` | Open Prisma database GUI |
+| `bunx prisma migrate dev` | Create and apply a new migration |
+| `bunx prisma migrate deploy` | Apply pending migrations (CI/prod) |
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Nginx Reverse Proxy (Docker)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The `nginx/` directory contains a Docker Compose setup to proxy port 80/443 to the Next.js server.
+
+1. Create your site config in `nginx/conf.d/jericho.conf` (see [`docs/guides/how-to-deploy.mdx`](./docs/guides/how-to-deploy.mdx) for an example)
+2. Place SSL certs in `nginx/certs/` (`jericho.crt` and `jericho.key`)
+3. Start the container:
+
+```bash
+cd nginx
+docker compose up -d
+```
+
+Logs are written to `nginx/logs/`.
+
+---
+
+## Further Reading
+
+- [Getting Started](./docs/getting-started.mdx) — full setup including first admin user
+- [Deployment Guide](./docs/guides/how-to-deploy.mdx) — production checklist
+- [Environment Variables](./docs/reference/environment-variables.mdx) — all config options
+- [Architecture](./docs/architecture/project-structure.mdx) — codebase structure

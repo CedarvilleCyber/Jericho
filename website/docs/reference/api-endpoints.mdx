@@ -1,0 +1,78 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## API Endpoints
+
+Jericho uses Next.js App Router. Most mutations go through **Server Actions** (not traditional REST endpoints). The only true HTTP API routes are the authentication endpoints.
+
+### Authentication API
+
+All auth endpoints are handled by better-auth at `/api/auth/[...all]`.
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/auth/sign-in/email` | Sign in with email/password |
+| `POST` | `/api/auth/sign-up/email` | Register a new account |
+| `POST` | `/api/auth/sign-out` | Sign out current session |
+| `POST` | `/api/auth/forget-password` | Request password reset email |
+| `POST` | `/api/auth/reset-password` | Submit new password with token |
+| `POST` | `/api/auth/verify-email` | Verify email with token |
+| `GET/POST` | `/api/auth/callback/microsoft-entra-id` | OAuth callback (if configured) |
+
+The full list of endpoints is determined by the better-auth plugins configured in `lib/auth.ts`. See the [better-auth documentation](https://www.better-auth.com/docs) for details.
+
+### Server Actions
+
+Server Actions are typed TypeScript functions (marked `"use server"`) called directly from client components. They are not traditional REST endpoints but behave similarly.
+
+#### Scenario Actions
+
+Located in `app/admin/scenarios/actions.ts` and `lib/scenarios/`:
+
+| Action | Description |
+|---|---|
+| `createScenario(data)` | Create a new scenario |
+| `updateScenario(id, data)` | Update scenario metadata |
+| `deleteScenario(id)` | Delete a scenario |
+| `addSection(scenarioId, data)` | Add a section to a scenario |
+| `updateSection(id, data)` | Update section title/order |
+| `deleteSection(id)` | Delete a section |
+| `addQuestion(scenarioId, data)` | Add a question |
+| `updateQuestion(id, data)` | Update question fields |
+| `deleteQuestion(id)` | Delete a question |
+| `addLivestream(scenarioId, data)` | Add a stream to a scenario |
+| `updateLivestream(id, data)` | Update stream config |
+| `deleteLivestream(id)` | Remove a stream |
+| `joinScenario(formData)` | Enroll current user in scenario |
+| `deleteUserScenario(formData)` | Remove user from scenario |
+| `submitAnswer(questionId, answer)` | Submit answer to a question |
+| `revealHint(hintId)` | Reveal a hint for a question |
+
+#### User Actions
+
+| Action | Description |
+|---|---|
+| `bulkCreateUsers(users[])` | Create multiple users at once |
+| `updateUserRoles(userId, roles)` | Change a user's roles |
+| `deleteUser(id)` | Delete a user |
+| `setUserScenarioVM(formData)` | Link/unlink VM to user scenario |
+
+#### VM Actions
+
+| Action | Description |
+|---|---|
+| `addExistingVMToUser(vmId, userId)` | Link existing Proxmox VM to user |
+| `cloneVMTemplateToUser(templateId, name, userId)` | Clone VM template to user |
+
+#### Livestream Actions
+
+Located in `app/admin/livestream/actions.ts`:
+
+| Action | Description |
+|---|---|
+| `updateLivestreamConfig(data)` | Update livestream page layout/streams |
+
+### Authorization
+
+- All admin actions call `requireAdminSession()` at the start — unauthenticated or non-admin calls throw/redirect
+- User-scoped actions (answer submission, hint reveal, scenario join) validate the current session server-side via `auth.api.getSession()`
+- No public unauthenticated API endpoints exist beyond the auth routes

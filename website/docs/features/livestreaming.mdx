@@ -1,0 +1,52 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Livestreaming
+
+Jericho supports FLV-based live streams both on a dedicated page and embedded in scenario labs.
+
+### Main Livestream Page
+
+The livestream page at `/livestream` shows a configurable multi-stream layout.
+
+- Layout and streams are configured by admins (see [Admin Guide](../guides/admin-guide#livestream))
+- Supports multiple simultaneous streams in a grid layout
+- Each stream has a `position`, `label`, and `streamKey`
+
+### Scenario Livestreams
+
+Individual scenarios can have their own associated streams via `ScenarioLivestream` records. These appear in the **Livestream** tab of the scenario lab interface at `/me/scenarios/[id]`.
+
+### Stream Configuration
+
+Set the stream source URLs in your environment:
+
+```env
+LIVESTREAM_URL="https://your-stream-server/live/{streamKey}.flv"
+LIVESTREAM_SNAPSHOT_URL="https://your-stream-server/snapshot/{streamKey}.jpg"
+```
+
+The `{streamKey}` placeholder is replaced per stream.
+
+### FLV Player
+
+Streams are played via [flv.js](https://github.com/Bilibili/flv.js) — a low-latency FLV player for browser.
+
+- Component: `components/livestream/flv-player.tsx`
+- Works with standard RTMP-to-FLV endpoints (e.g., nginx-rtmp, SRS, Ant Media)
+
+### Admin Configuration
+
+Admins configure the livestream page at `/admin/livestream`:
+
+- Add, remove, and reorder streams
+- Set stream keys and display labels
+- Choose layout (grid configuration)
+
+Configuration is stored in `LivestreamPageConfig` and `LivestreamPageStream` tables.
+
+### Technical Reference
+
+- Main viewer: `components/livestream/livestream-viewer.tsx`
+- FLV player: `components/livestream/flv-player.tsx`
+- Admin editor: `components/admin/livestream-page-editor.tsx`
+- DB models: `LivestreamPageConfig`, `LivestreamPageStream`, `ScenarioLivestream`

@@ -1,0 +1,94 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Authentication
+
+Jericho uses [better-auth](https://www.better-auth.com/) for authentication, with the `@daveyplate/better-auth-ui` package providing pre-built UI components.
+
+### Sign-Up & Sign-In
+
+Users access authentication at `/auth/sign-in` (redirected from `/sign-in`).
+
+**Email/Password flow:**
+1. User registers with name, email, and password
+2. A verification email is sent (see [Email setup](../reference/environment-variables#email))
+3. User clicks the link → auto signed-in and redirected to home
+
+**Microsoft Entra ID (OAuth):**
+- Enabled when `AUTH_MICROSOFT_ENTRA_ID_ID` and `AUTH_MICROSOFT_ENTRA_ID_SECRET` are set
+- Accounts are linked if an email already exists (account linking is enabled)
+- Tenant ID and authority are optional for single-tenant restrictions
+
+### Password Reset
+
+The reset flow uses the `/reset-password` page:
+
+1. User requests reset from sign-in page
+2. Email sent with a time-limited token
+3. User visits `/reset-password?token=<token>` to set a new password
+
+Email must be configured for this to work. See [SMTP variables](../reference/environment-variables#email).
+
+### Roles
+
+Jericho has three roles stored in the `UserRole` table:
+
+| Role | Access |
+|---|---|
+| `STUDENT` | Default — can join scenarios, view leaderboard |
+| `FACULTY` | Currently same access as STUDENT (reserved for future use) |
+| `ADMIN` | Full access — admin dashboard, user management, scenario CRUD |
+
+Roles are managed from `/admin/users/[id]` by admins. Multiple roles per user are supported.
+
+### Sessions
+
+Sessions are stored in the `Session` table and track:
+- IP address and user agent
+- Expiration time
+- Impersonator ID (when an admin is impersonating)
+
+Users can view and revoke their own sessions from `/me`.
+
+### Admin Impersonation
+
+Admins can impersonate any user via `/admin/users/[id]`:
+
+1. Click "Impersonate" — session is set to the target user's identity
+2. An `ImpersonationBanner` shows at the top of every page while impersonating
+3. Stop impersonation from the banner to return to admin session
+
+### User Account Management
+
+Users manage their accounts at `/me`:
+
+- Update display name and username
+- Change email (triggers re-verification)
+- Change password
+- View and revoke active sessions
+- Delete account
+
+### Proxmox User Provisioning
+
+On first sign-in, a Proxmox user is automatically created:
+
+- Function: `ensureUserHasProxmoxId()` in `lib/proxmox-api/user.ts`
+- Creates a `{nanoid}@pve` user in Proxmox
+- Sets initial password from `PVE_CREATE_USER_PASSWORD`
+- Stores the `proxmoxId` on the `User` record for future ACL grants
+
+### Banning Users
+
+The `User` model supports banning with optional expiry:
+
+- `banned`: boolean
+- `banReason`: string
+- `banExpires`: datetime (null = permanent)
+
+Banned users cannot sign in. Managed via BetterAuth's admin plugin.
+
+### Technical Reference
+
+- Auth config: `lib/auth.ts`
+- Client hooks: `lib/auth-client.ts`
+- Admin guard: `lib/auth-guard.ts` — `requireAdminSession()` for server-side route protection
+- Session provider: `components/providers.tsx`

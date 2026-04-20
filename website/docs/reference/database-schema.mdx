@@ -1,0 +1,241 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Database Schema
+
+Jericho uses [Prisma](https://www.prisma.io/) with a PostgreSQL backend. The full schema lives in `prisma/schema.prisma`.
+
+### Users & Auth
+
+#### `User`
+
+Core user entity.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | Primary key |
+| `name` | String | Display name |
+| `email` | String | Unique |
+| `emailVerified` | Boolean | |
+| `image` | String? | Avatar URL |
+| `proxmoxId` | String? | Unique — Proxmox user identifier |
+| `displayUsername` | String? | Shown on leaderboard |
+| `username` | String? | Unique |
+| `role` | String? | BetterAuth role field (synced with UserRole) |
+| `banned` | Boolean? | |
+| `banReason` | String? | |
+| `banExpires` | DateTime? | Null = permanent |
+| `createdAt` | DateTime | |
+| `updatedAt` | DateTime | |
+
+#### `UserRole`
+
+Many roles per user.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `role` | Role enum | `STUDENT`, `FACULTY`, `ADMIN` |
+| `userId` | String | FK → User (cascade delete) |
+
+#### `Session`
+
+BetterAuth session records.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `expiresAt` | DateTime | |
+| `token` | String | Unique |
+| `ipAddress` | String? | |
+| `userAgent` | String? | |
+| `userId` | String | FK → User (cascade delete) |
+| `impersonatedBy` | String? | Admin user ID when impersonating |
+
+#### `Account`
+
+OAuth provider accounts.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `accountId` | String | Provider-issued ID |
+| `providerId` | String | e.g., `microsoft-entra-id` |
+| `userId` | String | FK → User (cascade delete) |
+| Access tokens, refresh tokens, expiry fields | | Standard OAuth fields |
+
+#### `Verification`
+
+Email verification and password reset tokens.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `identifier` | String | Indexed |
+| `value` | String | The token |
+| `expiresAt` | DateTime | |
+
+### Scenarios & Questions
+
+#### `Scenario`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `name` | String | |
+| `slug` | String | Unique, URL-friendly |
+| `description` | String | |
+| `teaserText` | String? | Browse page preview |
+| `teaserImageURL` | String? | |
+| `learningObjectives` | String? | |
+| `topologyURL` | String? | External topology image |
+| `topology` | Json? | Node/edge graph definition |
+
+#### `Section`
+
+Groups questions within a scenario.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `title` | String | |
+| `order` | Int | Display order |
+| `scenarioId` | String | FK → Scenario (cascade delete) |
+
+#### `Question`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `title` | String | Question text |
+| `type` | QuestionType enum | See below |
+| `answer` | String? | Correct answer |
+| `answerIsRegex` | Boolean | Treat answer as regex |
+| `validationRegex` | String? | Input format validation |
+| `placeholder` | String? | Input placeholder |
+| `pointValue` | Int | Score for correct answer |
+| `options` | Json? | Choices for MC/ordering types |
+| `order` | Int | |
+| `scenarioId` | String | FK → Scenario (cascade delete) |
+| `sectionId` | String? | FK → Section |
+
+**QuestionType enum:** `TEXT`, `LONG_TEXT`, `MULTIPLE_CHOICE`, `TRUE_FALSE`, `NUMERIC`, `ORDERING`, `INFORMATIONAL`
+
+#### `Hint`
+
+Ordered hints for a question.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `text` | String | Hint content |
+| `order` | Int | |
+| `questionId` | String | FK → Question (cascade delete) |
+
+#### `Competency`
+
+Learning competency tags.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `name` | String | |
+
+Many-to-many with `Question`.
+
+### User Progress
+
+#### `UserScenario`
+
+Tracks a user's enrollment and progress in a scenario.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `userId` | String | FK → User (cascade delete) |
+| `scenarioId` | String | FK → Scenario (cascade delete) |
+| `vmId` | String? | FK → VM |
+| `startedAt` | DateTime | |
+| `completedAt` | DateTime? | Set on completion |
+| `hintsUsed` | Int | Machine/topology hints count |
+
+Unique on `[userId, scenarioId]`.
+
+#### `UserAnswer`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `answer` | String | Submitted answer |
+| `userId` | String | FK → User (cascade delete) |
+| `questionId` | String | FK → Question (cascade delete) |
+
+Unique on `[userId, questionId]` — upserted on resubmission.
+
+#### `UserHint`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `userId` | String | FK → User (cascade delete) |
+| `hintId` | String | FK → Hint (cascade delete) |
+| `createdAt` | DateTime | |
+
+Unique on `[userId, hintId]`.
+
+### Virtual Machines
+
+#### `VM`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `proxmoxId` | Int | Proxmox VMID |
+| `name` | String? | |
+| `userId` | String | FK → User (cascade delete) |
+| `powerOffAt` | DateTime? | Scheduled power-off |
+| `deleteAt` | DateTime? | Scheduled deletion |
+
+### Livestreaming
+
+#### `LivestreamPageConfig`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `layout` | String | Grid layout descriptor |
+| `updatedAt` | DateTime | |
+
+#### `LivestreamPageStream`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `position` | Int | Grid position |
+| `streamKey` | String | |
+| `label` | String | |
+| `configId` | String | FK → LivestreamPageConfig (cascade delete) |
+
+#### `ScenarioLivestream`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | String | |
+| `scenarioId` | String | FK → Scenario (cascade delete) |
+| `label` | String | |
+| `streamKey` | String | |
+| `order` | Int | |
+
+### ERD Summary
+
+```
+User ──< UserRole
+User ──< Session
+User ──< Account
+User ──< VM
+User ──< UserScenario >── Scenario ──< Section ──< Question ──< Hint
+                                     Scenario ──< ScenarioLivestream
+User ──< UserAnswer >── Question
+User ──< UserHint >── Hint
+UserScenario >── VM
+LivestreamPageConfig ──< LivestreamPageStream
+```

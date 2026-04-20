@@ -1,0 +1,57 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Design Decisions
+
+### Next.js App Router with Server Components
+
+Pages are async Server Components by default. Data is fetched directly in the component tree via Prisma and `auth.api.getSession()` — no separate API layer for reads.
+
+**Why:** Eliminates the client-fetch waterfall for data-heavy pages. Scenario labs, leaderboards, and admin pages all benefit from server-rendered data without loading states.
+
+### Server Actions for Mutations
+
+All write operations (answer submission, scenario CRUD, user management) use Next.js Server Actions rather than separate API routes.
+
+**Why:** Keeps mutation logic co-located with the page that triggers it, eliminates boilerplate fetch wrappers, and gets type safety between client and server automatically. `revalidatePath()` handles cache invalidation.
+
+### better-auth with Plugin Architecture
+
+Authentication uses better-auth with explicit plugins: `username`, `admin`, account linking.
+
+**Why:** better-auth provides a complete modern auth solution with CSRF protection, session management, and a plugin system that cleanly adds username support and admin impersonation without custom middleware. It avoids the overhead of rolling these features manually.
+
+### DaisyUI v5 over a Headless Component Library
+
+UI is built with DaisyUI on top of Tailwind v4 — HTML elements with DaisyUI class names rather than a React component library.
+
+**Why:** Fewer abstractions and bundle weight. Modals, tabs, and dropdowns are plain HTML with Tailwind classes, which are easier to maintain and customize. Migrated from Mantine v8 to eliminate a heavy React component dependency.
+
+### Prisma with PrismaPg Adapter
+
+Uses Prisma's native `pg` adapter instead of the default query engine binary.
+
+**Why:** The `@prisma/adapter-pg` adapter removes the native binary dependency, improving cold start performance and simplifying deployment.
+
+### JSON Topology Storage
+
+Network topologies are stored as a JSON column on `Scenario` rather than normalized node/edge tables.
+
+**Why:** Topology data is always read and written as a whole graph — denormalized JSON is simpler and faster for this access pattern. The XY Flow library naturally works with JSON graph structures.
+
+### Per-User Proxmox Users (ACL-based)
+
+Each Jericho user gets a corresponding Proxmox user with ACL grants restricted to their specific VMs.
+
+**Why:** Proxmox ACL enforcement limits VM access at the hypervisor level — a compromised student session cannot access other users' VMs even if they know the VM ID. Defense in depth at the infrastructure layer.
+
+### FLV.js for Livestreaming
+
+Livestreams use FLV.js rather than HLS/DASH.
+
+**Why:** FLV.js provides significantly lower latency (~1–2 seconds) compared to HLS (~10–30 seconds). For live lab scenarios where instructors are demonstrating in real time, low latency is critical.
+
+### Nanoid for Proxmox User IDs
+
+Proxmox user identifiers use nanoid-generated IDs rather than incrementing integers or usernames.
+
+**Why:** Proxmox usernames cannot be changed after creation. Nanoid IDs are short, URL-safe, and avoid conflicts with reserved usernames or enumeration risks.

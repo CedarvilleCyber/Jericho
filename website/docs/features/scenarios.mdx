@@ -1,0 +1,101 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Scenarios
+
+Scenarios are the core learning units of Jericho — lab challenges that combine virtual machines, questions, topology visualization, and live streaming.
+
+### User Flow
+
+1. Browse available scenarios at `/scenarios`
+2. Open a scenario detail page → `/scenarios/[id]`
+3. Click **Join Scenario** → creates a `UserScenario` record
+4. Redirected to the active lab interface at `/me/scenarios/[id]`
+
+Once joined, the scenario has four tabs:
+
+| Tab | Content |
+|---|---|
+| Details | Description, learning objectives, teaser |
+| Topology | Interactive network diagram with hint reveals |
+| Questions | Assessment panel with submission forms |
+| Livestream | FLV video streams (if configured) |
+
+### Questions
+
+#### Question Types
+
+| Type | Description |
+|---|---|
+| `TEXT` | Short text answer, matched by regex or exact string |
+| `LONG_TEXT` | Multi-line text answer |
+| `MULTIPLE_CHOICE` | Select one option from a list |
+| `TRUE_FALSE` | Boolean choice |
+| `NUMERIC` | Numeric value with optional tolerance |
+| `ORDERING` | Drag-and-drop ordering of items |
+| `INFORMATIONAL` | Read-only — user marks as completed |
+
+#### Answer Validation
+
+- Answers are submitted to `submitAnswer()` in `lib/scenarios/answer.ts`
+- `TEXT` answers: compared against `answer` field; regex supported when `answerIsRegex = true`
+- `INFORMATIONAL` questions complete with the sentinel value `__INFORMATIONAL_COMPLETED__`
+- Correct answers are stored in `UserAnswer`; repeated submissions upsert the record
+
+#### Sections
+
+Questions can be grouped into **Sections** for organization. Sections have an `order` field controlling display sequence. Each question has an `order` within its section.
+
+#### Point Values
+
+Each question has a `pointValue`. Scores are calculated on the [leaderboard](./leaderboard).
+
+### Hints
+
+Each question can have multiple hints (ordered). When a user reveals a hint:
+
+- A `UserHint` record is created
+- Points are deducted on the leaderboard (−2 per hint)
+- Hints cannot be un-revealed
+
+### Topology Visualization
+
+The topology tab renders an interactive network diagram using [XY Flow](https://reactflow.dev/).
+
+Topology is stored as JSON on the `Scenario` model:
+
+```json
+{
+  "nodes": [
+    { "id": "1", "label": "Router", "ip": "192.168.1.1", "revealOrder": 1 }
+  ],
+  "edges": [
+    { "id": "e1", "source": "1", "target": "2" }
+  ]
+}
+```
+
+Alternatively, a `topologyURL` can point to an external image.
+
+`revealOrder` on nodes links to the hint system — revealing topology node information costs points.
+
+### Scenario Completion
+
+A `UserScenario` is marked complete (`completedAt`) when all questions are answered correctly. Completion triggers a confetti animation via `CompletionConfetti`.
+
+### Livestreams per Scenario
+
+Scenarios can have associated `ScenarioLivestream` records with a `streamKey` and `label`. These appear in the Livestream tab using the FLV player. See [Livestreaming](./livestreaming).
+
+### Admin Scenario Management
+
+Admins create and edit scenarios at `/admin/scenarios`. See the [Admin Guide](../guides/admin-guide#scenarios).
+
+### Technical Reference
+
+- Join: `lib/scenarios/join.ts`
+- Answer submission: `lib/scenarios/answer.ts`
+- Admin CRUD: `lib/scenarios/admin.ts`
+- Topology types: `lib/scenarios/topology-types.ts`
+- Scenario tab UI: `components/scenario/scenario-tabs-card.tsx`
+- Questions panel: `components/scenario/questions-panel.tsx`
+- Topology viewer: `components/scenario/topology-viewer.tsx`

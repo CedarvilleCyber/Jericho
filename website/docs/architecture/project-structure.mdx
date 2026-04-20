@@ -1,0 +1,94 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Project Structure
+
+```
+website/
+├── app/                        # Next.js App Router pages and API routes
+│   ├── layout.tsx              # Root layout — html/body, providers, app bar
+│   ├── page.tsx                # Home page (landing or navigation hub)
+│   ├── about/                  # About page
+│   ├── auth/[path]/            # BetterAuth UI pages (sign-in, sign-up, etc.)
+│   ├── reset-password/         # Password reset page
+│   ├── me/                     # User account area
+│   │   ├── page.tsx            # Profile, sessions, password/email change
+│   │   └── scenarios/
+│   │       ├── page.tsx        # User's enrolled scenarios list
+│   │       └── [id]/page.tsx   # Active scenario lab interface
+│   ├── scenarios/              # Public scenario browsing
+│   │   ├── page.tsx
+│   │   └── [id]/page.tsx
+│   ├── vms/page.tsx            # VM list and console access
+│   ├── livestream/page.tsx     # Public livestream viewer
+│   ├── leaderboard/page.tsx    # Scenario leaderboards
+│   ├── admin/                  # Admin dashboard (ADMIN role required)
+│   │   ├── page.tsx            # User list, bulk create, scenario triggers
+│   │   ├── scenarios/          # Scenario management
+│   │   │   ├── page.tsx
+│   │   │   ├── actions.ts      # Server actions for scenario CRUD
+│   │   │   └── [id]/edit/
+│   │   ├── livestream/         # Livestream page config
+│   │   │   ├── page.tsx
+│   │   │   └── actions.ts
+│   │   ├── users/[id]/page.tsx # User management (roles, VMs, scenarios)
+│   │   └── user-scenario/[id]/ # VM assignment to user-scenario
+│   └── api/
+│       └── auth/[...all]/      # BetterAuth HTTP endpoints
+│
+├── components/                 # Reusable React components
+│   ├── layout/                 # App bar, footer
+│   ├── home/                   # Landing page, navigation hub
+│   ├── scenario/               # Scenario tabs, questions panel, topology
+│   ├── admin/                  # All admin UI components
+│   ├── leaderboard/            # Scenario selector
+│   ├── livestream/             # FLV player, stream viewer
+│   ├── me/                     # Profile, password, session forms
+│   ├── view/                   # PVE console viewer
+│   ├── providers.tsx           # AuthUIProvider, session context
+│   ├── color-scheme-toggle.tsx # Light/dark toggle
+│   ├── error-boundary.tsx
+│   └── impersonation-banner.tsx
+│
+├── lib/                        # Server-side utilities and business logic
+│   ├── auth.ts                 # BetterAuth server config
+│   ├── auth-client.ts          # BetterAuth client hooks
+│   ├── auth-guard.ts           # requireAdminSession()
+│   ├── prisma.ts               # Prisma singleton
+│   ├── proxmox.ts              # Proxmox API client init
+│   ├── email.ts                # Nodemailer + email templates
+│   ├── use-theme.ts            # Theme toggle hook
+│   ├── require-env.ts          # requireEnv() utility
+│   ├── proxmox-api/            # Proxmox operations (ticket, user, vms)
+│   ├── scenarios/              # Scenario business logic
+│   │   ├── join.ts
+│   │   ├── answer.ts
+│   │   ├── admin.ts
+│   │   ├── delete.ts
+│   │   ├── hint.ts
+│   │   ├── constants.ts
+│   │   └── topology-types.ts
+│   ├── vms/                    # VM operations (get, add, remove, filter)
+│   ├── users/                  # User operations (create, delete, roles)
+│   └── db/                     # Raw DB helpers
+│
+├── prisma/
+│   ├── schema.prisma           # Data model
+│   ├── prisma.config.ts        # Prisma configuration
+│   └── migrations/             # SQL migration files
+│
+├── public/                     # Static assets
+├── nginx/                      # Nginx reverse proxy config
+├── next.config.ts
+├── tsconfig.json
+├── eslint.config.mjs
+├── postcss.config.mjs
+└── package.json
+```
+
+### Key Conventions
+
+- **Server Components by default** — pages are async Server Components fetching data directly via Prisma or `auth.api.getSession()`
+- **Server Actions** — mutations use `"use server"` functions in `lib/` or `app/*/actions.ts` files; no separate API layer for mutations
+- **`@/` alias** — maps to the project root; use for all internal imports
+- **Co-located actions** — admin page actions live next to the page in `actions.ts`; shared scenario/user/VM logic lives in `lib/`
+- **DaisyUI components** — no custom component library; UI built with DaisyUI classes directly on HTML elements
