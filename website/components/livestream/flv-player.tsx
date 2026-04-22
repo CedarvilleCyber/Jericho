@@ -48,7 +48,7 @@ export default function FlvPlayer({
             href={flvUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/40"
+            className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/40"
             aria-label={`Open ${label} in new window`}
           >
             <IconExternalLink size={16} />

@@ -1,0 +1,95 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## VM Management
+
+Jericho integrates with Proxmox VE to provide per-user virtual machines with browser-based console access.
+
+### Prerequisites
+
+Set the required [Proxmox environment variables](../reference/environment-variables#proxmox) before using VM features.
+
+### User VM Interface
+
+Users view and access their VMs at `/vms`:
+
+- Lists all VMs assigned to the user
+- Each VM can be opened in a browser tab — renders a Proxmox **noVNC** console iframe
+- Multiple VMs can be open simultaneously via the tab interface
+- Proxmox authentication is handled automatically (ticket-based cookie)
+
+### Console Authentication
+
+Opening a VM console requires a Proxmox session ticket:
+
+1. Server calls `getTicket()` in `lib/proxmox-api/ticket.ts`
+2. Ticket is set as a cookie on the Proxmox domain
+3. The noVNC iframe loads at:
+   ```
+   https://{PVE_HOST}:{PVE_PORT}?console=kvm&novnc=1&node={node}&vmid={vmid}
+   ```
+
+> **Note:** `NODE_TLS_REJECT_UNAUTHORIZED=0` may be needed if your Proxmox uses a self-signed certificate.
+
+### Proxmox User Provisioning
+
+Each Jericho user gets a corresponding Proxmox user, created automatically on first sign-in:
+
+- Created as `{proxmoxId}@pve` where `proxmoxId` is a nanoid
+- Initial password set from `PVE_CREATE_USER_PASSWORD`
+- `proxmoxId` stored on the `User` model for future ACL operations
+
+### Assigning VMs to Users
+
+Admins assign VMs from `/admin/users/[id]` → **VMs tab**:
+
+#### Link an Existing VM
+
+```
+Admin → /admin/users/[id] → VMs tab → Add Existing VM
+```
+
+- Select from all VMs on the Proxmox node
+- Calls `addExistingVMToUser()` in `lib/vms/add.ts`
+- Grants `PVEVMUser` ACL role to the user in Proxmox on path `/vms/{vmId}`
+- Creates a `VM` record in the database
+
+#### Clone from Template
+
+```
+Admin → /admin/users/[id] → VMs tab → Clone VM Template
+```
+
+- Select a Proxmox VM template
+- Enter a name for the new VM
+- Calls `cloneVMTemplateToUser()` in `lib/vms/add.ts`
+- Auto-increments VM IDs to find the next available slot
+- Clones the template and grants the user ACL permissions
+
+### Linking VMs to Scenarios
+
+VMs can be associated with a specific `UserScenario` from `/admin/user-scenario/[id]`:
+
+- Assigns a VM to the user's scenario record (`vmId` on `UserScenario`)
+- This makes the VM accessible from within the scenario lab interface
+
+### VM Lifecycle
+
+The `VM` model includes scheduling fields for automated lifecycle management:
+
+| Field | Description |
+|---|---|
+| `powerOffAt` | Scheduled power-off time |
+| `deleteAt` | Scheduled deletion time |
+
+> **Note:** Automated enforcement of these schedules requires a separate cron job or background worker not included in the web application itself.
+
+### Technical Reference
+
+- Proxmox client: `lib/proxmox.ts`
+- VM listing: `lib/vms/get.ts`
+- VM assignment: `lib/vms/add.ts`
+- VM removal: `lib/vms/remove.ts`
+- Ticket generation: `lib/proxmox-api/ticket.ts`
+- User provisioning: `lib/proxmox-api/user.ts`
+- All VMs listing: `lib/proxmox-api/vms.ts`
+- User VM page: `app/vms/page.tsx`

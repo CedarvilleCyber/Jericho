@@ -1,0 +1,34 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Leaderboard
+
+The leaderboard at `/leaderboard` shows ranked scores for a selected scenario.
+
+### Scoring Formula
+
+```
+Final Score = Raw Score − (Hints Revealed × 2) − (Machines Revealed × 5)
+```
+
+| Component | Details |
+|---|---|
+| **Raw Score** | Sum of `pointValue` for each correctly answered question |
+| **Hint penalty** | −2 points per hint revealed (`UserHint` records) |
+| **Machine penalty** | −5 points per VM/machine hint used in topology |
+
+### Viewing the Leaderboard
+
+- Navigate to `/leaderboard`
+- Use the **Scenario Selector** dropdown to filter by scenario
+- Ranks are calculated dynamically server-side
+- The current user's row is highlighted
+
+### Display Names
+
+Users can set a `displayUsername` from `/me`. The leaderboard shows `displayUsername` when set, falling back to `name`.
+
+### Technical Reference
+
+- Page: `app/leaderboard/page.tsx`
+- Scenario selector: `components/leaderboard/scenario-selector.tsx`
+- Score data pulled via Prisma — `UserAnswer`, `UserHint`, and `UserScenario` tables

@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import { getUserRoles } from "@/lib/users/roles";
 import logo from "@/public/logo256.png";
 import {
+  IconBook,
   IconDeviceDesktop,
   IconLogout,
   IconPlayerPlay,
@@ -88,6 +89,12 @@ export default function AppBar() {
                     <Link href="/leaderboard">
                       <IconTrophy size={16} />
                       Leaderboard
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/docs">
+                      <IconBook size={16} />
+                      Docs
                     </Link>
                   </li>
                   {isAdmin && (

@@ -1,0 +1,96 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** 18+ (or use Bun directly)
+- **Bun** (recommended package manager — [install](https://bun.sh))
+- **PostgreSQL** 14+ database
+- **Proxmox VE** instance (for VM management features)
+- Optional: Microsoft Entra ID app registration (for OAuth sign-in)
+
+### Installation
+
+```bash
+git clone <repo-url>
+cd jericho/website
+bun install
+```
+
+### Environment Setup
+
+Copy the example env file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+See the full [Environment Variables reference](./reference/environment-variables) for every variable. At minimum you need:
+
+```env
+BETTER_AUTH_SECRET="<random-secret>"
+BETTER_AUTH_URL="http://localhost:3000"
+DATABASE_URL="postgresql://user:password@localhost:5432/jericho"
+```
+
+For VM features you also need the [Proxmox variables](./reference/environment-variables#proxmox).
+
+### Database Setup
+
+Jericho uses Prisma with PostgreSQL. After filling in `DATABASE_URL`:
+
+```bash
+# Apply all migrations to your database
+bunx prisma migrate deploy
+
+# Or in development (creates migration files on schema changes)
+bunx prisma migrate dev
+```
+
+> **Tip:** `prisma generate` is run automatically after install. If you change `prisma/schema.prisma`, run `bunx prisma generate` manually to regenerate the client.
+
+### Running Locally
+
+```bash
+bun run dev
+```
+
+The app is available at `http://localhost:3000`.
+
+### First Admin User
+
+1. Sign up with your email at `/sign-in`
+2. Verify your email from the verification link
+3. Manually set your role to `ADMIN` in the database:
+
+```sql
+INSERT INTO "UserRole" ("id", "role", "userId")
+VALUES (gen_random_uuid(), 'ADMIN', '<your-user-id>');
+```
+
+Or use the Prisma Studio GUI:
+
+```bash
+bunx prisma studio
+```
+
+After that, the `/admin` route is accessible and you can manage other users' roles from the UI.
+
+### Available Scripts
+
+| Command | Description |
+|---|---|
+| `bun run dev` | Start development server |
+| `bun run build` | Build for production |
+| `bun run start` | Start production server |
+| `bun run lint` | Run ESLint |
+| `bunx prisma studio` | Open Prisma database GUI |
+| `bunx prisma migrate dev` | Create and apply a new migration |
+| `bunx prisma migrate deploy` | Apply pending migrations (CI/prod) |
+
+### Next Steps
+
+- [Deploy to production](./guides/how-to-deploy)
+- [Configure your first scenario](./guides/admin-guide#scenarios)
+- [Set up Proxmox integration](./features/vm-management)

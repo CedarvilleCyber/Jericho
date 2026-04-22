@@ -1,31 +1,11 @@
 import BulkCreateUsers from "@/components/admin/bulk-create-users";
 import EditUserButton from "@/components/admin/edit-user-button";
 import ScenarioTriggers from "@/components/admin/scenario-triggers";
-import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { IconExternalLink } from "@tabler/icons-react";
-import { headers } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.session) {
-    redirect("/auth/sign-in");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: { userRoles: true },
-  });
-
-  if (!user?.userRoles?.find((role) => role.role === "ADMIN")) {
-    redirect("/");
-  }
-
   const users = (
     await prisma.user.findMany({
       include: { userRoles: true },

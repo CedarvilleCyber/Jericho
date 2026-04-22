@@ -1,0 +1,65 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Tech Stack
+
+### Core Framework
+
+| Technology | Version | Purpose |
+|---|---|---|
+| [Next.js](https://nextjs.org/) | 16.x | Full-stack React framework (App Router) |
+| [React](https://react.dev/) | 19.x | UI rendering |
+| [TypeScript](https://www.typescriptlang.org/) | 5.x | Type safety across the stack |
+| [Bun](https://bun.sh/) | latest | Package manager and runtime |
+
+### Database & ORM
+
+| Technology | Version | Purpose |
+|---|---|---|
+| [PostgreSQL](https://www.postgresql.org/) | 14+ | Relational database |
+| [Prisma](https://www.prisma.io/) | 7.x | ORM and migration tool |
+| `@prisma/adapter-pg` | 7.x | Native pg driver adapter |
+| [pg](https://node-postgres.com/) | 8.x | PostgreSQL Node.js client |
+
+### Authentication
+
+| Technology | Purpose |
+|---|---|
+| [better-auth](https://www.better-auth.com/) | Auth core — sessions, email/password, OAuth, admin, username plugins |
+| `@daveyplate/better-auth-ui` | Pre-built UI components (sign-in forms, session list, profile) |
+
+### UI & Styling
+
+| Technology | Version | Purpose |
+|---|---|---|
+| [Tailwind CSS](https://tailwindcss.com/) | 4.x | Utility-first CSS |
+| [DaisyUI](https://daisyui.com/) | 5.x | Tailwind component classes |
+| [@tabler/icons-react](https://tabler-icons.io/) | 3.x | Icon library |
+
+Themes: `corporate` (light default), `business` (dark, `prefers-dark`).
+
+### Visualization
+
+| Technology | Purpose |
+|---|---|
+| [@xyflow/react](https://reactflow.dev/) | Network topology visualization and interactive graph editor |
+| [react-confetti](https://github.com/alampros/react-confetti) | Scenario completion celebration animation |
+
+### Media & Streaming
+
+| Technology | Purpose |
+|---|---|
+| [flv.js](https://github.com/Bilibili/flv.js) | Low-latency FLV video player for livestreams |
+
+### Infrastructure Integration
+
+| Technology | Purpose |
+|---|---|
+| [proxmox-api](https://www.npmjs.com/package/proxmox-api) | Proxmox VE REST API client |
+| [node-ssh](https://github.com/steelbrain/node-ssh) | SSH operations |
+| [Nodemailer](https://nodemailer.com/) | SMTP email sending |
+
+### Utilities
+
+| Technology | Purpose |
+|---|---|
+| [nanoid](https://github.com/ai/nanoid) | Short unique ID generation (for Proxmox user IDs) |

@@ -1,25 +1,7 @@
 import { LivestreamPageEditor } from "@/components/admin/livestream-page-editor";
-import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 export default async function AdminLivestreamPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-
-  if (!session?.session) {
-    redirect("/auth/sign-in");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: { userRoles: true },
-  });
-
-  if (!user?.userRoles?.find((role) => role.role === "ADMIN")) {
-    redirect("/");
-  }
-
   const config = await prisma.livestreamPageConfig.findFirst({
     include: { streams: { orderBy: { position: "asc" } } },
   });

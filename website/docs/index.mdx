@@ -1,0 +1,58 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Jericho Web Documentation
+
+Jericho Web is a cyber-physical infrastructure lab platform for hands-on cybersecurity training. It combines scenario-based challenges, virtual machine management, live streaming, and a full admin dashboard.
+
+## Sections
+
+### [Getting Started](./getting-started)
+Prerequisites, installation, environment setup, and running the app locally.
+
+### Features
+
+| Guide | Description |
+|---|---|
+| [Authentication](./features/authentication) | Sign-up, sign-in, OAuth, roles, impersonation |
+| [Scenarios](./features/scenarios) | Lab scenarios, questions, hints, topology |
+| [VM Management](./features/vm-management) | Proxmox VMs, console access, cloning |
+| [Leaderboard](./features/leaderboard) | Scoring system, rankings, penalties |
+| [Livestreaming](./features/livestreaming) | FLV streams, layout configuration |
+
+### Guides
+
+| Guide | Description |
+|---|---|
+| [Deployment](./guides/how-to-deploy) | Production deployment and Nginx setup |
+| [Admin Guide](./guides/admin-guide) | Managing users, scenarios, VMs, livestreams |
+
+### Reference
+
+| Reference | Description |
+|---|---|
+| [Environment Variables](./reference/environment-variables) | All required env vars |
+| [Database Schema](./reference/database-schema) | Prisma models and relations |
+| [API Endpoints](./reference/api-endpoints) | Auth and server action endpoints |
+| [Configuration](./reference/configuration) | Next.js, ESLint, TypeScript config |
+
+### Architecture
+
+| Doc | Description |
+|---|---|
+| [Project Structure](./architecture/project-structure) | File/folder organization |
+| [Tech Stack](./architecture/tech-stack) | Technologies and libraries used |
+| [Design Decisions](./architecture/design-decisions) | Why key choices were made |
+
+### [Previous Teams](./previous-teams)
+
+The teams that have built and maintained Jericho over the years.
+
+## Quick Start
+
+```bash
+bun install
+cp .env.example .env   # fill in your values
+bun run dev            # http://localhost:3000
+```
+
+See [Getting Started](./getting-started) for full setup including database migrations.

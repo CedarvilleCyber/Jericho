@@ -36,8 +36,8 @@ Ensure that the following lines are in your hosts file:
    ```
 
 3. Access the sites:
-   - Main website: http://localhost
-   - Proxmox VE: http://pve.localhost
+   - Main website: [http://jericho.local](http://jericho.local)
+   - Proxmox VE: [http://pve.jericho.local](http://pve.jericho.local)
 
 ### Stopping
 
@@ -59,4 +59,4 @@ Logs are also available in the `./logs` directory.
 
 - The nginx container uses `host.docker.internal` to access your Next.js dev server on the host machine
 - Proxmox SSL verification is disabled since it uses self-signed certificates
-- Cookies set on `.localhost` will be shared between localhost and pve.localhost
+- Cookies set on `.jericho.local` will be shared between `jericho.local` and `pve.jericho.local`

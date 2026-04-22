@@ -1,0 +1,94 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Admin Guide
+
+The admin dashboard is available at `/admin` to users with the `ADMIN` role.
+
+### User Management
+
+#### Viewing Users
+
+The admin dashboard (`/admin`) lists all users sorted by creation date, showing name, email, and roles.
+
+#### Managing a User
+
+Navigate to `/admin/users/[id]` to:
+
+- **Change roles** — add/remove `STUDENT`, `FACULTY`, or `ADMIN` roles
+- **Impersonate** — act as the user to debug their experience
+- **Delete** — permanently remove the user and all their data
+
+#### Bulk User Creation
+
+From `/admin`, click **Bulk Create Users** to create multiple users at once. Users are created with:
+- A hashed password
+- `STUDENT` role assigned automatically
+- Email verification bypassed (users can reset password via email)
+
+### Scenarios
+
+#### Creating a Scenario
+
+1. Go to `/admin/scenarios`
+2. Click **Create Scenario**
+3. Fill in name, slug, description, teaser text/image, and learning objectives
+4. Save — you are taken to the edit page
+
+#### Editing a Scenario
+
+From `/admin/scenarios/[id]/edit`:
+
+**Metadata tab:**
+- `name` — display name
+- `slug` — URL-friendly identifier (must be unique)
+- `description` — full description shown to users
+- `teaserText` / `teaserImageURL` — shown on the browse page
+- `learningObjectives` — list of learning outcomes
+
+**Topology tab:**
+- Enter a JSON topology or provide a `topologyURL` image
+- JSON format: `{ nodes: [...], edges: [...] }`
+- Nodes support `id`, `label`, `ip`, and `revealOrder`
+
+**Sections & Questions:**
+
+1. Add sections to organize questions into groups
+2. Within each section, add questions:
+   - Choose a question type (`TEXT`, `MULTIPLE_CHOICE`, `ORDERING`, etc.)
+   - Set the correct answer (or regex pattern if `answerIsRegex` is enabled)
+   - Set `pointValue`
+   - Add ordered hints (each hint revealed costs −2 pts on leaderboard)
+3. Drag to reorder sections and questions
+
+**Livestreams:**
+
+Add stream keys for streams associated with this scenario. These appear in the Livestream tab of the lab interface.
+
+#### Deleting a Scenario
+
+From the scenario list, click **Delete** on the scenario card. This cascades to all related questions, sections, hints, user answers, and user scenarios.
+
+### VM Management
+
+Manage VMs for a specific user from `/admin/users/[id]` → **VMs tab**.
+
+See [VM Management](../features/vm-management) for full details on linking and cloning VMs.
+
+### Livestream Page
+
+Configure the public `/livestream` page at `/admin/livestream`:
+
+1. Add streams with a **stream key** and **label**
+2. Assign each stream a **position** (grid cell)
+3. Choose a **layout** (number of grid columns/rows)
+4. Save — changes take effect immediately
+
+### Scenario Triggers
+
+The admin dashboard includes a **Scenario Triggers** component for event-based scenario actions. Configuration details depend on the specific triggers set up for your deployment.
+
+### Security Notes
+
+- All admin routes check for `ADMIN` role server-side via `requireAdminSession()`
+- Impersonation is logged via `impersonatedBy` on the `Session` record
+- Role changes require the calling user to be an admin (enforced in `lib/users/roles.ts`)

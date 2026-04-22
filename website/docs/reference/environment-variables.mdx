@@ -1,0 +1,103 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Environment Variables
+
+All variables go in `.env` (development) or your deployment environment (production). Never commit secrets.
+
+### Authentication
+
+| Variable | Required | Description |
+|---|---|---|
+| `BETTER_AUTH_SECRET` | Yes | Random secret for signing sessions. Generate with `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | Yes | Public URL of the app (e.g., `https://jericho.example.com`) |
+
+### Microsoft Entra ID (OAuth)
+
+Optional — only needed if you want Microsoft sign-in.
+
+| Variable | Required | Description |
+|---|---|---|
+| `AUTH_MICROSOFT_ENTRA_ID_ID` | No | Entra app client ID |
+| `AUTH_MICROSOFT_ENTRA_ID_SECRET` | No | Entra app client secret |
+| `AUTH_MICROSOFT_ENTRA_ID_TENANT_ID` | No | Restrict to a specific tenant |
+| `AUTH_MICROSOFT_ENTRA_ID_AUTHORITY` | No | Custom authority URL |
+
+### Database
+
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection string, e.g. `postgresql://user:pass@host:5432/dbname?sslmode=require` |
+
+### Email (SMTP)
+
+Required for email verification and password reset.
+
+| Variable | Required | Description |
+|---|---|---|
+| `SMTP_HOST` | Yes | SMTP server hostname (e.g., `smtp.gmail.com`) |
+| `SMTP_PORT` | Yes | SMTP port (typically `587` for TLS) |
+| `SMTP_USER` | Yes | SMTP username / email address |
+| `SMTP_PASS` | Yes | SMTP password or app password |
+| `EMAIL_FROM` | Yes | From address shown to recipients, e.g. `Jericho <you@example.com>` |
+
+### Proxmox VE
+
+Required for VM management features.
+
+| Variable | Required | Description |
+|---|---|---|
+| `PVE_HOST` | Yes | Proxmox hostname or IP |
+| `PVE_PORT` | Yes | Proxmox API port (default `443`) |
+| `PVE_USER` | Yes | Proxmox API username (e.g., `root@pam`) |
+| `PVE_NODE` | Yes | Target Proxmox node name |
+| `PVE_TOKEN_ID` | Yes* | API token ID (preferred over password auth) |
+| `PVE_TOKEN_SECRET` | Yes* | API token secret |
+| `PVE_PASSWORD` | No | Password auth fallback (if not using token) |
+| `PVE_CREATE_USER_PASSWORD` | Yes | Default password for provisioned Proxmox users |
+| `NODE_TLS_REJECT_UNAUTHORIZED` | No | Set to `0` to allow self-signed TLS certificates |
+
+*Either token auth or password auth is required.
+
+**Client-side Proxmox variables** — these are exposed to the browser for noVNC console URLs:
+
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_PVE_HOST` | Same as `PVE_HOST` |
+| `NEXT_PUBLIC_PVE_PORT` | Same as `PVE_PORT` |
+| `NEXT_PUBLIC_PVE_NODE` | Same as `PVE_NODE` |
+
+### SSH
+
+| Variable | Required | Description |
+|---|---|---|
+| `SSH_PRIVATE_KEY` | No | Private key for SSH operations (if used) |
+
+### Example `.env`
+
+```env
+# Auth
+BETTER_AUTH_SECRET="replace-with-strong-random-value"
+BETTER_AUTH_URL="http://localhost:3000"
+
+# Database
+DATABASE_URL="postgresql://postgres:password@localhost:5432/jericho"
+
+# Email
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="you@gmail.com"
+SMTP_PASS="your-app-password"
+EMAIL_FROM="Jericho <you@gmail.com>"
+
+# Proxmox
+PVE_HOST="pve.example.com"
+PVE_PORT="443"
+PVE_USER="root@pam"
+PVE_NODE="pve"
+PVE_TOKEN_ID="root@pam!jericho"
+PVE_TOKEN_SECRET="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+PVE_CREATE_USER_PASSWORD="changeme"
+NEXT_PUBLIC_PVE_HOST="pve.example.com"
+NEXT_PUBLIC_PVE_PORT="443"
+NEXT_PUBLIC_PVE_NODE="pve"
+```

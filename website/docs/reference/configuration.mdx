@@ -1,0 +1,74 @@
+> **Note:** This documentation was written by an AI assistant. While care has been taken to ensure accuracy, please report any errors or unclear sections.
+
+## Configuration
+
+### Next.js (`next.config.ts`)
+
+Minimal configuration — Next.js defaults are used. No custom rewrites, redirects, or experimental flags needed for basic operation.
+
+### TypeScript (`tsconfig.json`)
+
+| Setting | Value |
+|---|---|
+| Target | `ES2017` |
+| Strict mode | Enabled |
+| Path alias | `@/*` → project root |
+| JSX | Handled by Next.js plugin |
+
+Import alias usage:
+
+```typescript
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+```
+
+### Tailwind CSS
+
+Tailwind v4 uses the `@plugin` CSS syntax — there is **no `tailwind.config.js`** file.
+
+Configuration lives in `app/globals.css`:
+
+```css
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: corporate --default, business --prefersdark;
+}
+```
+
+- `corporate` — light theme (default)
+- `business` — dark theme (activates when `prefers-color-scheme: dark` or `data-theme="business"`)
+
+See [DaisyUI documentation](https://daisyui.com/docs/themes/) for theme customization.
+
+### DaisyUI Theme Toggle
+
+The theme is toggled client-side by setting `data-theme` on the `<html>` element. Implementation is in `lib/use-theme.ts` — it reads/writes `localStorage["theme"]`.
+
+The root layout (`app/layout.tsx`) has `suppressHydrationWarning` on `<html>` to avoid hydration mismatch from the client-side theme read.
+
+### ESLint (`eslint.config.mjs`)
+
+Uses `@eslint/eslintrc` with Next.js core web vitals rules and TypeScript support. The `.next/`, `build/`, and `next-env.d.ts` are excluded from linting.
+
+### Prisma (`prisma.config.ts`)
+
+| Setting | Value |
+|---|---|
+| Schema path | `prisma/schema.prisma` |
+| Migrations path | `prisma/migrations/` |
+| Database provider | `postgresql` |
+| Connection | `DATABASE_URL` env var |
+| Client adapter | `@prisma/adapter-pg` (PrismaPg) |
+
+The Prisma client is initialized as a singleton in `lib/prisma.ts` to prevent multiple instances during hot reload in development.
+
+### Package Manager
+
+Bun is the primary package manager (`bun.lock` is committed). Standard npm/yarn/pnpm commands work as fallbacks, but Bun is recommended for consistent behavior.
+
+```bash
+bun install          # install dependencies
+bun add <package>    # add a package
+bun run <script>     # run package.json scripts
+bunx <command>       # run a package binary (like npx)
+```
