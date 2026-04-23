@@ -39,7 +39,7 @@ Returns the current arm idle state and step positions.
 }
 ```
 
-### `GET /idle/start`
+### `GET /start`
 
 Starts idle spinning on both arms.
 
@@ -48,7 +48,7 @@ Starts idle spinning on both arms.
 {"message": "idle started for both arms"}
 ```
 
-### `GET /idle/stop`
+### `GET /stop`
 
 Stops idle spinning on both arms and clears the GPIO outputs.
 
@@ -57,7 +57,7 @@ Stops idle spinning on both arms and clears the GPIO outputs.
 {"message": "idle stopped for both arms"}
 ```
 
-### `GET /idle/arm1/start`
+### `GET /arm1/start`
 
 Starts idle spinning for arm 1 only.
 
@@ -66,7 +66,7 @@ Starts idle spinning for arm 1 only.
 {"message": "idle started for arm1"}
 ```
 
-### `GET /idle/arm1/stop`
+### `GET /arm1/stop`
 
 Stops idle spinning for arm 1 only.
 
@@ -75,7 +75,7 @@ Stops idle spinning for arm 1 only.
 {"message": "idle stopped for arm1"}
 ```
 
-### `GET /idle/arm2/start`
+### `GET /arm2/start`
 
 Starts idle spinning for arm 2 only.
 
@@ -84,7 +84,7 @@ Starts idle spinning for arm 2 only.
 {"message": "idle started for arm2"}
 ```
 
-### `GET /idle/arm2/stop`
+### `GET /arm2/stop`
 
 Stops idle spinning for arm 2 only.
 
@@ -113,14 +113,14 @@ curl http://water.jericho.local:8000/health
 curl http://water.jericho.local:8000/state
 
 # Start both arms
-curl http://water.jericho.local:8000/idle/start
+curl http://water.jericho.local:8000/start
 
 # Stop both arms
-curl http://water.jericho.local:8000/idle/stop
+curl http://water.jericho.local:8000/stop
 
 # Stop arm1 only
-curl http://water.jericho.local:8000/idle/arm1/stop
+curl http://water.jericho.local:8000/arm1/stop
 
 # Start arm2 only
-curl http://water.jericho.local:8000/idle/arm2/start
+curl http://water.jericho.local:8000/arm2/start
 ```

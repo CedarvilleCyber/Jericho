@@ -85,7 +85,7 @@ func main() {
 	}
 
 	go idleLoop()
-	go waterTowerLoop()
+	go waterTowerLED()
 
 	router := gin.Default()
 
@@ -100,7 +100,7 @@ func main() {
 		c.JSON(200, state)
 	})
 
-	router.GET("/idle/start", func(c *gin.Context) {
+	router.GET("/start", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm1Active = true
 		idleArm2Active = true
@@ -108,7 +108,7 @@ func main() {
 		c.JSON(200, gin.H{"message": "idle started for both arms"})
 	})
 
-	router.GET("/idle/stop", func(c *gin.Context) {
+	router.GET("/stop", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm1Active = false
 		idleArm2Active = false
@@ -117,14 +117,14 @@ func main() {
 		c.JSON(200, gin.H{"message": "idle stopped for both arms"})
 	})
 
-	router.GET("/idle/arm1/start", func(c *gin.Context) {
+	router.GET("/arm1/start", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm1Active = true
 		stateMutex.Unlock()
 		c.JSON(200, gin.H{"message": "idle started for arm1"})
 	})
 
-	router.GET("/idle/arm1/stop", func(c *gin.Context) {
+	router.GET("/arm1/stop", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm1Active = false
 		stateMutex.Unlock()
@@ -132,14 +132,14 @@ func main() {
 		c.JSON(200, gin.H{"message": "idle stopped for arm1"})
 	})
 
-	router.GET("/idle/arm2/start", func(c *gin.Context) {
+	router.GET("/arm2/start", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm2Active = true
 		stateMutex.Unlock()
 		c.JSON(200, gin.H{"message": "idle started for arm2"})
 	})
 
-	router.GET("/idle/arm2/stop", func(c *gin.Context) {
+	router.GET("/arm2/stop", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm2Active = false
 		stateMutex.Unlock()
@@ -152,30 +152,24 @@ func main() {
 
 func idleLoop() {
 	for {
-		stateMutex.RLock()
-		arm1Active := idleArm1Active
-		arm2Active := idleArm2Active
-		step1 := currentStep1
-		step2 := currentStep2
-		stateMutex.RUnlock()
 
-		if !arm1Active && !arm2Active {
+		if !idleArm1Active && !idleArm2Active {
 			time.Sleep(200 * time.Millisecond)
 			continue
 		}
 
-		if arm1Active {
-			setGroupPins(arm1Pins, sequence[step1])
+		if idleArm1Active {
+			setGroupPins(arm1Pins, sequence[currentStep1])
 		}
-		if arm2Active {
-			setGroupPins(arm2Pins, sequence[step2])
+		if idleArm2Active {
+			setGroupPins(arm2Pins, sequence[currentStep2])
 		}
 
 		stateMutex.Lock()
-		if arm1Active {
+		if idleArm1Active {
 			currentStep1 = (currentStep1 + 1) % len(sequence)
 		}
-		if arm2Active {
+		if idleArm2Active {
 			currentStep2 = (currentStep2 + 1) % len(sequence)
 		}
 		stateMutex.Unlock()
@@ -184,7 +178,8 @@ func idleLoop() {
 	}
 }
 
-func waterTowerLoop() {
+// runs the LED on top of the water tower
+func waterTowerLED() {
 	for {
 		stateMutex.RLock()
 		active := idleArm1Active || idleArm2Active
