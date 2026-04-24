@@ -1,104 +1,126 @@
-# Motor Control API
+# Water Clarifier API
 
-A lightweight Flask API for controlling motors on a Raspberry Pi Zero.
+A lightweight Go API for controlling the water treatment clarifier arms on a Raspberry Pi.
 
 ## Setup
 
 ```bash
-uv sync            # install dependencies
-uv run main.py     # start the server
+env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o water-api main_ai.go # Build command on local machine
+
+./water-api 
 ```
 
-The API will be available at `http://<pi-ip>:5000`.
+The API is exposed at `http://water.jericho.local:8000`.
 
 ---
 
-### Updated Payload
-To stop the spinners and trigger the sound effect, curl and run this: 
-https://hst.sh/raw/uyisamuruc
 ## Endpoints
-
-### `POST /motors`
-
-NOTE: this endpoint is currently incomplete and does not work. 
-
-Control one or more arms in a single request.
-
-**Request body:**
-```json
-{
-    "arm1": { "direction": "clockwise",         "speed": 5 },
-    "arm2": { "direction": "counterclockwise",  "speed": 3 }
-}
-```
-
-| Field       | Type             | Rules                                         |
-|-------------|------------------|-----------------------------------------------|
-| `direction` | string           | `"clockwise"` or `"counterclockwise"`         |
-| `speed`     | non-negative int | RPM; set to `0` to stop                       |
-
-**Success response (200):**
-```json
-{
-    "ok": true,
-    "motors": {
-        "arm1": { "direction": "clockwise", "speed": 5, "status": "running" },
-        "arm2": { "direction": "counterclockwise", "speed": 3, "status": "running" }
-    }
-}
-```
-
-**Validation error (400):**
-```json
-{
-    "errors": {
-        "arm1": "arm1: 'direction' must be 'clockwise' or 'counterclockwise', got 'spin'"
-    }
-}
-```
-
-**Stop an arm** — set `speed` to `0`:
-```json
-{ "arm1": { "direction": "clockwise", "speed": 0 } }
-```
 
 ### `GET /health`
 
-Returns `{"status": "ok"}` — useful for checking the Pi is reachable.
+Returns service health.
+
+**Response:**
+```json
+{"status": "ok"}
+```
+
+### `GET /state`
+
+Returns the current arm idle state and step positions.
+
+**Response:**
+```json
+{
+  "arm1_active": true,
+  "arm2_active": true,
+  "current_step_1": 3,
+  "current_step_2": 5
+}
+```
+
+### `GET /start`
+
+Starts idle spinning on both arms.
+
+**Response:**
+```json
+{"message": "idle started for both arms"}
+```
 
 ### `GET /stop`
 
-Stops the water treatment spinners for five seconds. 
+Stops idle spinning on both arms and clears the GPIO outputs.
+
+**Response:**
+```json
+{"message": "idle stopped for both arms"}
+```
+
+### `GET /arm1/start`
+
+Starts idle spinning for arm 1 only.
+
+**Response:**
+```json
+{"message": "idle started for arm1"}
+```
+
+### `GET /arm1/stop`
+
+Stops idle spinning for arm 1 only.
+
+**Response:**
+```json
+{"message": "idle stopped for arm1"}
+```
+
+### `GET /arm2/start`
+
+Starts idle spinning for arm 2 only.
+
+**Response:**
+```json
+{"message": "idle started for arm2"}
+```
+
+### `GET /arm2/stop`
+
+Stops idle spinning for arm 2 only.
+
+**Response:**
+```json
+{"message": "idle stopped for arm2"}
+```
 
 ---
 
-## Hooking up real motors
+## Notes
 
-In `main.py`, find `set_motor()` and replace the `TODO` comments with your
-actual GPIO / PWM / motor-controller calls. Common choices on Pi Zero:
-
-- **L298N / L293D** — set direction pin high/low, PWM pin for speed
-- **DRV8833 / TB6612** — similar, two direction pins + PWM
-- **Stepper via A4988** — send step pulses and set DIR pin
+- The Go API controls two stepper-style arms and a water tower LED on a Raspberry Pi.
+- Both arms start in the active idle state by default.
+- No request body is required for the current routes; all controls are done via GET requests.
 
 ---
 
 ## Quick curl examples
 
 ```bash
-# Start two arms (not working yet)
-curl http://<pi-ip>:8000/motors \
-     -H "Content-Type: application/json" \
-     -d '{"arm1":{"direction":"clockwise","speed":5},"arm2":{"direction":"counterclockwise","speed":3}}'
+# Check health
+curl http://water.jericho.local:8000/health
 
-# Stop arm1 (not working yet)
-curl http://<pi-ip>:8000/motors \
-     -H "Content-Type: application/json" \
-     -d '{"arm1":{"direction":"clockwise","speed":0}}'
+# Get current state
+curl http://water.jericho.local:8000/state
 
-# Stop the arms for ten seconds using the simple STOP route
-curl http://<pi-ip>:8000/stop
+# Start both arms
+curl http://water.jericho.local:8000/start
 
-# Health check
-curl http://<pi-ip>:8000/health
+# Stop both arms
+curl http://water.jericho.local:8000/stop
+
+# Stop arm1 only
+curl http://water.jericho.local:8000/arm1/stop
+
+# Start arm2 only
+curl http://water.jericho.local:8000/arm2/start
 ```
