@@ -1,4 +1,4 @@
-module jericho/nuclear/golang
+module jericho/nuclear
 
 go 1.26.1
 
