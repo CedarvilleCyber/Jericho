@@ -2,16 +2,6 @@
 
 A minimal Flask API for playing sounds on a Raspberry Pi.
 
-## Setup
-
-```bash
-uv sync           # install dependencies
-uv run main.py    # start the server for testing
-uv run gunicorn -b 0.0.0.0:8000 main:app  # run server for prod
-```
-
----
-
 ## Endpoints
 
 ### `POST /play`

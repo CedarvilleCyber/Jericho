@@ -18,25 +18,6 @@ The API controls LEDs connected to the following GPIO pins:
 
 **Note:** The LEDs have common anode, so GPIO logic is inverted (High = Off, Low = On)
 
-## Building and Running
-
-### Prerequisites
-- Go 1.21+
-- Raspberry Pi with periph.io support
-- Required Go packages: gin-gonic/gin, periph.io
-
-### Build
-```bash
-cd golang
-go mod download
-env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o traffic-api main.go
-```
-
-### Run
-```bash
-./traffic-api
-```
-
 ## API Endpoints
 
 ### Health Check

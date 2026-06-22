@@ -1,12 +1,5 @@
 # Matrix (Datacenter) API
 
-## Setup
-
-```bash
-env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o matrix-api main.go # Build command on local machine
-
-./matrix-api # run API
-```
 
 ## Endpoints
 ### `GET /health`
