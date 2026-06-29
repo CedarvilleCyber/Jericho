@@ -93,13 +93,34 @@ export async function triggerTraffic(): Promise<{ success: boolean; error?: stri
 
 export async function triggerWaterTreatment(): Promise<{ success: boolean; error?: string }> {
   console.log("[demo] triggerWaterTreatment start");
-  const results = await Promise.allSettled([
-    piGet(`${WATER}/stop`),
-    piPost(`${SOUND}/play`, { sound: "water5.wav" }),
-  ]);
-  const result = wrapResult(results);
-  console.log("[demo] triggerWaterTreatment result:", result);
-  return result;
+  try {
+    const results = await Promise.allSettled([
+      piGet(`${WATER}/stop`),
+      piPost(`${SOUND}/play`, { sound: "water5.wav" }),
+    ]);
+
+    const stopResult = wrapResult(results);
+    if (!stopResult.success) {
+      console.log("[demo] triggerWaterTreatment result:", stopResult);
+      return stopResult;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 5_000));
+
+    const start = await piGet(`${WATER}/start`);
+    if (!start.ok) {
+      const result = { success: false, error: `restore failed: HTTP ${start.status}` };
+      console.log("[demo] triggerWaterTreatment result:", result);
+      return result;
+    }
+
+    console.log("[demo] triggerWaterTreatment result: success");
+    return { success: true };
+  } catch (error) {
+    const result = { success: false, error: String(error) };
+    console.log("[demo] triggerWaterTreatment result:", result);
+    return result;
+  }
 }
 
 export async function triggerDatacenter(): Promise<{ success: boolean; error?: string }> {
