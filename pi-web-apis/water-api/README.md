@@ -2,15 +2,6 @@
 
 A lightweight Go API for controlling the water treatment clarifier arms on a Raspberry Pi.
 
-## Setup
-
-```bash
-env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o water-api main_ai.go # Build command on local machine
-
-./water-api 
-```
-
-The API is exposed at `http://water.jericho.local:8000`.
 
 ---
 

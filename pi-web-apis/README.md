@@ -1,45 +1,51 @@
 # Overview
 This README document walks through the process of setting up one of these API
-services on a Raspberry Pi Zero.
+services on a Raspberry Pi
 
-First, install UV on the Pi: 
-```
-curl -LsSf https://astral.sh/uv/install.sh | sh
+All the APIs are written in Go and use the same build command
+
+All APIs are exposed on port 8000
+
+---
+
+## Building and Running
+
+### Prerequisites
+- Go 1.21+
+- Raspberry Pi with periph.io support
+- Required Go packages: gin-gonic/gin, periph.io
+
+---
+
+Move to the directory of the API you wish to build
+
+Ensure you have the go modules
+```bash
+go mod download
 ```
 
-Next, reboot your shell so you can use UV. (Close, then re-open the terminal.)
-Now, copy the project directory onto the pi. You can use SCP or git clone.
+Build the executable with the following command, replacing the output name with the respective API
+```bash
+env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o (name)-api main.go # Build command on local machine
+```
+Once you have the updated executable scp it over to the respective Raspberry Pi.
 
-Move the project directory (ex: `sound-api`) into `/opt`. Next, set permissions
-and ownership on the project directory to your chosen user. 
-To set the sound API up, do this (assuming the user is named "pi"):
+```bash
+scp (name)-api username@password:/path/on/pi
 ```
-mv sound-api /opt
-chmod 644 /opt/sound-api/
-chown pi:pi /opt/sound-api/
+**Note:** Jericho Team check the manual for ips, credentials and tips for moving files
+
+Make sure to replace the existing executable on the Pi with the one you moved over
+
+With the executable on the Pi you can restart the scenario service to run the new executable. 
+You may also run it manually with the following command
+
+```bash
+./(name)-api
 ```
 
-Next, set up the project with `uv` and run it with `gunicorn`:
-Run these commands from the project directory.
-```
-uv sync
-uv run gunicorn -b 0.0.0.0:8000 main:app
+If the file is not executable by defualt change its permissions with the following
 
-# to log to /var/log/api: 
-uv run gunicorn -b 0.0.0.0:8000 main:app --access-logfile /var/log/api
-
-# to log to stdout (the terminal): 
-uv run gunicorn -b 0.0.0.0:8000 main:app --access-logfile -
-```
-# Python Interpreter Errors
-If you get an error about a Python interpreter version:
-- `uv python list` -> write down python version
-- make sure python version in pyproject.toml is less than or equal to your version
-- `rm .python-version` (could be a relic from a machine with a higher python version)
-# Logging
-Note that if you choose to set up logging with --acccess-logfile, you will likely
-have to configure permissions to allow gunicorn to access that file. Ex: 
-```
-sudo chown pi:pi /var/log/api
-sudo chmod 644 /var/log/api
+```bash
+chmod 755 (name)-api
 ```
