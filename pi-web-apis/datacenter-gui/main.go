@@ -9,7 +9,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
-	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
 
@@ -29,7 +28,6 @@ func main() {
 func run(w *app.Window) error {
 	th := material.NewTheme()
 	var ops op.Ops
-	var btn1, btn2, btn3, btn4, btn5, btn6 widget.Clickable
 	for {
 		switch e := w.Event().(type) {
 		case app.DestroyEvent:
@@ -42,43 +40,51 @@ func run(w *app.Window) error {
 				Axis: layout.Vertical,
 			}.Layout(gtx,
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-					return layout.Flex{
-						Axis: layout.Horizontal,
-					}.Layout(gtx,
-						layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-							return material.Button(th, &btn1, "Button1").Layout(gtx)
-						}),
-						layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-							return material.Button(th, &btn2, "Button2").Layout(gtx)
-						}),
-					)
+					return twoLetterRow("J", "E", gtx, th)
 				}),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-					return layout.Flex{
-						Axis: layout.Horizontal,
-					}.Layout(gtx,
-						layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-							return material.Button(th, &btn3, "Button3").Layout(gtx)
-						}),
-						layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-							return material.Button(th, &btn4, "Button4").Layout(gtx)
-						}),
-					)
-				}), layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-					return layout.Flex{
-						Axis: layout.Horizontal,
-					}.Layout(gtx,
-						layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-							return material.Button(th, &btn5, "Button5").Layout(gtx)
-						}),
-						layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-							return material.Button(th, &btn6, "Button6").Layout(gtx)
-						}),
-					)
+					return twoLetterRow("R", "I", gtx, th)
+				}),
+				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+					return twoLetterRow("C", "H", gtx, th)
+				}),
+				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+					return twoLetterRow("O", "!", gtx, th)
 				}),
 			)
 			e.Frame(gtx.Ops)
 		}
 
 	}
+}
+
+func twoLetterRow(letter1, letter2 string, gtx layout.Context, th *material.Theme) layout.Dimensions {
+	return layout.Flex{
+		Axis: layout.Horizontal,
+	}.Layout(gtx,
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+			lbl := material.Label(th, 50, letter1)
+			lbl.Color = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+
+			return layout.Flex{
+				Axis:      layout.Vertical,
+				Alignment: layout.Middle,
+			}.Layout(gtx,
+				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+					return layout.Center.Layout(gtx, lbl.Layout)
+				}))
+		}),
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+			lbl := material.Label(th, 50, letter2)
+			lbl.Color = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+
+			return layout.Flex{
+				Axis:      layout.Vertical,
+				Alignment: layout.Middle,
+			}.Layout(gtx,
+				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+					return layout.Center.Layout(gtx, lbl.Layout)
+				}))
+		}),
+	)
 }
