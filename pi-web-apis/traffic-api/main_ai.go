@@ -77,6 +77,12 @@ var (
 	ewGreen  bool
 )
 
+type lightControl struct {
+	Direction string `json:"direction"`
+	Color     string `json:"color"`
+	State     string `json:"state"`
+}
+
 func main() {
 	// Initialize periph.io host
 	if _, err := host.Init(); err != nil {
@@ -137,14 +143,14 @@ func main() {
 	})
 
 	// Idle control endpoints
-	router.POST("/idle/start", func(c *gin.Context) {
+	router.POST("/start", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleActive = true
 		stateMutex.Unlock()
 		c.JSON(200, gin.H{"message": "idle started"})
 	})
 
-	router.POST("/idle/stop", func(c *gin.Context) {
+	router.POST("/stop", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleActive = false
 		blackOut = false // Exit blackout mode too
@@ -154,11 +160,21 @@ func main() {
 	})
 
 	// Control individual lights
-	// /light/{direction}/{color}?state=on|off
-	router.POST("/light/:direction/:color", func(c *gin.Context) {
-		direction := c.Param("direction")
-		color := c.Param("color")
-		state := c.DefaultQuery("state", "on")
+	// /light
+	router.POST("/light", func(c *gin.Context) {
+		var req lightControl
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{"error": "invalid request body"})
+			return
+		}
+
+		direction := req.Direction
+		color := req.Color
+		state := req.State
+
+		if state == "" {
+			state = "on"
+		}
 
 		on := state == "on"
 

@@ -5,6 +5,21 @@ A lightweight Go API for controlling the water treatment clarifier arms on a Ras
 
 ---
 
+## Features
+The API has various endpoints to check health and state, the API also provides individual
+control over each of the arms.
+The specifics can be found below along with examples of API calls
+
+## Build Process
+**Note**: The latest executable can be found in the water-api directory
+
+The executable can be cross complied for a raspberry pi running `armv71` using the
+following go build command.
+
+```bash
+env GOOS=linux GOARCH=arm GOARM=7 go build -o water-api main.go
+```
+
 ## Endpoints
 
 ### `GET /health`
@@ -30,7 +45,7 @@ Returns the current arm idle state and step positions.
 }
 ```
 
-### `GET /start`
+### `POST /start`
 
 Starts idle spinning on both arms.
 
@@ -39,7 +54,7 @@ Starts idle spinning on both arms.
 {"message": "idle started for both arms"}
 ```
 
-### `GET /stop`
+### `POST /stop`
 
 Stops idle spinning on both arms and clears the GPIO outputs.
 
@@ -48,7 +63,7 @@ Stops idle spinning on both arms and clears the GPIO outputs.
 {"message": "idle stopped for both arms"}
 ```
 
-### `GET /arm1/start`
+### `POST /arm1/start`
 
 Starts idle spinning for arm 1 only.
 
@@ -57,7 +72,7 @@ Starts idle spinning for arm 1 only.
 {"message": "idle started for arm1"}
 ```
 
-### `GET /arm1/stop`
+### `POST /arm1/stop`
 
 Stops idle spinning for arm 1 only.
 
@@ -66,7 +81,7 @@ Stops idle spinning for arm 1 only.
 {"message": "idle stopped for arm1"}
 ```
 
-### `GET /arm2/start`
+### `POST /arm2/start`
 
 Starts idle spinning for arm 2 only.
 
@@ -75,7 +90,7 @@ Starts idle spinning for arm 2 only.
 {"message": "idle started for arm2"}
 ```
 
-### `GET /arm2/stop`
+### `POST /arm2/stop`
 
 Stops idle spinning for arm 2 only.
 
@@ -94,7 +109,7 @@ Stops idle spinning for arm 2 only.
 
 ---
 
-## Quick curl examples
+## Examples
 
 ```bash
 # Check health
@@ -104,14 +119,14 @@ curl http://water.jericho.local:8000/health
 curl http://water.jericho.local:8000/state
 
 # Start both arms
-curl http://water.jericho.local:8000/start
+curl -X POST http://water.jericho.local:8000/start
 
 # Stop both arms
-curl http://water.jericho.local:8000/stop
+curl -X POST http://water.jericho.local:8000/stop
 
 # Stop arm1 only
-curl http://water.jericho.local:8000/arm1/stop
+curl -X POST http://water.jericho.local:8000/arm1/stop
 
 # Start arm2 only
-curl http://water.jericho.local:8000/arm2/start
+curl -X POST http://water.jericho.local:8000/arm2/start
 ```

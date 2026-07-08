@@ -100,7 +100,7 @@ func main() {
 		c.JSON(200, state)
 	})
 
-	router.GET("/start", func(c *gin.Context) {
+	router.POST("/start", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm1Active = true
 		idleArm2Active = true
@@ -108,7 +108,7 @@ func main() {
 		c.JSON(200, gin.H{"message": "idle started for both arms"})
 	})
 
-	router.GET("/stop", func(c *gin.Context) {
+	router.POST("/stop", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm1Active = false
 		idleArm2Active = false
@@ -117,14 +117,14 @@ func main() {
 		c.JSON(200, gin.H{"message": "idle stopped for both arms"})
 	})
 
-	router.GET("/arm1/start", func(c *gin.Context) {
+	router.POST("/arm1/start", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm1Active = true
 		stateMutex.Unlock()
 		c.JSON(200, gin.H{"message": "idle started for arm1"})
 	})
 
-	router.GET("/arm1/stop", func(c *gin.Context) {
+	router.POST("/arm1/stop", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm1Active = false
 		stateMutex.Unlock()
@@ -132,14 +132,14 @@ func main() {
 		c.JSON(200, gin.H{"message": "idle stopped for arm1"})
 	})
 
-	router.GET("/arm2/start", func(c *gin.Context) {
+	router.POST("/arm2/start", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm2Active = true
 		stateMutex.Unlock()
 		c.JSON(200, gin.H{"message": "idle started for arm2"})
 	})
 
-	router.GET("/arm2/stop", func(c *gin.Context) {
+	router.POST("/arm2/stop", func(c *gin.Context) {
 		stateMutex.Lock()
 		idleArm2Active = false
 		stateMutex.Unlock()

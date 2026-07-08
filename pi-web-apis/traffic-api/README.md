@@ -2,6 +2,21 @@
 
 A Raspberry Pi-based REST API for controlling traffic light hardware using direct GPIO pin control.
 
+## Features
+The API has various endpoints to check health and state, the API can shift between normal traffic cycle
+to stop light cycle and a full blackout. There are also calls to test each light color.
+The specifics can be found below along with examples of API calls
+
+## Build Process
+**Note**: The latest executable can be found in the traffic-api directory
+
+The executable can be cross complied for a raspberry pi running `armv71` using the
+following go build command.
+
+```bash
+env GOOS=linux GOARCH=arm GOARM=7 go build -o traffic-api main.go
+```
+
 ## Hardware Configuration
 
 The API controls LEDs connected to the following GPIO pins:
@@ -20,23 +35,23 @@ The API controls LEDs connected to the following GPIO pins:
 
 ## API Endpoints
 
-### Health Check
-**GET** `/health`
+### `GET /health`
+Health check. Returns 200 OK if the API is responsive
+
 ```bash
 curl http://localhost:8000/health
 ```
-Response:
+**Response**
 ```json
 {"status": "ok"}
 ```
 
-### Get Current State
-**GET** `/state`
+### `GET /state`
 Returns the complete state of all lights and the traffic cycle
 ```bash
 curl http://localhost:8000/state
 ```
-Response:
+**Response**
 ```json
 {
   "north_south": {
@@ -55,58 +70,81 @@ Response:
 }
 ```
 
-### Idle Control
+### `POST /start`
+Runs normal traffic light cycle
 
-**Start Idle Mode** (runs normal traffic light cycle)
-**POST** `/idle/start`
 ```bash
-curl -X POST http://localhost:8000/idle/start
+curl -X POST http://localhost:8000/start
+```
+**Response**
+```json
+{"message":  "idle started"}
 ```
 
-**Stop Idle Mode** (enters flash mode - all lights off, then red)
-**POST** `/idle/stop`
+
+### `POST /stop`
+Enters flash mode - all lights off, then red
 ```bash
-curl -X POST http://localhost:8000/idle/stop
+curl -X POST http://localhost:8000/stop
+```
+**Response**
+```json
+{"message":  "idle stopped"}
 ```
 
-### Blackout Mode
-
-**Enter Blackout Mode** (stops all automatic functions, enables manual control)
-**POST** `/blackout`
+### `POST /blackout`
+Stops all automatic functions, enables manual control
 ```bash
 curl -X POST http://localhost:8000/blackout
 ```
 Starts with all lights off. Use individual light control endpoints to manually set desired lights.
 
-**Exit Blackout Mode** (returns to idle cycling)
-**POST** `/blackout/exit`
+**Response**
+```json
+{"status": "blackout","message":  "manual control enabled"}
+```
+
+### `POST /blackout/exit`
+Returns to idle cycle
 ```bash
 curl -X POST http://localhost:8000/blackout/exit
+```
+**Response**
+```json
+{"status": "blackout exited","message":  "return to idle mode"}
 ```
 
 ### Individual Light Control
 
-**Set Individual Light State** (Primary Control Method)
-**POST** `/light/:direction/:color?state=on|off`
+**Set Individual Light State** (Primary Control Method) 
+
+### `POST /light`
 
 Controls a specific traffic light. This overrides any automatic cycling and gives you direct control over each light.
 
-Directions: `north-south` or `ns`, `east-west` or `ew`
-Colors: `red`, `yellow`, `green`
+**Data Options** \
+Directions: `north-south` or `ns`, `east-west` or `ew` \
+Colors: `red`, `yellow`, `green` \
 States: `on` (default), `off`
 
 ```bash
 # Turn on north-south red light
-curl -X POST "http://localhost:8000/light/north-south/red?state=on"
+curl "http://localhost:8000/light" \
+      -H "Content-Type: application/json" \
+      -d '{"direction": "north-south", "color": "red", "state": "on"}' 
 
 # Turn off east-west green light
-curl -X POST "http://localhost:8000/light/ew/green?state=off"
+curl "http://localhost:8000/light" \
+      -H "Content-Type: application/json" \
+      -d '{"direction": "ew", "color": "green", "state": "off"}'
 
 # Turn on east-west yellow (state=on is default)
-curl -X POST "http://localhost:8000/light/east-west/yellow"
+curl "http://localhost:8000/light" \
+      -H "Content-Type: application/json" \
+      -d '{"direction": "east-west", "color": "yellow"}'
 ```
 
-Response:
+**Response Example**
 ```json
 {
   "direction": "north-south",
@@ -115,13 +153,15 @@ Response:
 }
 ```
 
-**Get Individual Light State** (for debugging/verification)
-**GET** `/light/:direction/:color`
+### `GET /light/:direction/:color`
 ```bash
 curl http://localhost:8000/light/north-south/red
 ```
+**URL Options** \
+Directions: `north-south` or `ns`, `east-west` or `ew` \
+Colors: `red`, `yellow`, `green`
 
-Response:
+**Response Example**
 ```json
 {
   "direction": "north-south",
@@ -134,7 +174,7 @@ Response:
 
 Activate test modes where all lights display a single color:
 
-**POST** `/test/:mode`
+### `POST /test/:mode`
 
 Modes: `red`, `yellow`, `green`
 
@@ -149,7 +189,7 @@ curl -X POST http://localhost:8000/test/yellow
 curl -X POST http://localhost:8000/test/green
 ```
 
-Response:
+**Response Example**
 ```json
 {
   "mode": "red",

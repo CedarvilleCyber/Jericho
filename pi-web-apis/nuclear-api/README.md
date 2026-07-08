@@ -6,7 +6,7 @@ To trigger the smoke & sound effect, curl and run this:
 https://hst.sh/raw/otehupilec
 
 ## Features
-The API has various endpoints to set health of the API and a smoke call to set off the nuclear smoke.
+The API has various endpoints to check health of the API and a smoke call to set off the nuclear smoke.
 The specifics can be found below along with examples of API calls
 
 ## Build Process

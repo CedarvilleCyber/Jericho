@@ -2,7 +2,40 @@
 
 A minimal Flask API for playing sounds on a Raspberry Pi.
 
+## Features
+The API has various endpoints to check health and available sounds of the API, 
+along with a play call to play those sounds.
+The specifics can be found below along with examples of API calls
+
+## Build Process
+**Note**: The latest executable can be found in the sound-api directory
+
+The executable can be cross complied for a raspberry pi running `armv71` using the
+following go build command.
+
+```bash
+env GOOS=linux GOARCH=arm GOARM=7 go build -o sound-api main.go
+```
+
 ## Endpoints
+
+### `GET /health`
+
+Health check. Returns 200 OK if you can hit the endpoint.
+
+
+### `GET /sounds`
+
+List available sounds.
+
+**Response:**
+```json
+{
+    "ok": true,
+    "sounds": ["beep.wav", "funky.wav", "alarm.wav", "notification.wav"],
+    "count": 4
+}
+```
 
 ### `POST /play`
 
@@ -37,29 +70,17 @@ Play a sound from the hardcoded list.
     "available_sounds": ["beep.wav", "funky.wav", "alarm.wav", "notification.wav"]
 }
 ```
-
-### `GET /sounds`
-
-List available sounds.
-
-**Response:**
-```json
-{
-    "ok": true,
-    "sounds": ["beep.wav", "funky.wav", "alarm.wav", "notification.wav"],
-    "count": 4
-}
-```
-
-### `GET /health`
-
-Health check. Returns 200 OK if you can hit the endpoint. 
-
 ---
 
 ## Examples
 
 ```bash
+# Health check
+curl http://localhost:8000/health
+
+# List available sounds
+curl http://localhost:8000/sounds
+
 # Play once
 curl http://localhost:8000/play \
      -H "Content-Type: application/json" \
@@ -70,11 +91,6 @@ curl http://localhost:8000/play \
      -H "Content-Type: application/json" \
      -d '{"sound": "steal.wav", "duration": 10}'
 
-# List available sounds
-curl http://localhost:8000/sounds
-
-# Health check
-curl http://localhost:8000/health
 ```
 
 ---

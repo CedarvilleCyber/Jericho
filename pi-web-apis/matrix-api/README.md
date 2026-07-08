@@ -1,7 +1,7 @@
 # Matrix (Datacenter) API
 
 ## Features
-The API has various endpoints to set health of the API, start and stop the API and
+The API has various endpoints to check health of the API, start and stop the API and
 send text in various colors to the API. The specifics can be found below along with 
 examples of API calls
 
