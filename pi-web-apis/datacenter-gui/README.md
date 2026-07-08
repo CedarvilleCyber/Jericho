@@ -8,6 +8,8 @@ that allows users to trigger the other physical effects.
 other APIs
 
 ## Build Process
+**Note**: The latest executable can be found in the datacenter-gui directory
+
 The executable can be cross complied using docker with the following 
 command
 
@@ -29,5 +31,5 @@ docker run --rm -v "$PWD":/app -w /app golang:1.26 /bin/bash -c "
   CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o datacenter-gui
 "
 ```
-The latest executable can be found in the datacenter-gui directory
+
 

