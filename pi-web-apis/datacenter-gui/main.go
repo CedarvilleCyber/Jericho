@@ -50,10 +50,10 @@ func display(w *app.Window) error {
 	//var body layout.Dimensions
 	useTriggers := false
 	var triggers [4]Trigger
-	triggers[0] = Trigger{Name: "Nuclear", URL: "http://nuclear.jericho.local/health", Color: color.NRGBA{R: 255, A: 255}}
-	triggers[1] = Trigger{Name: "Traffic", URL: "http://traffic.jericho.local/health", Color: color.NRGBA{G: 255, B: 120, R: 100, A: 255}}
-	triggers[2] = Trigger{Name: "Water", URL: "http://water.jericho.local/health", Color: color.NRGBA{B: 255, A: 255}}
-	triggers[3] = Trigger{Name: "Sound", URL: "http://sound.jericho.local/health", Color: color.NRGBA{R: 0, G: 0, B: 0, A: 255}}
+	triggers[0] = Trigger{Name: "Nuclear", URL: "http://nuclear.jericho.local/", Color: color.NRGBA{R: 255, A: 255}}
+	triggers[1] = Trigger{Name: "Traffic", URL: "http://traffic.jericho.local/", Color: color.NRGBA{G: 255, B: 120, R: 100, A: 255}}
+	triggers[2] = Trigger{Name: "Water", URL: "http://water.jericho.local/", Color: color.NRGBA{B: 255, A: 255}}
+	triggers[3] = Trigger{Name: "Sound", URL: "http://sound.jericho.local/", Color: color.NRGBA{R: 0, G: 0, B: 0, A: 255}}
 	client := http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -122,7 +122,7 @@ func triggerDisplay(gtx layout.Context, th *material.Theme, triggers *[4]Trigger
 			trigger := &triggers[i]
 			fmt.Printf("Trigger: %s Clicked\n", trigger.Name)
 			go func(t *Trigger) {
-				resp, err := client.Get(t.URL)
+				resp, err := client.Get(t.URL + "health")
 				if err != nil {
 					fmt.Printf("%s error: %v\n", t.Name, err)
 					return
