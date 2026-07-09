@@ -146,6 +146,17 @@ func main() {
 		clearGroupPins(arm2Pins)
 		c.JSON(200, gin.H{"message": "idle stopped for arm2"})
 	})
+	router.POST("/trigger", func(c *gin.Context) {
+		stateMutex.Lock()
+		idleArm1Active = false
+		idleArm2Active = false
+		timer := time.NewTimer(5 * time.Second)
+		<-timer.C
+		idleArm1Active = true
+		idleArm2Active = true
+		stateMutex.Unlock()
+		c.JSON(200, gin.H{"message": "triggered"})
+	})
 
 	router.Run("0.0.0.0:8000")
 }

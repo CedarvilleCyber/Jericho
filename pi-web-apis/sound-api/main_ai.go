@@ -50,8 +50,8 @@ type ErrorResponse struct {
 }
 
 func playSound(sound string, duration *float64) {
-	filepath := filepath.Join(SOUND_DIR, sound)
-	cmd := exec.Command("aplay", filepath)
+	filePath := filepath.Join(SOUND_DIR, sound)
+	cmd := exec.Command("aplay", filePath)
 	cmd.Run() // TODO: handle duration-based looping
 }
 
@@ -171,12 +171,27 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
+func triggerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	req := PlayRequest{
+		Sound:    `funky.wav`,
+		Duration: nil,
+	}
+
+	playSound(req.Sound, req.Duration)
+}
+
 func main() {
 	populateAvailableSounds()
 
 	http.HandleFunc("/play", playHandler)
 	http.HandleFunc("/sounds", soundsHandler)
 	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/trigger", triggerHandler)
 
 	fmt.Println("Server starting on :8000")
 	http.ListenAndServe(":8000", nil)

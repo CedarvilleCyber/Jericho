@@ -51,6 +51,7 @@ func main() {
 	// HTTP handlers
 	http.HandleFunc("/smoke", smokeHandler)
 	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/trigger", triggerHandler)
 
 	log.Println("nuclear API initialized")
 	log.Fatal(http.ListenAndServe(":8000", nil))
@@ -65,6 +66,19 @@ func blink(pin gpio.PinOut) {
 	}
 }
 
+func reserveTrigger(duration time.Duration) bool {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	if time.Since(timeOfLastRequest) < previousDuration+3*time.Second {
+		return false
+	}
+
+	timeOfLastRequest = time.Now()
+	previousDuration = duration
+	return true
+}
+
 func smokeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -76,10 +90,6 @@ func smokeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error": "Invalid JSON"}`, http.StatusBadRequest)
 		return
 	}
-
-	// Validation
-	mutex.Lock()
-	defer mutex.Unlock()
 
 	durationVal, ok := body["duration"]
 	if !ok {
@@ -98,13 +108,10 @@ func smokeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if time.Since(timeOfLastRequest) < previousDuration+3*time.Second {
+	if !reserveTrigger(time.Duration(duration * float64(time.Second))) {
 		http.Error(w, `{"system busy": "Another request is being processed. Wait 5-10 seconds, then retry."}`, http.StatusTooManyRequests)
 		return
 	}
-
-	timeOfLastRequest = time.Now()
-	previousDuration = time.Duration(duration * float64(time.Second))
 
 	// Trigger smoke
 	go triggerSmoke(gpioreg.ByName("GPIO21"), previousDuration)
@@ -125,4 +132,27 @@ func triggerSmoke(pin gpio.PinOut, duration time.Duration) {
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+}
+
+func triggerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	duration := 5 * time.Second
+
+	if !reserveTrigger(duration) {
+		http.Error(w, `{"system busy": "Another request is being processed. Wait 5-10 seconds, then retry."}`, http.StatusTooManyRequests)
+		return
+	}
+
+	go triggerSmoke(gpioreg.ByName("GPIO21"), duration)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"Effect status": "triggered",
+		"duration":      5,
+	})
+
 }

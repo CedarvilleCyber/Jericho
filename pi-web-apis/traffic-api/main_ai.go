@@ -243,6 +243,29 @@ func main() {
 		c.JSON(200, gin.H{"status": "blackout exited", "message": "returned to idle mode"})
 	})
 
+	router.POST("/trigger", func(c *gin.Context) {
+		stateMutex.Lock()
+		idleActive = false
+		blackOut = true
+		clearAllLights()
+		timer := time.NewTimer(2 * time.Second)
+		<-timer.C
+		setAllLights(false, true, false)
+		timer.Reset(2 * time.Second)
+		<-timer.C
+		setAllLights(true, true, false)
+		timer.Reset(2 * time.Second)
+		<-timer.C
+		setAllLights(true, true, true)
+		timer.Reset(2 * time.Second)
+		<-timer.C
+		clearAllLights()
+		blackOut = false
+		idleActive = true
+		stateMutex.Unlock()
+		c.JSON(200, gin.H{"status": "triggered"})
+	})
+
 	router.Run("0.0.0.0:8000")
 
 }
