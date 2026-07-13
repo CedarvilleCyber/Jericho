@@ -8,6 +8,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -19,6 +20,12 @@ import (
 )
 
 const SOUND_DIR = "./sounds"
+
+type routeInfo struct {
+	Method      string
+	Path        string
+	Description string
+}
 
 var (
 	availableSounds []string
@@ -47,6 +54,13 @@ type ErrorResponse struct {
 	Error           string   `json:"error,omitempty"`
 	AvailableSounds []string `json:"available_sounds,omitempty"`
 	SystemBusy      string   `json:"system busy,omitempty"`
+}
+
+var routes = []routeInfo{
+	{Method: http.MethodGet, Path: "/health", Description: "health check"},
+	{Method: http.MethodGet, Path: "/sounds", Description: "list available .wav files"},
+	{Method: http.MethodPost, Path: "/play", Description: "play a requested sound"},
+	{Method: http.MethodPost, Path: "/trigger", Description: "play the default capture sound"},
 }
 
 func playSound(sound string, duration *float64) {
@@ -148,6 +162,7 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+	log.Printf("Executed POST /play sound=%s duration=%s", req.Sound, durationStr)
 }
 
 func soundsHandler(w http.ResponseWriter, r *http.Request) {
@@ -164,11 +179,13 @@ func soundsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+	log.Printf("Executed GET /sounds count=%d", len(availableSounds))
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	log.Println("Executed GET /health")
 }
 
 func triggerHandler(w http.ResponseWriter, r *http.Request) {
@@ -183,17 +200,38 @@ func triggerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	playSound(req.Sound, req.Duration)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "triggered"})
+	log.Printf("Executed POST /trigger sound=%s", req.Sound)
+}
+
+func printStartupRoutes() {
+	log.Println("Sound API initialized")
+	log.Println("Available routes:")
+	for _, route := range routes {
+		log.Printf("  %s %-10s %s", route.Method, route.Path, route.Description)
+	}
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		log.Printf("Started %s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+		log.Printf("Completed %s %s in %s", r.Method, r.URL.Path, time.Since(start))
+	})
 }
 
 func main() {
 	populateAvailableSounds()
 
-	http.HandleFunc("/play", playHandler)
-	http.HandleFunc("/sounds", soundsHandler)
-	http.HandleFunc("/health", healthHandler)
-	http.HandleFunc("/trigger", triggerHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/play", playHandler)
+	mux.HandleFunc("/sounds", soundsHandler)
+	mux.HandleFunc("/health", healthHandler)
+	mux.HandleFunc("/trigger", triggerHandler)
 
-	fmt.Println("Server starting on :8000")
-	http.ListenAndServe(":8000", nil)
+	printStartupRoutes()
+	log.Println("Server starting on :8000")
+	log.Fatal(http.ListenAndServe(":8000", loggingMiddleware(mux)))
 }
