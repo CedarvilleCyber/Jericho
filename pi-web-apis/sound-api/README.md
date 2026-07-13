@@ -37,6 +37,14 @@ List available sounds.
 }
 ```
 
+### `POST /trigger`
+Triggers a preset sound to play, providing and easy way to display the sound effect
+
+**Response:**
+```json
+{ "status": "triggered" }
+```
+
 ### `POST /play`
 
 Play a sound from the hardcoded list.

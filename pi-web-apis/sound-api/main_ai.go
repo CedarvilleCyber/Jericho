@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const SOUND_DIR = "/opt/sound-api/sounds"
+const SOUND_DIR = "./sounds"
 
 var (
 	availableSounds []string
@@ -178,11 +178,12 @@ func triggerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := PlayRequest{
-		Sound:    `funky.wav`,
+		Sound:    `capture.wav`,
 		Duration: nil,
 	}
 
 	playSound(req.Sound, req.Duration)
+	json.NewEncoder(w).Encode(map[string]string{"status": "triggered"})
 }
 
 func main() {

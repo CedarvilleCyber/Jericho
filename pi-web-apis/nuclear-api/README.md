@@ -29,6 +29,15 @@ Health check. Returns 200 OK if the API is responsive.
 { "status": "ok" }
 ```
 
+### `POST /trigger`
+Triggers the smoke for five seconds. This call provides an easy way to call and 
+trigger the nuclear physical effect
+
+**Response:**
+```json
+{ "status": "triggered" }
+```
+
 ### `POST /smoke`
 Trigger the nuclear smoke effect for a specified duration.
 

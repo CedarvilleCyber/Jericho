@@ -70,6 +70,15 @@ curl http://localhost:8000/state
 }
 ```
 
+### `POST /trigger`
+Triggers a preset effect for the traffic lights, provides an easy way to display 
+the traffic physical effect
+
+**Response:**
+```json
+{ "status": "triggered" }
+```
+
 ### `POST /start`
 Runs normal traffic light cycle
 

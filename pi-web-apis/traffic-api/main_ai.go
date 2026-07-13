@@ -247,22 +247,27 @@ func main() {
 		stateMutex.Lock()
 		idleActive = false
 		blackOut = true
+		stateMutex.Unlock()
+
 		clearAllLights()
-		timer := time.NewTimer(2 * time.Second)
-		<-timer.C
+		time.Sleep(2 * time.Second)
+
 		setAllLights(false, true, false)
-		timer.Reset(2 * time.Second)
-		<-timer.C
+		time.Sleep(2 * time.Second)
+
 		setAllLights(true, true, false)
-		timer.Reset(2 * time.Second)
-		<-timer.C
+		time.Sleep(2 * time.Second)
+
 		setAllLights(true, true, true)
-		timer.Reset(2 * time.Second)
-		<-timer.C
+		time.Sleep(2 * time.Second)
+
 		clearAllLights()
+
+		stateMutex.Lock()
 		blackOut = false
 		idleActive = true
 		stateMutex.Unlock()
+
 		c.JSON(200, gin.H{"status": "triggered"})
 	})
 

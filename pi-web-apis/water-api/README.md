@@ -45,6 +45,15 @@ Returns the current arm idle state and step positions.
 }
 ```
 
+### `POST /trigger`
+Triggers a preset effect for the arms, provides an easy way to display 
+the water treatment physical effect  
+
+**Response:**
+```json
+{ "status": "triggered" }
+```
+
 ### `POST /start`
 
 Starts idle spinning on both arms.
