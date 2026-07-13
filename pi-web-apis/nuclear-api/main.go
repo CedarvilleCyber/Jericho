@@ -22,6 +22,18 @@ var (
 	mutex             sync.Mutex
 )
 
+type routeInfo struct {
+	Method      string
+	Path        string
+	Description string
+}
+
+var routes = []routeInfo{
+	{Method: http.MethodGet, Path: "/health", Description: "health check"},
+	{Method: http.MethodPost, Path: "/smoke", Description: "trigger smoke for a requested duration"},
+	{Method: http.MethodPost, Path: "/trigger", Description: "trigger smoke for the default duration"},
+}
+
 func main() {
 	// Initialize periph
 	if _, err := host.Init(); err != nil {
@@ -49,11 +61,14 @@ func main() {
 	go blink(blinkPin)
 
 	// HTTP handlers
-	http.HandleFunc("/smoke", smokeHandler)
-	http.HandleFunc("/health", healthHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/smoke", smokeHandler)
+	mux.HandleFunc("/health", healthHandler)
+	mux.HandleFunc("/trigger", triggerHandler)
 
-	log.Println("nuclear API initialized")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	printStartupRoutes()
+	log.Println("Server starting on :8000")
+	log.Fatal(http.ListenAndServe(":8000", loggingMiddleware(mux)))
 }
 
 func blink(pin gpio.PinOut) {
@@ -63,6 +78,19 @@ func blink(pin gpio.PinOut) {
 		pin.Out(gpio.Low)
 		time.Sleep(time.Second)
 	}
+}
+
+func reserveTrigger(duration time.Duration) bool {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	if time.Since(timeOfLastRequest) < previousDuration+3*time.Second {
+		return false
+	}
+
+	timeOfLastRequest = time.Now()
+	previousDuration = duration
+	return true
 }
 
 func smokeHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,10 +104,6 @@ func smokeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error": "Invalid JSON"}`, http.StatusBadRequest)
 		return
 	}
-
-	// Validation
-	mutex.Lock()
-	defer mutex.Unlock()
 
 	durationVal, ok := body["duration"]
 	if !ok {
@@ -98,13 +122,10 @@ func smokeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if time.Since(timeOfLastRequest) < previousDuration+3*time.Second {
+	if !reserveTrigger(time.Duration(duration * float64(time.Second))) {
 		http.Error(w, `{"system busy": "Another request is being processed. Wait 5-10 seconds, then retry."}`, http.StatusTooManyRequests)
 		return
 	}
-
-	timeOfLastRequest = time.Now()
-	previousDuration = time.Duration(duration * float64(time.Second))
 
 	// Trigger smoke
 	go triggerSmoke(gpioreg.ByName("GPIO21"), previousDuration)
@@ -114,6 +135,7 @@ func smokeHandler(w http.ResponseWriter, r *http.Request) {
 		"Effect status": "triggered",
 		"duration":      duration,
 	})
+	log.Printf("Executed POST /smoke duration=%.2fs", duration)
 }
 
 func triggerSmoke(pin gpio.PinOut, duration time.Duration) {
@@ -125,4 +147,46 @@ func triggerSmoke(pin gpio.PinOut, duration time.Duration) {
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	log.Println("Executed GET /health")
+}
+
+func triggerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	duration := 5 * time.Second
+
+	if !reserveTrigger(duration) {
+		http.Error(w, `{"system busy": "Another request is being processed. Wait 5-10 seconds, then retry."}`, http.StatusTooManyRequests)
+		return
+	}
+
+	go triggerSmoke(gpioreg.ByName("GPIO21"), duration)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"Effect status": "triggered",
+		"duration":      5,
+	})
+	log.Println("Executed POST /trigger duration=5s")
+
+}
+
+func printStartupRoutes() {
+	log.Println("Nuclear API initialized")
+	log.Println("Available routes:")
+	for _, route := range routes {
+		log.Printf("  %s %-10s %s", route.Method, route.Path, route.Description)
+	}
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		log.Printf("Started %s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+		log.Printf("Completed %s %s in %s", r.Method, r.URL.Path, time.Since(start))
+	})
 }

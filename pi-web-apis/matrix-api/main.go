@@ -1,7 +1,7 @@
 /*
 Description:
-This api is meant to be run on the pi controlling the matricies on top of the data
-center. The api allows calls to be made to enact affects on the matrix
+This api is meant to be run on the pi controlling the matrices on top of the data
+center. The api allows calls to be made to enact effects on the matrix
 */
 package main
 
@@ -82,7 +82,12 @@ var CLEAR = [8]byte{0, 0, 0, 0, 0, 0, 0, 0}
 var spiConn spi.Conn
 var spiMutex sync.Mutex
 
-var idleRunning bool = true
+var idleRunning = true
+
+type FlashRequest struct {
+	Text  string `json:"text"`
+	Color string `json:"color"`
+}
 
 func main() {
 	// Initialize periph.io host (required for hardware access)
@@ -131,20 +136,31 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
-	router.POST("/idle/start", func(c *gin.Context) {
+	router.POST("/start", func(c *gin.Context) {
 		idleRunning = true
 		c.JSON(200, gin.H{"message": "idle started"})
 	})
 
-	router.POST("/idle/stop", func(c *gin.Context) {
+	router.POST("/stop", func(c *gin.Context) {
 		idleRunning = false
 		clearAll()
 		c.JSON(200, gin.H{"message": "idle stopped"})
 	})
 
 	router.POST("/flash", func(c *gin.Context) {
-		text := strings.ToUpper(c.Query("text"))
-		color := strings.ToUpper(c.DefaultQuery("color", "B"))
+		var req FlashRequest
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{"error": "invalid request body"})
+			return
+		}
+
+		text := strings.ToUpper(req.Text)
+		color := strings.ToUpper(req.Color)
+
+		if color == "" {
+			color = "B"
+		}
 
 		if text == "" {
 			c.JSON(400, gin.H{"error": "must include text to display"})
@@ -157,7 +173,10 @@ func main() {
 		}
 
 		go func() {
+			idleRunning = false
+			clearAll()
 			flash_string(text, color)
+			idleRunning = true
 		}()
 		c.JSON(200, gin.H{"text": text, "color": color, "duration": "10 seconds"})
 	})
@@ -210,7 +229,7 @@ func clearAll() {
 	}
 }
 
-// flash a 8 character string on matrix board for 10 seconds
+// flash an 8 character string on matrix board for 10 seconds
 func flash_string(text, color string) {
 	display := make([][8]byte, len(text))
 	for i, char := range text {
@@ -257,9 +276,21 @@ func idle() {
 		display[i] = matrix_font[rune(char)]
 	}
 	for i := 0; i < len(text); i++ {
+		if !idleRunning {
+			clearAll()
+			return
+		}
 		start := time.Now()
 		for time.Since(start) < time.Second {
+			if !idleRunning {
+				clearAll()
+				return
+			}
 			for row := 0; row < 8; row++ {
+				if !idleRunning {
+					clearAll()
+					return
+				}
 				send_data(0, row, display[0][row], "B")
 				if i >= 1 {
 					send_data(1, row, display[1][row], "B")
