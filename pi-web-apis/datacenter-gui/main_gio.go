@@ -50,10 +50,10 @@ func display(w *app.Window) error {
 	//var body layout.Dimensions
 	useTriggers := false
 	var triggers [4]Trigger
-	triggers[0] = Trigger{Name: "Nuclear", URL: "http://nuclear.jericho.local/", Color: color.NRGBA{R: 255, A: 255}}
-	triggers[1] = Trigger{Name: "Traffic", URL: "http://traffic.jericho.local/", Color: color.NRGBA{G: 255, B: 120, R: 100, A: 255}}
-	triggers[2] = Trigger{Name: "Water", URL: "http://water.jericho.local/", Color: color.NRGBA{B: 255, A: 255}}
-	triggers[3] = Trigger{Name: "Sound", URL: "http://sound.jericho.local/", Color: color.NRGBA{R: 0, G: 0, B: 0, A: 255}}
+	triggers[0] = Trigger{Name: "Nuclear", URL: "http://nuclear.jericho.local/", Color: color.NRGBA{R: 40, G: 40, B: 40, A: 255}}
+	triggers[1] = Trigger{Name: "Traffic", URL: "http://traffic.jericho.local/", Color: color.NRGBA{R: 40, G: 40, B: 40, A: 255}}
+	triggers[2] = Trigger{Name: "Water", URL: "http://water.jericho.local/", Color: color.NRGBA{R: 40, G: 40, B: 40, A: 255}}
+	triggers[3] = Trigger{Name: "Sound", URL: "http://sound.jericho.local/", Color: color.NRGBA{R: 40, G: 40, B: 40, A: 255}}
 	client := http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -70,15 +70,23 @@ func display(w *app.Window) error {
 				useTriggers = false
 			}
 
+			border := widget.Border{
+				Color:        color.NRGBA{R: 0, G: 0, B: 0, A: 255},
+				CornerRadius: unit.Dp(10),
+				Width:        unit.Dp(2),
+			}
+
 			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return header(gtx, th, &triggersBtn, &jerichoBtn)
+					return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return header(gtx, th, &triggersBtn, &jerichoBtn)
+					})
 				}),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					if useTriggers {
 						return triggerDisplay(gtx, th, &triggers, &client)
 					}
-					return jerichoDisplay(gtx, th)
+					return matrixDisplay(gtx, th)
 				}),
 			)
 			e.Frame(gtx.Ops)
@@ -101,13 +109,17 @@ func header(gtx layout.Context, th *material.Theme, triggers, jericho *widget.Cl
 			}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return margins.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return material.Button(th, triggers, "Triggers").Layout(gtx)
+						btn := material.Button(th, jericho, "Jericho")
+						btn.Background = color.NRGBA{R: 0, G: 0, B: 0, A: 255}
+						return btn.Layout(gtx)
 					})
 
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return margins.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return material.Button(th, jericho, "Jericho").Layout(gtx)
+						btn := material.Button(th, triggers, "Triggers")
+						btn.Background = color.NRGBA{R: 0, G: 0, B: 0, A: 255}
+						return btn.Layout(gtx)
 					})
 
 				}),
@@ -122,7 +134,7 @@ func triggerDisplay(gtx layout.Context, th *material.Theme, triggers *[4]Trigger
 			trigger := &triggers[i]
 			fmt.Printf("Trigger: %s Clicked\n", trigger.Name)
 			go func(t *Trigger) {
-				resp, err := client.Get(t.URL + "health")
+				resp, err := client.Post(t.URL+"trigger", "application/json", nil)
 				if err != nil {
 					fmt.Printf("%s error: %v\n", t.Name, err)
 					return
@@ -140,6 +152,18 @@ func triggerDisplay(gtx layout.Context, th *material.Theme, triggers *[4]Trigger
 		}
 	}
 
+	margins := layout.Inset{
+		Top:    unit.Dp(20),
+		Bottom: unit.Dp(20),
+		Left:   unit.Dp(20),
+		Right:  unit.Dp(20),
+	}
+
+	border := widget.Border{
+		Color: color.NRGBA{R: 0, G: 0, B: 0, A: 255},
+		Width: unit.Dp(2),
+	}
+
 	return layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(gtx,
@@ -148,13 +172,21 @@ func triggerDisplay(gtx layout.Context, th *material.Theme, triggers *[4]Trigger
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					btn := material.Button(th, &triggers[0].Button, triggers[0].Name)
 					btn.Background = triggers[0].Color
+					btn.TextSize = unit.Sp(50)
+					return margins.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+							return btn.Layout(gtx)
+						})
+					})
 
-					return btn.Layout(gtx)
 				}),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					btn := material.Button(th, &triggers[1].Button, triggers[1].Name)
 					btn.Background = triggers[1].Color
-					return btn.Layout(gtx)
+					btn.TextSize = unit.Sp(50)
+					return margins.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return btn.Layout(gtx)
+					})
 				}),
 			)
 
@@ -164,12 +196,18 @@ func triggerDisplay(gtx layout.Context, th *material.Theme, triggers *[4]Trigger
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					btn := material.Button(th, &triggers[2].Button, triggers[2].Name)
 					btn.Background = triggers[2].Color
-					return btn.Layout(gtx)
+					btn.TextSize = unit.Sp(50)
+					return margins.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return btn.Layout(gtx)
+					})
 				}),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					btn := material.Button(th, &triggers[3].Button, triggers[3].Name)
 					btn.Background = triggers[3].Color
-					return btn.Layout(gtx)
+					btn.TextSize = unit.Sp(50)
+					return margins.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return btn.Layout(gtx)
+					})
 				}),
 			)
 
@@ -257,4 +295,15 @@ func twoLetterRow(letter1, letter2 string, gtx layout.Context, th *material.Them
 			return layout.Center.Layout(gtx, lbl.Layout)
 		}),
 	)
+}
+
+func matrixDisplay(gtx layout.Context, th *material.Theme) layout.Dimensions {
+	var btn widget.Clickable
+	return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+				return material.Button(th, &btn, "0").Layout(gtx)
+			}),
+		)
+	})
 }
