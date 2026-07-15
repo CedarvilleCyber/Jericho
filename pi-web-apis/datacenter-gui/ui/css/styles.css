@@ -1,0 +1,84 @@
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #111111;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    /*cursor: none; !* Hide cursor for kiosk *!*/
+    user-select: none;
+}
+
+header {
+    display: flex;
+}
+
+#triggers {
+    display: none;
+}
+
+#display-container {
+    text-align: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 2rem;
+}
+
+#display-text {
+    font-size: 4rem;
+    font-weight: bold;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+}
+
+/* ─── Fade animation ─── */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+.anim-fade-in  { animation: fadeIn  0.8s ease-in-out forwards; }
+.anim-fade-out { animation: fadeOut 0.8s ease-in-out forwards; }
+
+/* ─── Slide animation ─── */
+@keyframes slideIn {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateY(0);     opacity: 1; }
+    to   { transform: translateY(-60px); opacity: 0; }
+}
+
+.anim-slide-in  { animation: slideIn  0.6s ease-out forwards; }
+.anim-slide-out { animation: slideOut 0.6s ease-in  forwards; }
+
+/* ─── Zoom animation ─── */
+@keyframes zoomIn {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes zoomOut {
+    from { transform: scale(1);   opacity: 1; }
+    to   { transform: scale(1.4); opacity: 0; }
+}
+
+.anim-zoom-in  { animation: zoomIn  0.5s ease-out forwards; }
+.anim-zoom-out { animation: zoomOut 0.5s ease-in  forwards; }
