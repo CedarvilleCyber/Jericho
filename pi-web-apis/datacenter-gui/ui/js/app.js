@@ -61,3 +61,12 @@ function showDisplay() {
     triggers.style.display = 'none';
 
 }
+
+async function triggerEffectButton(name) {
+    try {
+        const result = await window.triggerEffect(name);
+        console.log(`${name} triggered`, result);
+    } catch (err) {
+        console.error(`Failed to trigger ${name}`, err);
+    }
+}
