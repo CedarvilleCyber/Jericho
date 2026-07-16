@@ -8,14 +8,11 @@ body {
     background: #111111;
     color: #ffffff;
     font-family: 'Arial', sans-serif;
-    width: 100vw;
+    min-height: 100vh;
     height: 100vh;
-    display: block;
-    justify-content: center;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    /*cursor: none; !* Hide cursor for kiosk *!*/
-    user-select: none;
 }
 
 header {
@@ -24,6 +21,17 @@ header {
 
 #triggers {
     display: none;
+    height: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+
+}
+
+#triggers button {
+    width: 100%;
+    height: 100%;
+    font-size: clamp(1.25rem, 4vw, 3rem);
 }
 
 #display-container {
@@ -32,6 +40,8 @@ header {
     width: 100%;
     height: 100%;
     padding: 2rem;
+    flex: 1;
+    min-height: 0;
 }
 
 #display-text {

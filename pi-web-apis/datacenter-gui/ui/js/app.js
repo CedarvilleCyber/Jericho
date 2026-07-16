@@ -50,7 +50,7 @@ function showTriggers() {
     const displayText = document.getElementById('display-text');
 
     displayText.style.display = 'none';
-    triggers.style.display = 'block';
+    triggers.style.display = 'grid';
 }
 
 function showDisplay() {
