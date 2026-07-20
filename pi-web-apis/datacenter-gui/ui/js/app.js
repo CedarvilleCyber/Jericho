@@ -19,7 +19,7 @@ function showText(text, animationType) {
     isAnimating = true;
 
     const anim = ANIMATIONS[animationType] || ANIMATIONS.fade;
-
+    const coin = document.getElementById('coin');
     // If there's existing text, play the exit animation first
     if (displayEl.textContent.trim() !== '') {
         displayEl.classList.add(anim.exit);
@@ -34,6 +34,12 @@ function showText(text, animationType) {
         displayEl.textContent = text;
         playEnter(anim);
     }
+    setTimeout(function() {
+       displayEl.innerHTML = '';
+       displayEl.appendChild(coin);
+
+
+    }, 10000)
 }
 
 function playEnter(anim) {

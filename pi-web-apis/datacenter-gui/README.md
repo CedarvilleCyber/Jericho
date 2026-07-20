@@ -2,10 +2,8 @@
 
 ## Features
 The GUI currently has two views. A basic view that displays
-JERICHO similar to how the Matrix setup did and a view
+the Jericho logo on a spinning coin and a view
 that allows users to trigger the other physical effects.
-**Note**: The trigger currently just check the health of the
-other APIs
 
 ## Build Process
 **Note**: The latest executable can be found in the datacenter-gui directory
@@ -37,7 +35,7 @@ docker run --rm \
     export PKG_CONFIG_ALLOW_CROSS=1
     export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig
 
-    go build -o datacenter-gui-rpi3 main.go
+    go build -o datacenter-gui main.go
   '
 ```
 

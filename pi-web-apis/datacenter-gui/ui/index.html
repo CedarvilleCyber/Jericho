@@ -8,19 +8,19 @@
 </head>
 <body>
 <header>
-    <h1>Datacenter GUI</h1>
-    <button onclick="showTriggers()">Triggers</button>
-    <button onclick="showDisplay()">Display</button>
+    <h1>Jericho</h1>
+    <button onclick="showTriggers()" class="header-btn">Triggers</button>
+    <button onclick="showDisplay()" class="header-btn">Display</button>
 </header>
 <div id="display-container">
     <div id="display-text">
         <div id="coin"> </div>
     </div>
     <div id="triggers">
-        <button onclick="triggerEffectButton('nuclear')">Nuclear</button>
-        <button onclick="triggerEffectButton('traffic')">Traffic</button>
-        <button onclick="triggerEffectButton('water')">Water</button>
-        <button onclick="triggerEffectButton('sound')">Sound</button>
+        <button onclick="triggerEffectButton('nuclear')" id="nuclear-btn">Nuclear</button>
+        <button onclick="triggerEffectButton('traffic')" id="traffic-btn">Traffic</button>
+        <button onclick="triggerEffectButton('water')" id="water-btn">Water</button>
+        <button onclick="triggerEffectButton('sound')" id="sound-btn">Sound</button>
     </div>
 
 </div>
