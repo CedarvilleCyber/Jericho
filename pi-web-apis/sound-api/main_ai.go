@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-const SOUND_DIR = "./sounds"
+const SOUND_DIR = "/home/pi/Documents/env/sounds"
 
 type routeInfo struct {
 	Method      string
@@ -63,10 +63,13 @@ var routes = []routeInfo{
 	{Method: http.MethodPost, Path: "/trigger", Description: "play the default capture sound"},
 }
 
-func playSound(sound string, duration *float64) {
+func playSound(sound string) {
 	filePath := filepath.Join(SOUND_DIR, sound)
-	cmd := exec.Command("aplay", filePath)
-	cmd.Run() // TODO: handle duration-based looping
+	cmd := exec.Command("/usr/bin/aplay", filePath)
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("Audio play failed with error: %v", err)
+	}
 }
 
 func validateRequest(req PlayRequest) (string, int) {
@@ -147,7 +150,7 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go playSound(req.Sound, req.Duration)
+	go playSound(req.Sound)
 
 	durationStr := "once"
 	if req.Duration != nil {
@@ -199,7 +202,7 @@ func triggerHandler(w http.ResponseWriter, r *http.Request) {
 		Duration: nil,
 	}
 
-	playSound(req.Sound, req.Duration)
+	go playSound(req.Sound)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "triggered"})
 	log.Printf("Executed POST /trigger sound=%s", req.Sound)
