@@ -76,3 +76,61 @@ async function triggerEffectButton(name) {
         console.error(`Failed to trigger ${name}`, err);
     }
 }
+
+(function() {
+    const TAP_COUNT_REQUIRED = 5;
+    const TAP_WINDOW_MS = 2000; // taps must land within 2s of each other
+    const AUTO_HIDE_MS = 15000; // auto hide the header after 15s
+
+    let taps = 0;
+    let tapTimer = null;
+    let hideTimer = null;
+
+    const menuBar = document.getElementById('menu-bar');
+
+    function resetTapWindow() {
+        taps = 0;
+        clearTimeout(tapTimer);
+    }
+
+    function showMenu() {
+        menuBar.classList.add('visible');
+        restartHideTimer();
+    }
+
+    function restartHideTimer() {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+            menuBar.classList.remove('visible');
+            showDisplay();
+        }, AUTO_HIDE_MS);
+    }
+
+    function isMenuVisible() {
+        return menuBar.classList.contains('visible');
+    }
+
+
+    document.addEventListener('touchstart', handleTap, { passive: true });
+    document.addEventListener('click', handleTap);
+
+    function handleTap(e) {
+        // If the menu is visible, any touch/click will reset the timer to auto hide the menu
+        if(isMenuVisible()) {
+            restartHideTimer();
+            return;
+        }
+
+        // Menu is hidden - count taps towards revealing the menu
+        taps++;
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(resetTapWindow, TAP_WINDOW_MS);
+
+        if (taps >= TAP_COUNT_REQUIRED) {
+            resetTapWindow();
+            showMenu();
+        }
+    }
+
+
+})();

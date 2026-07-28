@@ -50,6 +50,14 @@ header {
     background-color: color-mix(in srgb, var(--cu-gold), black 15%);
 }
 
+#menu-bar {
+    transform: translateY(-100%);
+    transition: transform 0.2s ease-out;
+}
+#menu-bar.visible {
+    transform: translateY(0);
+}
+
 #triggers {
     display: none;
     height: 100%;
