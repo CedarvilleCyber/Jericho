@@ -39,4 +39,37 @@ docker run --rm \
   '
 ```
 
+## Endpoints
+### `GET /health`
+Health check. Returns 200 OK if the API is responsive.
+
+**Response:**
+```json
+{ "status": "ok" }
+```
+
+### `POST /display`
+Animates text onto the screen using various animation options
+
+**Response:**
+```json
+{ "status": "ok", "message": "display updated"}
+```
+
+**Data Options** \
+`Text: any text` \
+`Animation: fade(default), slide, zoom`
+
+## Examples
+```bash
+curl http://localhost:8000/health
+
+curl http://local:8000/display -H "Content-Type: application/json" \
+      -d '{"text": "anything", "animation": "zoom"}'
+      
+curl http://local:8000/display -H "Content-Type: application/json" \
+      -d '{"text": "anything"}'
+```
+
+
 

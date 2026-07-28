@@ -63,7 +63,7 @@ function showDisplay() {
     const triggers = document.getElementById('triggers');
     const displayText = document.getElementById('display-text');
 
-    displayText.style.display = 'block';
+    displayText.style.display = 'flex';
     triggers.style.display = 'none';
 
 }
