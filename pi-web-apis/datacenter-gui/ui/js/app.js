@@ -6,7 +6,26 @@ const ANIMATIONS = {
 };
 
 const displayEl = document.getElementById('display-text');
+const triggersEl = document.getElementById('triggers');
+const livestreamEl = document.getElementById('livestream');
+const streamSelectorEl = document.getElementById('stream-selector');
+const streamVideoEl = document.getElementById('stream-video');
+const streamLabelEl = document.getElementById('stream-label');
+const streamMessageEl = document.getElementById('stream-message');
 let isAnimating = false;
+let activeView = 'display';
+let activeStreamIndex = 0;
+let streamPlayer = null;
+
+// Match the website livestream URL shape: {base}/live/{streamKey}.flv.
+// Change this value if the SRS/live stream host is different from jericho.local.
+const STREAM_BASE_URL = (window.JERICHO_STREAM_BASE_URL || 'http://jericho.local').replace(/\/$/, '');
+const LIVESTREAMS = [
+    { label: 'Nuclear', streamKey: 'nuclear' },
+    { label: 'Traffic Light', streamKey: 'traffic' },
+    { label: 'Water Treatment Plant', streamKey: 'watertreatment' },
+    { label: 'Datacenter', streamKey: 'datacenter' },
+];
 
 /**
  * showText is called by Go through webview to update the displayed text.
@@ -52,20 +71,128 @@ function playEnter(anim) {
 }
 
 function showTriggers() {
-    const triggers = document.getElementById('triggers');
-    const displayText = document.getElementById('display-text');
+    activeView = 'triggers';
+    stopLivestreamPlayer();
 
-    displayText.style.display = 'none';
-    triggers.style.display = 'grid';
+    displayEl.style.display = 'none';
+    livestreamEl.style.display = 'none';
+    triggersEl.style.display = 'grid';
 }
 
 function showDisplay() {
-    const triggers = document.getElementById('triggers');
-    const displayText = document.getElementById('display-text');
+    activeView = 'display';
+    stopLivestreamPlayer();
 
-    displayText.style.display = 'flex';
-    triggers.style.display = 'none';
+    displayEl.style.display = 'flex';
+    triggersEl.style.display = 'none';
+    livestreamEl.style.display = 'none';
+}
 
+function showLivestream() {
+    activeView = 'livestream';
+
+    displayEl.style.display = 'none';
+    triggersEl.style.display = 'none';
+    livestreamEl.style.display = 'flex';
+    selectLivestream(activeStreamIndex);
+}
+
+function buildStreamUrl(stream) {
+    return `${STREAM_BASE_URL}/live/${stream.streamKey}.flv`;
+}
+
+function buildSnapshotUrl(stream) {
+    return `${STREAM_BASE_URL}/snapshot/${stream.streamKey}.jpg`;
+}
+
+function setStreamMessage(message) {
+    streamMessageEl.textContent = message;
+    streamMessageEl.style.display = message ? 'flex' : 'none';
+}
+
+function stopLivestreamPlayer() {
+    setStreamMessage('');
+
+    if (streamPlayer) {
+        streamPlayer.destroy();
+        streamPlayer = null;
+    }
+
+    streamVideoEl.removeAttribute('src');
+    streamVideoEl.load();
+}
+
+function selectLivestream(index) {
+    const stream = LIVESTREAMS[index];
+    if (!stream) return;
+
+    activeStreamIndex = index;
+    streamLabelEl.textContent = stream.label;
+
+    document.querySelectorAll('.stream-option').forEach((button, buttonIndex) => {
+        button.classList.toggle('active', buttonIndex === index);
+    });
+
+    stopLivestreamPlayer();
+
+    if (!window.flvjs) {
+        setStreamMessage('FLV player library did not load.');
+        return;
+    }
+
+    if (!window.flvjs.isSupported()) {
+        setStreamMessage('This display does not support FLV playback.');
+        return;
+    }
+
+    const streamUrl = buildStreamUrl(stream);
+    setStreamMessage('Loading livestream...');
+
+    streamPlayer = window.flvjs.createPlayer({
+        type: 'flv',
+        url: streamUrl,
+        isLive: true,
+    });
+    streamPlayer.attachMediaElement(streamVideoEl);
+    streamPlayer.load();
+
+    const playPromise = streamVideoEl.play();
+    if (playPromise) {
+        playPromise.catch((err) => {
+            console.warn('Livestream autoplay was blocked', err);
+            setStreamMessage('Press play to start the livestream.');
+        });
+    }
+
+    streamPlayer.on(window.flvjs.Events.ERROR, (errorType, errorDetail) => {
+        console.error('Livestream failed', errorType, errorDetail);
+        setStreamMessage(`Unable to load ${stream.label}.`);
+    });
+
+    streamVideoEl.onplaying = () => setStreamMessage('');
+}
+
+function renderStreamSelector() {
+    streamSelectorEl.innerHTML = '';
+
+    LIVESTREAMS.forEach((stream, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'stream-option';
+        button.setAttribute('aria-label', `Show ${stream.label}`);
+        button.onclick = () => selectLivestream(index);
+
+        const thumb = document.createElement('span');
+        thumb.className = 'stream-thumb';
+        thumb.style.backgroundImage = `url("${buildSnapshotUrl(stream)}")`;
+
+        const label = document.createElement('span');
+        label.className = 'stream-option-label';
+        label.textContent = stream.label;
+
+        button.append(thumb, label);
+        streamSelectorEl.appendChild(button);
+    });
 }
 
 async function triggerEffectButton(name) {
@@ -102,7 +229,9 @@ async function triggerEffectButton(name) {
         clearTimeout(hideTimer);
         hideTimer = setTimeout(() => {
             menuBar.classList.remove('visible');
-            showDisplay();
+            if (activeView === 'triggers' || activeView === 'livestream') {
+                showDisplay();
+            }
         }, AUTO_HIDE_MS);
     }
 
@@ -134,3 +263,5 @@ async function triggerEffectButton(name) {
 
 
 })();
+
+renderStreamSelector();
