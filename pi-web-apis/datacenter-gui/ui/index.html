@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk Display</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header id="menu-bar">
+    <h1>Jericho</h1>
+    <button onclick="showDisplay()" class="header-btn">Display</button>
+    <button onclick="showTriggers()" class="header-btn">Triggers</button>
+    <button onclick="showLivestream()" class="header-btn">Livestream</button>
+</header>
+<div id="display-container">
+    <div id="display-text">
+        <div id="coin"> </div>
+    </div>
+    <div id="triggers">
+        <button onclick="triggerEffectButton('nuclear')" id="nuclear-btn">Nuclear</button>
+        <button onclick="triggerEffectButton('traffic')" id="traffic-btn">Traffic</button>
+        <button onclick="triggerEffectButton('water')" id="water-btn">Water</button>
+        <button onclick="triggerEffectButton('sound')" id="sound-btn">Sound</button>
+    </div>
+    <div id="livestream">
+        <div id="stream-selector" aria-label="Livestream selector"></div>
+        <div id="stream-player-card">
+            <div id="stream-status">
+                <span id="stream-live-dot" aria-hidden="true"></span>
+                <span id="stream-label">Stream 1</span>
+            </div>
+            <div id="stream-video-wrap">
+                <video id="stream-video" controls autoplay muted playsinline></video>
+                <div id="stream-message" role="status"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="/js/flv.min.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

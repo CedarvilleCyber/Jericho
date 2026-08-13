@@ -8,6 +8,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -18,7 +19,13 @@ import (
 	"time"
 )
 
-const SOUND_DIR = "/opt/sound-api/sounds"
+const SOUND_DIR = "/home/pi/Documents/env/sounds"
+
+type routeInfo struct {
+	Method      string
+	Path        string
+	Description string
+}
 
 var (
 	availableSounds []string
@@ -49,10 +56,20 @@ type ErrorResponse struct {
 	SystemBusy      string   `json:"system busy,omitempty"`
 }
 
-func playSound(sound string, duration *float64) {
-	filepath := filepath.Join(SOUND_DIR, sound)
-	cmd := exec.Command("aplay", filepath)
-	cmd.Run() // TODO: handle duration-based looping
+var routes = []routeInfo{
+	{Method: http.MethodGet, Path: "/health", Description: "health check"},
+	{Method: http.MethodGet, Path: "/sounds", Description: "list available .wav files"},
+	{Method: http.MethodPost, Path: "/play", Description: "play a requested sound"},
+	{Method: http.MethodPost, Path: "/trigger", Description: "play the default capture sound"},
+}
+
+func playSound(sound string) {
+	filePath := filepath.Join(SOUND_DIR, sound)
+	cmd := exec.Command("/usr/bin/aplay", filePath)
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("Audio play failed with error: %v", err)
+	}
 }
 
 func validateRequest(req PlayRequest) (string, int) {
@@ -133,7 +150,7 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go playSound(req.Sound, req.Duration)
+	go playSound(req.Sound)
 
 	durationStr := "once"
 	if req.Duration != nil {
@@ -148,6 +165,7 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+	log.Printf("Executed POST /play sound=%s duration=%s", req.Sound, durationStr)
 }
 
 func soundsHandler(w http.ResponseWriter, r *http.Request) {
@@ -164,20 +182,59 @@ func soundsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+	log.Printf("Executed GET /sounds count=%d", len(availableSounds))
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	log.Println("Executed GET /health")
+}
+
+func triggerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	req := PlayRequest{
+		Sound:    `capture.wav`,
+		Duration: nil,
+	}
+
+	go playSound(req.Sound)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "triggered"})
+	log.Printf("Executed POST /trigger sound=%s", req.Sound)
+}
+
+func printStartupRoutes() {
+	log.Println("Sound API initialized")
+	log.Println("Available routes:")
+	for _, route := range routes {
+		log.Printf("  %s %-10s %s", route.Method, route.Path, route.Description)
+	}
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		log.Printf("Started %s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+		log.Printf("Completed %s %s in %s", r.Method, r.URL.Path, time.Since(start))
+	})
 }
 
 func main() {
 	populateAvailableSounds()
 
-	http.HandleFunc("/play", playHandler)
-	http.HandleFunc("/sounds", soundsHandler)
-	http.HandleFunc("/health", healthHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/play", playHandler)
+	mux.HandleFunc("/sounds", soundsHandler)
+	mux.HandleFunc("/health", healthHandler)
+	mux.HandleFunc("/trigger", triggerHandler)
 
-	fmt.Println("Server starting on :8000")
-	http.ListenAndServe(":8000", nil)
+	printStartupRoutes()
+	log.Println("Server starting on :8000")
+	log.Fatal(http.ListenAndServe(":8000", loggingMiddleware(mux)))
 }
