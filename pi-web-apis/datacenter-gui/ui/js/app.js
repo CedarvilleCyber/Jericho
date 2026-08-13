@@ -19,12 +19,12 @@ let streamPlayer = null;
 
 // Match the website livestream URL shape: {base}/live/{streamKey}.flv.
 // Change this value if the SRS/live stream host is different from jericho.local.
-const STREAM_BASE_URL = (window.JERICHO_STREAM_BASE_URL || 'http://jericho.local').replace(/\/$/, '');
+const STREAM_BASE_URL ='http://livestream.jericho.local:8080';
 const LIVESTREAMS = [
-    { label: 'Nuclear', streamKey: 'nuclear' },
-    { label: 'Traffic Light', streamKey: 'traffic' },
-    { label: 'Water Treatment Plant', streamKey: 'watertreatment' },
-    { label: 'Datacenter', streamKey: 'datacenter' },
+    { label: 'Nuclear', streamKey: 'nuclear'},
+    { label: 'Traffic Light', streamKey: 'traffic'},
+    { label: 'Water Treatment', streamKey: 'watertreatment'},
+    { label: 'Datacenter', streamKey: 'datacenter'},
 ];
 
 /**
@@ -207,7 +207,7 @@ async function triggerEffectButton(name) {
 (function() {
     const TAP_COUNT_REQUIRED = 5;
     const TAP_WINDOW_MS = 2000; // taps must land within 2s of each other
-    const AUTO_HIDE_MS = 15000; // auto hide the header after 15s
+    const AUTO_HIDE_MS = 60000; // auto hide the header after 15s
 
     let taps = 0;
     let tapTimer = null;
