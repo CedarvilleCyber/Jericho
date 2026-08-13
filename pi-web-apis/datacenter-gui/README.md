@@ -1,9 +1,13 @@
 # Datacenter Display GUI
 
 ## Features
-The GUI currently has two views. A basic view that displays
-the Jericho logo on a spinning coin and a view
-that allows users to trigger the other physical effects.
+The GUI has three views. A basic view that displays
+the Jericho logo on a spinning coin, a view
+that allows users to trigger the other physical effects, 
+and a view that displays the livestreams.
+
+The display works like a kiosk hiding the menu until prompted then
+switching back to basic view after a minute of inactivity
 
 ## Build Process
 **Note**: The latest executable can be found in the datacenter-gui directory
