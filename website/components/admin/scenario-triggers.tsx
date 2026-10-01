@@ -16,15 +16,15 @@ import {
 export default function ScenarioTriggers() {
   return (
     <div className="border border-base-300 shadow-lg rounded-md p-4 flex flex-col gap-2 mb-3">
-      <h2 className="text-xl">Trigger Scenarios</h2>
+      <h2 className="text-xl">Trigger Effects</h2>
       <div>
         <button className="btn btn-error" onClick={() => triggerNuclear()}>
-          <IconRadioactive className="mr-3" /> Trigger Nuclear Scenario
+          <IconRadioactive className="mr-3" /> Trigger Nuclear Effect
         </button>
       </div>
       <div>
         <button className="btn btn-warning" onClick={() => triggerTraffic()}>
-          <IconTrafficLights className="mr-3" /> Trigger Traffic Scenario
+          <IconTrafficLights className="mr-3" /> Trigger Traffic Effect
         </button>
       </div>
       <div>
@@ -32,7 +32,7 @@ export default function ScenarioTriggers() {
           className="btn btn-info"
           onClick={() => triggerWaterTreatment()}
         >
-          <IconRotate className="mr-3" /> Trigger Water Treatment Scenario
+          <IconRotate className="mr-3" /> Trigger Water Treatment Effect
         </button>
       </div>
       <div>
