@@ -17,10 +17,12 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AppBar() {
   const { data } = authClient.useSession();
   const [isAdmin, setIsAdmin] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (data?.user?.id) {
@@ -107,7 +109,11 @@ export default function AppBar() {
                   )}
                   <li>
                     <button
-                      onClick={() => authClient.signOut()}
+                      onClick={() => authClient.signOut({
+                        fetchOptions: {
+                          onSuccess: () => router.push("/"),
+                        }
+                      })}
                       className="text-error"
                     >
                       <IconLogout size={16} />

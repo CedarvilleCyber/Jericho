@@ -3,9 +3,11 @@
 import { authClient } from "@/lib/auth-client";
 import { IconLogout, IconUser } from "@tabler/icons-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Footer() {
   const { data } = authClient.useSession();
+  const router = useRouter();
 
   if (!data?.session) {
     return null;
@@ -21,7 +23,11 @@ export default function Footer() {
       </Link>
       <button
         className="btn btn-ghost btn-sm text-error"
-        onClick={() => authClient.signOut()}
+        onClick={() => authClient.signOut({
+          fetchOptions: {
+            onSuccess: () => router.push("/"),
+          }
+        })}
       >
         <IconLogout size={16} />
         Sign Out
