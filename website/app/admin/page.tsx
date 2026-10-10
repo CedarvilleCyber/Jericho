@@ -1,6 +1,6 @@
 import BulkCreateUsers from "@/components/admin/bulk-create-users";
-import EditUserButton from "@/components/admin/edit-user-button";
 import ScenarioTriggers from "@/components/admin/scenario-triggers";
+import UserTable from "@/components/admin/user-table";
 import prisma from "@/lib/prisma";
 import { IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
@@ -24,32 +24,14 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      <div className="border border-base-300 shadow-lg rounded-md p-4 mb-4">
-        <div className="overflow-auto max-h-[50vh]">
-          <table className="table min-w-175">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>User Management</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>{user.userRoles.map((role) => role.role).join(", ")}</td>
-                  <td>
-                    <EditUserButton userId={user.id} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <UserTable
+        users={users.map((user) => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          roles: user.userRoles.map((role) => role.role),
+        }))}
+      />
       <ScenarioTriggers />
     </div>
   );
