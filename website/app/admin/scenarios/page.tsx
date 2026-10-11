@@ -1,6 +1,11 @@
 import CreateScenarioButton from "@/components/admin/create-scenario-button";
 import { ScenarioCard } from "@/components/admin/scenario-card";
 import prisma from "@/lib/prisma";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Manage Scenarios",
+};
 
 export default async function ScenariosPage() {
   const scenarios = await prisma.scenario.findMany({

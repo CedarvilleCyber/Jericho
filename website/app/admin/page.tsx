@@ -4,6 +4,11 @@ import UserTable from "@/components/admin/user-table";
 import prisma from "@/lib/prisma";
 import { IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Admin Dashboard",
+};
 
 export default async function AdminPage() {
   const users = (

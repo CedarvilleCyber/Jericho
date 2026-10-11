@@ -1,5 +1,10 @@
 import { LivestreamPageEditor } from "@/components/admin/livestream-page-editor";
 import prisma from "@/lib/prisma";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Manage Livestream Page",
+};
 
 export default async function AdminLivestreamPage() {
   const config = await prisma.livestreamPageConfig.findFirst({

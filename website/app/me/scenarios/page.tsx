@@ -4,6 +4,11 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | My Scenarios",
+};
 
 export default async function MyScenarios() {
   const session = await auth.api.getSession({

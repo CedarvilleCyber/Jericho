@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Documentation",
+};
+
 export default function DocsLayout({
   children,
 }: {

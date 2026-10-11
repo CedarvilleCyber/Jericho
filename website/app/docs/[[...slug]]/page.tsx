@@ -1,4 +1,21 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug = [] } = await params;
+  const filename = slug.at(-1);
+
+  const documentName = filename
+    ? filename
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    : "Documentation";
+
+  return {
+    title: `Jericho | ${documentName}`,
+  };
+}
 
 type Props = { params: Promise<{ slug?: string[] }> };
 

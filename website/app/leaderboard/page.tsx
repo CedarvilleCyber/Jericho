@@ -5,6 +5,11 @@ import { IconTrophy } from "@tabler/icons-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Leaderboard",
+};
 
 const MACHINE_REVEAL_PENALTY = 5;
 const QUESTION_HINT_PENALTY = 2;
