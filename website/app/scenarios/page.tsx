@@ -2,6 +2,11 @@ import prisma from "@/lib/prisma";
 import { IconDeviceDesktop } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Scenarios",
+};
 
 export default async function ScenariosPage() {
   const scenarios = await prisma.scenario.findMany();

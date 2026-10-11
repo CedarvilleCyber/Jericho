@@ -11,6 +11,11 @@ import { IconTrash } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Manage User",
+};
 
 export default async function AdminUserPage({
   params,

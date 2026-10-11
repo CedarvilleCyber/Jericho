@@ -1,6 +1,11 @@
 import UserScenarioVMEditor from "@/components/admin/vm-editor";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Manage User Scenario",
+};
 
 export default async function UserScenarioPage({
   params,

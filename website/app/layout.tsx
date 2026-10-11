@@ -8,7 +8,7 @@ import Providers from "@/components/providers";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Jericho Web",
+  title: "Jericho",
   description: "Interact with cyber in the real world",
 };
 

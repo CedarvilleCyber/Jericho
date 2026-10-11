@@ -9,6 +9,23 @@ import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const scenario = await prisma.scenario.findUnique({
+    where: { id },
+    select: { name: true },
+  });
+
+  return {
+    title: scenario ? `Jericho | ${scenario.name}` : "Jericho | Scenario",
+  };
+}
 
 export default async function ScenarioLabPage({
   params,

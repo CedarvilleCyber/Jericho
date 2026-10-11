@@ -3,6 +3,11 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Livestreams",
+};
 
 export default async function LivestreamPage() {
   const session = await auth.api.getSession({ headers: await headers() });

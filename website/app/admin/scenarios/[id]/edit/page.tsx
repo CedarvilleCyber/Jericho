@@ -1,6 +1,11 @@
 import { EditScenarioPage } from "@/components/admin/edit-scenario-page";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Jericho | Edit Scenario",
+};
 
 export default async function EditScenarioRoute({
   params,
