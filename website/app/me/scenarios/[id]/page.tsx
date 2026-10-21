@@ -4,6 +4,11 @@ import PVEViewer from "@/components/view/pve-viewer";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { INFORMATIONAL_COMPLETED_SENTINEL } from "@/lib/scenarios/constants";
+import {
+  buildLeaderboardEntries,
+  MACHINE_REVEAL_PENALTY,
+  QUESTION_HINT_PENALTY,
+} from "@/lib/scenarios/leaderboard";
 import { parseTopology } from "@/lib/scenarios/topology-types";
 import { IconExternalLink } from "@tabler/icons-react";
 import { headers } from "next/headers";
@@ -77,6 +82,39 @@ export default async function ScenarioLabPage({
     redirect("/me/scenarios");
   }
 
+  const leaderboardUserScenarios = await prisma.userScenario.findMany({
+    where: { scenarioId: scenario.id },
+    include: {
+      user: {
+        select: { name: true, displayUsername: true },
+      },
+    },
+  });
+  const leaderboardUserIds = leaderboardUserScenarios.map(
+    (userScenario) => userScenario.userId
+  );
+  const [leaderboardQuestions, leaderboardUserHints] = await Promise.all([
+    prisma.question.findMany({
+      where: { scenarioId: scenario.id },
+      include: {
+        userAnswers: { where: { userId: { in: leaderboardUserIds } } },
+      },
+    }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (prisma as any).userHint.findMany({
+      where: {
+        userId: { in: leaderboardUserIds },
+        hint: { question: { scenarioId: scenario.id } },
+      },
+      select: { userId: true },
+    }) as Promise<{ userId: string }[]>,
+  ]);
+  const leaderboardEntries = buildLeaderboardEntries(
+    leaderboardUserScenarios,
+    leaderboardQuestions,
+    leaderboardUserHints
+  );
+
   const revealedHintIds = scenario.questions
     .flatMap((q) => q.hints)
     .filter(
@@ -127,6 +165,10 @@ export default async function ScenarioLabPage({
               return ua.answer.trim() === q.answer.trim();
             })
             .map((q) => q.id)}
+          leaderboardEntries={leaderboardEntries}
+          currentUserId={session.user.id}
+          machineRevealPenalty={MACHINE_REVEAL_PENALTY}
+          questionHintPenalty={QUESTION_HINT_PENALTY}
         />
         <div className="card bg-base-100 border border-base-300 min-h-0">
           <div className="card-body p-4 flex flex-col overflow-y-auto">

@@ -9,8 +9,10 @@ import QuestionsPanel from "./questions-panel";
 import { Topology } from "@/lib/scenarios/topology-types";
 import { Section, UserAnswer } from "@/app/generated/prisma/client";
 import { QuestionWithSection } from "@/components/admin/scenario-types";
+import Leaderboard from "@/components/leaderboard/leaderboard";
+import type { LeaderboardEntry } from "@/lib/scenarios/leaderboard";
 
-type Tab = "Details" | "Topology" | "Questions" | "Livestream";
+type Tab = "Details" | "Topology" | "Questions" | "Livestream" | "Leaderboard";
 
 interface ScenarioLivestream {
   id: string;
@@ -31,6 +33,10 @@ export default function ScenarioTabsCard({
   userAnswers,
   revealedHintIds,
   correctQuestionIds,
+  leaderboardEntries,
+  currentUserId,
+  machineRevealPenalty,
+  questionHintPenalty,
   livestreams = [],
 }: {
   description: string;
@@ -44,6 +50,10 @@ export default function ScenarioTabsCard({
   userAnswers: UserAnswer[];
   revealedHintIds: string[];
   correctQuestionIds: string[];
+  leaderboardEntries: LeaderboardEntry[];
+  currentUserId: string;
+  machineRevealPenalty: number;
+  questionHintPenalty: number;
   livestreams?: ScenarioLivestream[];
 }) {
   const hasTopology = !!(topology || topologyURL);
@@ -53,7 +63,8 @@ export default function ScenarioTabsCard({
   const allTabs: Tab[] = ["Details"];
   if (hasTopology) allTabs.push("Topology");
   if (hasQuestions) allTabs.push("Questions");
-  allTabs.push("Livestream");
+  if (hasLivestreams) allTabs.push("Livestream");
+  allTabs.push("Leaderboard");
 
   const [active, setActive] = useState<Tab>("Details");
 
@@ -151,6 +162,16 @@ export default function ScenarioTabsCard({
               </div>
             )}
           </div>
+        )}
+
+        {active === "Leaderboard" && (
+          <Leaderboard
+            entries={leaderboardEntries}
+            currentUserId={currentUserId}
+            scenarioName={scenarioName}
+            machineRevealPenalty={machineRevealPenalty}
+            questionHintPenalty={questionHintPenalty}
+          />
         )}
       </div>
     </div>
