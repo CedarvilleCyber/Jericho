@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { IconExternalLink } from "@tabler/icons-react";
 
 export default function FlvPlayer({
   streamKey,
   label,
+  actions,
 }: {
   streamKey: string;
   label: string;
+  actions?: ReactNode;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const srsBase = process.env.NEXT_PUBLIC_SRS_BASE_URL ?? "";
@@ -44,16 +46,19 @@ export default function FlvPlayer({
             <div className="flex h-3 w-3 animate-pulse rounded-full bg-red-500 shadow-lg shadow-red-500/50" />
             <h3 className="text-lg font-bold tracking-tight">{label}</h3>
           </div>
-          <a
-            href={flvUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/40"
-            aria-label={`Open ${label} in new window`}
-          >
-            <IconExternalLink size={16} />
-            <span className="hidden sm:inline">Open</span>
-          </a>
+          <div className="flex items-center gap-2">
+            {actions}
+            <a
+              href={flvUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-medium text-white transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/40"
+              aria-label={`Open ${label} in new window`}
+            >
+              <IconExternalLink size={16} />
+              <span className="hidden sm:inline">Open</span>
+            </a>
+          </div>
         </div>
 
         <div className="relative w-full overflow-hidden rounded-xl bg-black shadow-xl">
