@@ -19,6 +19,7 @@ const EMPTY_FORM = {
 export default function CreateScenarioButton() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const { handleCancelAttempt, handleDialogCancel, confirmDialog } = useSaveGuard(
     () => dialogRef.current?.close(),
@@ -27,14 +28,25 @@ export default function CreateScenarioButton() {
 
   function open() {
     setForm(EMPTY_FORM);
+    setError(null);
     dialogRef.current?.showModal();
   }
 
   async function handleCreate() {
     setSaving(true);
-    await createScenario({ ...form, topology: null });
-    setSaving(false);
-    dialogRef.current?.close();
+    setError(null);
+    try {
+      const result = await createScenario({ ...form, topology: null });
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+      dialogRef.current?.close();
+    } catch {
+      setError("Failed to create scenario");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -140,6 +152,7 @@ export default function CreateScenarioButton() {
               />
             </label>
           </div>
+          {error && <p className="text-error text-sm mt-3">{error}</p>}
           <div className="modal-action">
             <button className="btn btn-ghost" onClick={handleCancelAttempt}>
               Cancel
