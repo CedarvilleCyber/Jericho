@@ -67,7 +67,7 @@ export default async function ScenarioPage({
         </ul>
       </div>
       <div className="flex items-center gap-4 mb-4">
-        {scenario?.teaserImageURL ? (
+        {scenario?.teaserImageURL && (
           <Image
             src={scenario.teaserImageURL}
             alt={scenario.name || "Scenario Image"}
@@ -75,10 +75,6 @@ export default async function ScenarioPage({
             height={64}
             className="rounded-md"
           />
-        ) : (
-          <div className="w-16 h-16 bg-base-300 rounded-md flex items-center justify-center">
-            <span className="text-base-content/60">No Image</span>
-          </div>
         )}
         <h2 className="text-2xl font-bold">
           {scenario?.name || "Scenario Not Found"}
