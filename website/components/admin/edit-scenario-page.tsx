@@ -590,15 +590,26 @@ export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions
   });
   const [topology, setTopology] = useState<Topology>(parseTopology(scenario.topology));
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSave() {
     setSaving(true);
-    await updateScenario(scenario.id, {
-      ...form,
-      topology: topology.nodes.length > 0 ? topology : null,
-    });
-    setSaving(false);
-    router.push("/admin/scenarios");
+    setError(null);
+    try {
+      const result = await updateScenario(scenario.id, {
+        ...form,
+        topology: topology.nodes.length > 0 ? topology : null,
+      });
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+      router.push("/admin/scenarios");
+    } catch {
+      setError("Failed to save scenario");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -664,6 +675,7 @@ export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions
               />
               <LivestreamsList livestreams={scenario.livestreams} scenarioId={scenario.id} />
 
+              {error && <p className="text-error text-sm text-right">{error}</p>}
               <div className="flex justify-end gap-2 mt-2">
                 <button className="btn btn-ghost" onClick={handleCancelAttempt}>Cancel</button>
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
