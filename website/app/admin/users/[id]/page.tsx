@@ -115,13 +115,15 @@ export default async function AdminUserPage({
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col gap-1 mr-auto">
                       <div className="flex items-center gap-2">
-                        <Image
-                          src={us.scenario.teaserImageURL ?? "/placeholder.png"}
-                          alt={us.scenario.name}
-                          width={48}
-                          height={48}
-                          className="mb-3 rounded-md"
-                        />
+                        {us.scenario.teaserImageURL && (
+                          <Image
+                            src={us.scenario.teaserImageURL}
+                            alt={us.scenario.name}
+                            width={48}
+                            height={48}
+                            className="mb-3 rounded-md"
+                          />
+                        )}
                         <span className="text-lg">{us.scenario.name}</span>
                       </div>
                       <p className="text-sm text-base-content/60">
