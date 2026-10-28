@@ -582,7 +582,6 @@ export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions
   const [form, setForm] = useState({
     name: scenario.name,
     description: scenario.description,
-    slug: scenario.slug,
     topologyURL: scenario.topologyURL ?? "",
     teaserText: scenario.teaserText ?? "",
     teaserImageURL: scenario.teaserImageURL ?? "",
@@ -611,18 +610,11 @@ export function EditScenarioPage({ scenario }: { scenario: ScenarioWithQuestions
 
           <div className="card bg-base-100 border border-base-300 shadow-md">
             <div className="card-body flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <label className="form-control">
-                  <div className="label"><span className="label-text">Name</span></div>
-                  <input className="input input-bordered w-full" value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                </label>
-                <label className="form-control">
-                  <div className="label"><span className="label-text">Slug</span></div>
-                  <input className="input input-bordered w-full" value={form.slug}
-                    onChange={(e) => setForm({ ...form, slug: e.target.value })} />
-                </label>
-              </div>
+              <label className="form-control">
+                <div className="label"><span className="label-text">Name</span></div>
+                <input className="input input-bordered w-full" value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </label>
               <label className="form-control">
                 <div className="label"><span className="label-text">Description</span></div>
                 <textarea className="textarea textarea-bordered w-full" rows={3}
