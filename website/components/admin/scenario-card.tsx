@@ -9,7 +9,6 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioWithQuestions }) 
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="card-title text-lg">{scenario.name}</h3>
-            <p className="text-xs text-base-content/50 font-mono">/{scenario.slug}</p>
           </div>
           <Link
             href={`/admin/scenarios/${scenario.id}/edit`}

@@ -141,7 +141,6 @@ model Scenario {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   topologyURL        String?
-  slug               String               @unique
   teaserText         String?
   teaserImageURL     String?
   learningObjectives String?
