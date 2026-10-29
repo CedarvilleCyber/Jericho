@@ -26,6 +26,9 @@ export default async function AdminPage() {
           <Link href={"/admin/scenarios"} className="btn btn-primary">
             <IconExternalLink /> Manage Scenarios
           </Link>
+          <Link href={"/admin/livestream"} className="btn btn-primary">
+            <IconExternalLink /> Manage Livestream
+          </Link>
         </div>
       </div>
 
