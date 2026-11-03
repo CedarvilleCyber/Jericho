@@ -9,7 +9,6 @@ export async function updateScenario(
   data: {
     name: string;
     description: string;
-    slug: string;
     topologyURL: string;
     topology: object | null;
     teaserText: string;
@@ -22,7 +21,6 @@ export async function updateScenario(
     data: {
       name: data.name,
       description: data.description,
-      slug: data.slug,
       topologyURL: data.topologyURL || null,
       topology: data.topology ?? undefined,
       teaserText: data.teaserText || null,
@@ -120,7 +118,6 @@ export async function deleteQuestion(id: string) {
 export async function createScenario(data: {
   name: string;
   description: string;
-  slug: string;
   topologyURL: string;
   topology: object | null;
   teaserText: string;
@@ -131,7 +128,6 @@ export async function createScenario(data: {
     data: {
       name: data.name,
       description: data.description,
-      slug: data.slug,
       topologyURL: data.topologyURL || null,
       topology: data.topology ?? undefined,
       teaserText: data.teaserText || null,
