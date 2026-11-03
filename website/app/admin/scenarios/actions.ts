@@ -15,7 +15,16 @@ export async function updateScenario(
     teaserImageURL: string;
     learningObjectives: string;
   },
-) {
+): Promise<{ error: string } | { success: true }> {
+  if (!data.name.trim() || !data.slug.trim()) {
+    return { error: "Name and slug are required." };
+  }
+
+  const existing = await prisma.scenario.findUnique({ where: { slug: data.slug } });
+  if (existing && existing.id !== id) {
+    return { error: `The slug "${data.slug}" is already in use.` };
+  }
+
   await prisma.scenario.update({
     where: { id },
     data: {
@@ -29,6 +38,7 @@ export async function updateScenario(
     },
   });
   revalidatePath("/admin/scenarios");
+  return { success: true };
 }
 
 export async function updateQuestion(
@@ -123,7 +133,16 @@ export async function createScenario(data: {
   teaserText: string;
   teaserImageURL: string;
   learningObjectives: string;
-}) {
+}): Promise<{ error: string } | { success: true }> {
+  if (!data.name.trim() || !data.slug.trim()) {
+    return { error: "Name and slug are required." };
+  }
+
+  const existing = await prisma.scenario.findUnique({ where: { slug: data.slug } });
+  if (existing) {
+    return { error: `The slug "${data.slug}" is already in use.` };
+  }
+
   await prisma.scenario.create({
     data: {
       name: data.name,
@@ -136,6 +155,7 @@ export async function createScenario(data: {
     },
   });
   revalidatePath("/admin/scenarios");
+  return { success: true };
 }
 
 export async function addSection(
