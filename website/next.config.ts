@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  experimental: {
+    serverActions: { bodySizeLimit: "6mb" },
+  },
 };
 
 const withMDX = createMDX({
