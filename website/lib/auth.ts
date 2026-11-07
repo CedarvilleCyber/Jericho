@@ -4,6 +4,7 @@ import { nextCookies } from "better-auth/next-js";
 import prisma from "./prisma";
 import { admin, username } from "better-auth/plugins";
 import { sendEmail, verificationEmailHtml } from "./email";
+import { avatarFileFromUrl, deleteUpload } from "./uploads/storage";
 
 const microsoftClientId = process.env.AUTH_MICROSOFT_ENTRA_ID_ID;
 const microsoftClientSecret = process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET;
@@ -66,6 +67,10 @@ export const auth = betterAuth({
   user: {
     deleteUser: {
       enabled: true,
+      afterDelete: async (user) => {
+        const file = avatarFileFromUrl(user.image);
+        if (file) await deleteUpload("avatars", file);
+      },
     },
   },
   plugins: [nextCookies(), username(), admin()],

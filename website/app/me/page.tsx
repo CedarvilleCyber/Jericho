@@ -1,5 +1,6 @@
 "use client";
 
+import AvatarForm from "@/components/me/avatar-form";
 import ChangeEmailForm from "@/components/me/change-email-form";
 import ChangePasswordForm from "@/components/me/change-password-form";
 import DeleteAccountSection from "@/components/me/delete-account-section";
@@ -50,6 +51,7 @@ export default function MePage() {
           </p>
         </div>
 
+        <AvatarForm />
         <ProfileForm
           initialName={data.user.name || ""}
           initialUsername={(data.user as { username?: string }).username || ""}

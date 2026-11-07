@@ -2,6 +2,7 @@
 
 import { requireAdminSession } from "@/lib/auth-guard";
 import prisma from "@/lib/prisma";
+import { avatarFileFromUrl, deleteUpload } from "@/lib/uploads/storage";
 import { redirect } from "next/navigation";
 
 export async function deleteUser(
@@ -10,7 +11,13 @@ export async function deleteUser(
   const guard = await requireAdminSession();
   if (guard) return guard;
 
-  await prisma.user.delete({ where: { id: userId } });
+  const { image } = await prisma.user.delete({
+    where: { id: userId },
+    select: { image: true },
+  });
+
+  const avatarFile = avatarFileFromUrl(image);
+  if (avatarFile) await deleteUpload("avatars", avatarFile);
 
   redirect("/admin");
 }
