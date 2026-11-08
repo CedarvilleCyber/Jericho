@@ -14,8 +14,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const scenario = await prisma.scenario.findUnique({
-    where: { id },
+  const scenario = await prisma.scenario.findFirst({
+    where: { id, archivedAt: null },
     select: { name: true },
   });
 
@@ -36,9 +36,10 @@ export default async function ScenarioPage({
     redirect("/sign-in");
   }
   const { id } = await params;
-  const scenario = await prisma.scenario.findUnique({
+  const scenario = await prisma.scenario.findFirst({
     where: {
       id,
+      archivedAt: null,
     },
   });
   const prismaUser = await prisma.user.findUnique({

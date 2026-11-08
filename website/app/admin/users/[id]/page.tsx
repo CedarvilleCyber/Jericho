@@ -39,7 +39,9 @@ export default async function AdminUserPage({
     template: vm.template === 1,
   }));
 
-  const allScenarios = (await prisma.scenario.findMany()).map((scenario) => ({
+  const allScenarios = (
+    await prisma.scenario.findMany({ where: { archivedAt: null } })
+  ).map((scenario) => ({
     ...scenario,
     joined:
       user?.userScenarios.some((us) => us.scenarioId === scenario.id) ?? false,

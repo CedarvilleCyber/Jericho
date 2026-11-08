@@ -9,7 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ScenariosPage() {
-  const scenarios = await prisma.scenario.findMany();
+  const scenarios = await prisma.scenario.findMany({
+    where: { archivedAt: null },
+  });
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">

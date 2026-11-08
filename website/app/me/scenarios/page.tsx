@@ -23,6 +23,7 @@ export default async function MyScenarios() {
     },
     include: {
       userScenarios: {
+        where: { scenario: { archivedAt: null } },
         include: {
           scenario: true,
         },

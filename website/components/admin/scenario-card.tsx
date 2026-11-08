@@ -1,6 +1,7 @@
 import { ScenarioWithQuestions } from "@/components/admin/scenario-types";
 import { IconPencil } from "@tabler/icons-react";
 import Link from "next/link";
+import ArchiveScenarioButton from "@/components/admin/archive-scenario-button";
 
 export function ScenarioCard({ scenario }: { scenario: ScenarioWithQuestions }) {
   return (
@@ -10,12 +11,19 @@ export function ScenarioCard({ scenario }: { scenario: ScenarioWithQuestions }) 
           <div>
             <h3 className="card-title text-lg">{scenario.name}</h3>
           </div>
-          <Link
-            href={`/admin/scenarios/${scenario.id}/edit`}
-            className="btn btn-sm btn-ghost shrink-0"
-          >
-            <IconPencil size={16} /> Edit
-          </Link>
+          <div className="flex items-center gap-1 shrink-0">
+            <Link
+              href={`/admin/scenarios/${scenario.id}/edit`}
+              className="btn btn-sm btn-ghost"
+            >
+              <IconPencil size={16} /> Edit
+            </Link>
+            <ArchiveScenarioButton
+              scenarioId={scenario.id}
+              scenarioName={scenario.name}
+              archived={scenario.archivedAt !== null}
+            />
+          </div>
         </div>
 
         <p className="text-sm text-base-content/80 mt-1 whitespace-pre-wrap">{scenario.description}</p>

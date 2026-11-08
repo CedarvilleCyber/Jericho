@@ -28,6 +28,7 @@ export default async function LeaderboardPage({
   }
 
   const scenarios = await prisma.scenario.findMany({
+    where: { archivedAt: null },
     select: { id: true, name: true },
     orderBy: { name: "asc" },
   });

@@ -140,6 +140,7 @@ model Scenario {
   description        String
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
+  archivedAt         DateTime?
   topologyURL        String?
   teaserText         String?
   teaserImageURL     String?
