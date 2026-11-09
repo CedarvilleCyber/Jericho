@@ -30,12 +30,11 @@ Email must be configured for this to work. See [SMTP variables](../reference/env
 
 ### Roles
 
-Jericho has three roles stored in the `UserRole` table:
+Jericho has two roles stored in the `UserRole` table:
 
 | Role | Access |
 |---|---|
 | `STUDENT` | Default — can join scenarios, view leaderboard |
-| `FACULTY` | Currently same access as STUDENT (reserved for future use) |
 | `ADMIN` | Full access — admin dashboard, user management, scenario CRUD |
 
 Roles are managed from `/admin/users/[id]` by admins. Multiple roles per user are supported.

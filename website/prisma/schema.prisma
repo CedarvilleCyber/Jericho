@@ -256,7 +256,6 @@ model Competency {
 
 enum Role {
   STUDENT
-  FACULTY
   ADMIN
 }
 
