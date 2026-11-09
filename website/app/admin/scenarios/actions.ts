@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { QuestionType } from "@/app/generated/prisma/client";
+import { requireAdminSession } from "@/lib/auth-guard";
 import { revalidatePath } from "next/cache";
 
 export async function updateScenario(
@@ -136,6 +137,30 @@ export async function createScenario(data: {
     },
   });
   revalidatePath("/admin/scenarios");
+}
+
+export async function archiveScenario(id: string) {
+  const guard = await requireAdminSession();
+  if (guard) return guard;
+  await prisma.scenario.update({
+    where: { id },
+    data: { archivedAt: new Date() },
+  });
+  revalidatePath("/admin/scenarios");
+  revalidatePath("/scenarios");
+  revalidatePath("/leaderboard");
+}
+
+export async function restoreScenario(id: string) {
+  const guard = await requireAdminSession();
+  if (guard) return guard;
+  await prisma.scenario.update({
+    where: { id },
+    data: { archivedAt: null },
+  });
+  revalidatePath("/admin/scenarios");
+  revalidatePath("/scenarios");
+  revalidatePath("/leaderboard");
 }
 
 export async function addSection(

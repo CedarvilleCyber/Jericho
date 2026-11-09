@@ -19,6 +19,8 @@ export default async function ScenariosPage() {
     },
     orderBy: { name: "asc" },
   });
+  const activeScenarios = scenarios.filter((s) => s.archivedAt === null);
+  const archivedScenarios = scenarios.filter((s) => s.archivedAt !== null);
 
   return (
     <div className="flex flex-col mt-3">
@@ -27,9 +29,21 @@ export default async function ScenariosPage() {
           <h2 className="text-2xl font-bold">Scenarios</h2>
           <CreateScenarioButton />
         </div>
-        {scenarios.map((scenario) => (
+        {activeScenarios.map((scenario) => (
           <ScenarioCard key={scenario.id} scenario={scenario} />
         ))}
+        {archivedScenarios.length > 0 && (
+          <details className="collapse collapse-arrow border border-base-300 bg-base-100 mt-8">
+            <summary className="collapse-title text-lg font-semibold text-base-content/70">
+              Archived ({archivedScenarios.length})
+            </summary>
+            <div className="collapse-content">
+              {archivedScenarios.map((scenario) => (
+                <ScenarioCard key={scenario.id} scenario={scenario} />
+              ))}
+            </div>
+          </details>
+        )}
       </div>
     </div>
   );
