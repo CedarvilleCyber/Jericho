@@ -115,6 +115,8 @@ function QuestionBox({
   }
 
   async function handleSubmit() {
+    if (isQuestionComplete) return;
+
     let submitValue = state.value;
     if (isInformational) {
       submitValue = INFORMATIONAL_COMPLETED_SENTINEL;
@@ -141,6 +143,7 @@ function QuestionBox({
   }
 
   function moveUp(i: number) {
+    if (isQuestionComplete) return;
     setState((s) => {
       const items = [...s.orderedItems];
       [items[i - 1], items[i]] = [items[i], items[i - 1]];
@@ -157,6 +160,7 @@ function QuestionBox({
   }
 
   const isSubmitDisabled =
+    isQuestionComplete ||
     state.submitting ||
     (!isInformational && question.type !== "ORDERING" && !state.value.trim());
 
@@ -225,6 +229,7 @@ function QuestionBox({
                   setState((s) => ({ ...s, value: e.target.value, validationError: null, correct: null }))
                 }
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                disabled={isQuestionComplete}
               />
               {state.validationError && (
                 <p className="text-error text-xs mt-1">{state.validationError}</p>
@@ -246,6 +251,7 @@ function QuestionBox({
               onChange={(e) =>
                 setState((s) => ({ ...s, value: e.target.value, validationError: null, correct: null }))
               }
+              disabled={isQuestionComplete}
             />
             {state.validationError && (
               <p className="text-error text-xs">{state.validationError}</p>
@@ -265,6 +271,7 @@ function QuestionBox({
                 setState((s) => ({ ...s, value: e.target.value, correct: null }))
               }
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              disabled={isQuestionComplete}
             />
             <SubmitButton submitting={state.submitting} disabled={isSubmitDisabled} onSubmit={handleSubmit} />
           </div>
@@ -282,6 +289,7 @@ function QuestionBox({
                     value={opt}
                     checked={state.value === opt}
                     onChange={() => setState((s) => ({ ...s, value: opt, correct: null }))}
+                    disabled={isQuestionComplete}
                   />
                   <span className="text-sm">{opt}</span>
                 </label>
@@ -303,6 +311,7 @@ function QuestionBox({
                     value={opt}
                     checked={state.value === opt}
                     onChange={() => setState((s) => ({ ...s, value: opt, correct: null }))}
+                    disabled={isQuestionComplete}
                   />
                   <span className="text-sm">{opt}</span>
                 </label>
@@ -326,7 +335,7 @@ function QuestionBox({
                     type="button"
                     className="btn btn-ghost btn-xs btn-square"
                     onClick={() => moveUp(i)}
-                    disabled={i === 0}
+                    disabled={isQuestionComplete || i === 0}
                   >
                     ↑
                   </button>
@@ -334,14 +343,14 @@ function QuestionBox({
                     type="button"
                     className="btn btn-ghost btn-xs btn-square"
                     onClick={() => moveDown(i)}
-                    disabled={i === state.orderedItems.length - 1}
+                    disabled={isQuestionComplete || i === state.orderedItems.length - 1}
                   >
                     ↓
                   </button>
                 </div>
               ))}
             </div>
-            <SubmitButton submitting={state.submitting} disabled={false} onSubmit={handleSubmit} />
+            <SubmitButton submitting={state.submitting} disabled={isQuestionComplete || state.submitting} onSubmit={handleSubmit} />
           </div>
         )}
 
