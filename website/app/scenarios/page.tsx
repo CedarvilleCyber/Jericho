@@ -4,6 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 
+// Nothing here reads the request (headers/cookies), so without this Next
+// prerenders the page at build time and the scenario list goes stale.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Jericho | Scenarios",
 };

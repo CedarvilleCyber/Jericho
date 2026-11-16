@@ -30,6 +30,7 @@ export async function updateScenario(
     },
   });
   revalidatePath("/admin/scenarios");
+  revalidatePath("/scenarios");
 }
 
 export async function updateQuestion(
@@ -137,6 +138,7 @@ export async function createScenario(data: {
     },
   });
   revalidatePath("/admin/scenarios");
+  revalidatePath("/scenarios");
 }
 
 export async function archiveScenario(id: string) {
